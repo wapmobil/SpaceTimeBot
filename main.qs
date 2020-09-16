@@ -65,8 +65,9 @@ class Storage extends Building {
 	info() {
 		let msg = `${this.name()}:\n`;
 		msg += `  Хранилище: вместимость ${this.capacity(this.level)}💰\n`;
-		msg += `  Следующий уровень: вместимость ${this.capacity(this.level+1)}💰\n`;
-		msg += `  Стоимость постройки: ${this.cost()}💰\n`;
+		msg += `  Следующий: вместимость ${this.capacity(this.level+1)}💰\n`;
+		msg += `  Стоимость: ${this.cost()}💰\n`;
+		msg += `  Время: ${this.buildTime()}⏳\n`;
 		if (this.build_progress > 0) msg += `  Идёт строительство, осталось - ${this.build_progress}🛠\n`;
 		return msg;
 	}
@@ -95,8 +96,9 @@ class Plant extends Building {
 	info() {
 		let msg = `${this.name()}:\n`;
 		msg += `  Доход +${this.level}💰⏳\n`;
-		msg += `  Следующий уровень: доход +${this.level+1}💰⏳\n`;
-		msg += `  Стоимость постройки: ${this.cost()}💰\n`;
+		msg += `  Следующий: доход +${this.level+1}💰⏳\n`;
+		msg += `  Стоимость: ${this.cost()}💰\n`;
+		msg += `  Время: ${this.buildTime()}⏳\n`;
 		if (this.build_progress > 0) msg += `  Идёт строительство, осталось - ${this.build_progress}🛠\n`;
 		return msg;
 	}
@@ -141,6 +143,12 @@ class Planet {
 	buildStorage() { // построить шахту
 		this.money = this.storage.build(this.money);
 	}
+	researchMining() {
+		Telegram.send(this.chat_id, "В разработке...");
+	}
+	researchBuilding() {
+		Telegram.send(this.chat_id, "В разработке...");
+	}
 }
 
 
@@ -155,6 +163,8 @@ Telegram.disablePassword();
 Telegram.addCommand("планета🌍/инфа🏙", "planet_info");
 Telegram.addCommand("планета🌍/строить шахту⛏", "build_plant");
 Telegram.addCommand("планета🌍/строить хранилище⛏", "build_storage");
+Telegram.addCommand("планета🌍/исследования/добыча", "res_mining");
+Telegram.addCommand("планета🌍/исследования/строительство", "res_building");
 Telegram.addCommand("карта🌌", "map_info");
 
 Telegram["receiveCommand"].connect(function(id, cmd, script) {this[script](id);});
@@ -165,7 +175,7 @@ Telegram.start("733272349:AAFUM4UUYlKepYilMt2q3s27g5L5sAoEmVE");
 
 let timer = new QTimer();
 timer["timeout"].connect(timerDone);
-timer.start(100);
+timer.start(1000);
 
 
  // Здесь вся БД
@@ -209,6 +219,16 @@ function build_plant(chat_id) {
 function build_storage(chat_id) {
 	let p = Users.get(chat_id);
 	p.buildStorage();
+	Users.set(chat_id, p);
+}
+function res_mining(chat_id) {
+	let p = Users.get(chat_id);
+	p.researchMining();
+	Users.set(chat_id, p);
+}
+function res_building(chat_id) {
+	let p = Users.get(chat_id);
+	p.researchBuilding();
 	Users.set(chat_id, p);
 }
 
