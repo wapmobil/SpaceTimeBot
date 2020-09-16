@@ -1,11 +1,12 @@
+buttonSave["clicked()"].connect(on_buttonSave_clicked);
 Telegram.clearCommands();
 Telegram.disablePassword();
-Telegram.addCommand("планета/инфа", "planet_info");
-Telegram.addCommand("планета/строить шахту", "build_plant");
-Telegram.addCommand("карта", "map_info");
+Telegram.addCommand("планета🌍/инфа🏙", "planet_info");
+Telegram.addCommand("планета🌍/строить шахту⛏", "build_plant");
+Telegram.addCommand("карта🌌", "map_info");
 
 Telegram["receiveCommand"].connect(function(id, cmd, script) {this[script](id);});
-//Telegram["receiveMessage"].connect(received);
+Telegram["receiveMessage"].connect(received);
 Telegram["connected"].connect(telegramConnect);
 Telegram["disconnected"].connect(telegramDisconnect);
 Telegram.start("733272349:AAFUM4UUYlKepYilMt2q3s27g5L5sAoEmVE");
@@ -14,14 +15,22 @@ let timer = new QTimer();
 timer["timeout"].connect(timerDone);
 timer.start(1000);
 
-let Users = new Map(); // Здесь вся БД
-
 // Шахта
 class Plant {
 	constructor(id){
 		this.level = 0;
 		this.build_progress = 0;
 		this.chat_id = id;
+	}
+	load(o) {
+		print("load");
+		for (const [key, value] of Object.entries(o)) {
+			if (typeof value == 'object') {
+				this[key].load(value);
+			} else {
+				this[key] = value;
+			}
+		}
 	}
 	build() {
 		if (this.build_progress == 0) {
@@ -53,10 +62,20 @@ class Planet {
 		this.plant = new Plant(id);
 		this.chat_id = id;
 	}
+	load(o) {
+		for (const [key, value] of Object.entries(o)) {
+			print(typeof value);
+			if (typeof value == 'object') {
+				this[key].load(value);
+			} else {
+				this[key] = value;
+			}
+		}
+	}
 	info() { // отобразить текущее состояние планеты
 		let msg =  `Деньги = ${this.money}💰\n`;
-		msg += `Шахта: доход +${this.plant.level}💰)\n`;
-		msg += `Следующий уровень: доход +${this.plant.level+1}💰)\n`;
+		msg += `Шахта: доход +${this.plant.level}💰⏳\n`;
+		msg += `Следующий уровень: доход +${this.plant.level+1}💰⏳\n`;
 		msg += `Стоимость постройки: ${this.plant.cost()}💰\n`;
 		if (this.plant.build_progress > 0) msg += `Идёт строительство, осталось - ${this.plant.build_progress}🛠`;
 		Telegram.send(this.chat_id, msg);
@@ -79,6 +98,11 @@ class Planet {
 	}
 }
 
+
+///=======================================
+ // Здесь вся БД
+let Users = loadUsers('[]');
+
 function telegramConnect() {
 	Telegram.sendAll("Server started");
 	print("telegram bot connected");
@@ -94,14 +118,14 @@ function timerDone() {
 	}
 }
 
-//function received(chat_id, msg) { // сюда приходят сообщения, не содержащиеся в фиксированном меню
-//	print(`message:\"${msg}\" from ${chat_id}`);
-//}
-
-function planet_info(chat_id) {
+function received(chat_id, msg) {
+	print(msg);
 	if (!Users.has(chat_id)) {
 		Users.set(chat_id, new Planet(chat_id));
 	}
+}
+
+function planet_info(chat_id) {
 	Users.get(chat_id).info();
 }
 
@@ -119,4 +143,22 @@ function map_info(chat_id) {
 	}
 	Telegram.send(chat_id, msg);
 }
-	
+
+function on_buttonSave_clicked() {
+	let a = [];
+	for (var value of Users.values()) {
+		a.push(value);
+	}
+	print(JSON.stringify(a));
+}
+
+function loadUsers(data) {
+	let m = new Map();
+	const arr = JSON.parse(data);
+	arr.forEach(function(item) {
+		let p = new Planet(item.chat_id);
+		p.load(item);
+  		m.set(item.chat_id, p);
+	});
+	return m;
+}
