@@ -1,4 +1,3 @@
-buttonLoad["clicked()"].connect(on_buttonLoad_clicked);
 // Базовый класс строения
 class Building {
 	name() {
@@ -144,7 +143,13 @@ class Planet {
 	}
 }
 
+
+///==========================================================
+buttonLoad["clicked()"].connect(on_buttonLoad_clicked);
 buttonSave["clicked()"].connect(on_buttonSave_clicked);
+let save_timer = new QTimer();
+save_timer["timeout"].connect(on_buttonSave_clicked);
+
 Telegram.clearCommands();
 Telegram.disablePassword();
 Telegram.addCommand("планета🌍/инфа🏙", "planet_info");
@@ -163,9 +168,10 @@ timer["timeout"].connect(timerDone);
 timer.start(100);
 
 
-///=======================================
  // Здесь вся БД
 let Users = loadUsers();
+save_timer.start(timer.interval*10);
+
 
 function telegramConnect() {
 	Telegram.sendAll("Server started");
@@ -180,6 +186,7 @@ function timerDone() {
 	for (var value of Users.values()) {
 		value.step();
 	}
+	on_buttonSave_clicked();
 }
 
 function received(chat_id, msg) {
@@ -220,12 +227,12 @@ function on_buttonSave_clicked() {
 		a.push(value);
 	}
 	SHS.save(1, JSON.stringify(a));
-	print(SHS.load(1));
+	//print(SHS.load(1));
 }
 
 function loadUsers() {
 	let data = SHS.load(1);
-	print(data);
+	//print(data);
 	let m = new Map();
 	if (typeof data == 'string') {
 		const arr = JSON.parse(data);
