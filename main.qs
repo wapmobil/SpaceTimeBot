@@ -1,3 +1,4 @@
+buttonLoad["clicked()"].connect(on_buttonLoad_clicked);
 // Базовый класс строения
 class Building {
 	name() {
@@ -164,7 +165,7 @@ timer.start(100);
 
 ///=======================================
  // Здесь вся БД
-let Users = loadUsers('[]');
+let Users = loadUsers();
 
 function telegramConnect() {
 	Telegram.sendAll("Server started");
@@ -218,16 +219,25 @@ function on_buttonSave_clicked() {
 	for (var value of Users.values()) {
 		a.push(value);
 	}
-	print(JSON.stringify(a));
+	SHS.save(1, JSON.stringify(a));
+	print(SHS.load(1));
 }
 
-function loadUsers(data) {
+function loadUsers() {
+	let data = SHS.load(1);
+	print(data);
 	let m = new Map();
-	const arr = JSON.parse(data);
-	arr.forEach(function(item) {
-		let p = new Planet(item.chat_id);
-		p.load(item);
-  		m.set(item.chat_id, p);
-	});
+	if (typeof data == 'string') {
+		const arr = JSON.parse(data);
+		arr.forEach(function(item) {
+			let p = new Planet(item.chat_id);
+			p.load(item);
+	  		m.set(item.chat_id, p);
+		});
+	}
 	return m;
+}
+
+function on_buttonLoad_clicked() {
+	Users = loadUsers();
 }
