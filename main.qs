@@ -23,7 +23,7 @@ class Building {
 			//print(`build=${this.build_progress}`)
 			if (this.build_progress == 0) {
 				this.level += 1;
-				Telegram.send(this.chat_id, this.name() + " построено");
+				Telegram.send(this.chat_id, this.name() + " - строительство завершено");
 			}
 		}
 	}
@@ -47,6 +47,9 @@ class Building {
 	cost() {
 		return 0;
 	}
+	isBuilding() {
+		return this.build_progress != 0;
+	}
 }
 // Хранилище
 class Storage extends Building {
@@ -60,7 +63,7 @@ class Storage extends Building {
 		return (Math.pow(2, lvl)*1000);
 	}
 	cost() {
-		return (this.buildTime()*10);
+		return ((this.level*this.level+1)*1000);
 	}
 	info() {
 		let msg = `${this.name()}:\n`;
@@ -78,15 +81,6 @@ class Plant extends Building {
 	name() {
 		return "Шахта";
 	}
-	load(o) {
-		for (const [key, value] of Object.entries(o)) {
-			if (typeof value == 'object') {
-				this[key].load(value);
-			} else {
-				this[key] = value;
-			}
-		}
-	}
 	buildTime() {
 		return 10*(this.level*this.level+1);
 	}
@@ -95,8 +89,29 @@ class Plant extends Building {
 	}
 	info() {
 		let msg = `${this.name()}:\n`;
-		msg += `  Доход +${this.level}💰⏳\n`;
-		msg += `  Следующий: доход +${this.level+1}💰⏳\n`;
+		msg += `  Доход +${this.level}💰\n`;
+		msg += `  Следующий: доход +${this.level+1}💰\n`;
+		msg += `  Стоимость: ${this.cost()}💰\n`;
+		msg += `  Время: ${this.buildTime()}⏳\n`;
+		if (this.build_progress > 0) msg += `  Идёт строительство, осталось - ${this.build_progress}🛠\n`;
+		return msg;
+	}
+}
+
+// База
+class Facility extends Building {
+	name() {
+		return "База";
+	}
+	buildTime() {
+		return this.cost();
+	}
+	cost() {
+		return Math.pow(10, (this.level+3));
+	}
+	info() {
+		let msg = `${this.name()}:\n`;
+		msg += `  Уровень базы ${this.level}🏢\n`;
 		msg += `  Стоимость: ${this.cost()}💰\n`;
 		msg += `  Время: ${this.buildTime()}⏳\n`;
 		if (this.build_progress > 0) msg += `  Идёт строительство, осталось - ${this.build_progress}🛠\n`;
@@ -110,11 +125,11 @@ class Planet {
 		this.money = 200;
 		this.plant = new Plant(id);
 		this.storage = new Storage(id);
+		this.facility = new Facility(id);
 		this.chat_id = id;
 	}
 	load(o) {
 		for (const [key, value] of Object.entries(o)) {
-			//print(typeof value);
 			if (typeof value == 'object') {
 				this[key].load(value);
 			} else {
@@ -126,15 +141,19 @@ class Planet {
 		let msg = `Деньги = ${this.money}💰\n`;
 		msg += this.plant.info();
 		msg += this.storage.info();
+		msg += this.facility.info();
 		Telegram.send(this.chat_id, msg);
 	}
 	step() { // эта функция вызывается каждый timerDone
 		this.plant.step();
 		this.storage.step();
+		this.facility.step();
 		if (this.money < this.storage.capacity(this.storage.level)) {
 			this.money += this.plant.level;
-			if (this.money > this.storage.capacity(this.storage.level))
+			if (this.money > this.storage.capacity(this.storage.level)) {
 				this.money = this.storage.capacity(this.storage.level);
+				Telegram.send(this.chat_id, "Хранилище заполнено");
+			}
 		}
 	}
 	buildPlant() { // построить шахту
@@ -142,6 +161,9 @@ class Planet {
 	}
 	buildStorage() { // построить шахту
 		this.money = this.storage.build(this.money);
+	}
+	buildFacility() { // построить шахту
+		this.money = this.facility.build(this.money);
 	}
 	researchMining() {
 		Telegram.send(this.chat_id, "В разработке...");
@@ -155,16 +177,20 @@ class Planet {
 ///==========================================================
 buttonLoad["clicked()"].connect(on_buttonLoad_clicked);
 buttonSave["clicked()"].connect(on_buttonSave_clicked);
+buttonReset["clicked()"].connect(on_buttonReset_clicked);
 let save_timer = new QTimer();
 save_timer["timeout"].connect(on_buttonSave_clicked);
 
 Telegram.clearCommands();
 Telegram.disablePassword();
-Telegram.addCommand("планета🌍/инфа🏙", "planet_info");
-Telegram.addCommand("планета🌍/строить шахту⛏", "build_plant");
-Telegram.addCommand("планета🌍/строить хранилище⛏", "build_storage");
-Telegram.addCommand("исследования", "research");
 Telegram.addCommand("карта🌌", "map_info");
+Telegram.addCommand("поискать 💰", "find_money");
+Telegram.addCommand("планета🌍/инфа🏙", "planet_info");
+Telegram.addCommand("планета🌍/исследования🔍", "research");
+Telegram.addCommand("планета🌍/строительство🛠", "planet_info");
+Telegram.addCommand("планета🌍/строительство🛠/строить шахту⛏", "build_plant");
+Telegram.addCommand("планета🌍/строительство🛠/строить хранилище📦", "build_storage");
+Telegram.addCommand("планета🌍/строительство🛠/строить базу🏢", "build_facility");
 
 Telegram["receiveCommand"].connect(function(id, cmd, script) {this[script](id);});
 Telegram["receiveMessage"].connect(received);
@@ -203,11 +229,12 @@ function timerDone() {
 
 function received(chat_id, msg) {
 	//print(msg);
-	if (msg == "отмена") {
-		Telegram.send(chat_id, "Принято");
-	}
 	if (!Users.has(chat_id)) {
 		Users.set(chat_id, new Planet(chat_id));
+		Telegram.send(chat_id, "Добро пожаловать на свою планету\n для начала нужно построить шахту...");
+	}
+	if (msg == "отмена") {
+		Telegram.send(chat_id, "Принято");
 	}
 }
 
@@ -227,8 +254,31 @@ function build_storage(chat_id) {
 	Users.set(chat_id, p);
 }
 
+function build_facility(chat_id) {
+	let p = Users.get(chat_id);
+	p.buildFacility();
+	Users.set(chat_id, p);
+}
+
+function getRandom(max) {
+  return Math.floor(Math.random() * Math.floor(max));
+}
+
+function find_money(chat_id) {
+	let p = Users.get(chat_id);
+	let pr = getRandom(3);
+	p.money += pr * (p.facility.level*2+1);
+	Users.set(chat_id, p);
+	Telegram.send(chat_id, `Ты заработал ${pr}💰`);
+}
+
 function research(chat_id) {
-	Telegram.sendButtons(chat_id, "Доступные исследования", research_base.concat(["отмена"]));
+	let p = Users.get(chat_id);
+	if (p.facility.level > 1) {
+		Telegram.sendButtons(chat_id, "Доступные исследования", research_base.concat(["отмена"]));
+	} else {
+		Telegram.send(chat_id, "Требуется база 2🏢 уровня");
+	}
 }
 
 
@@ -236,7 +286,7 @@ function map_info(chat_id) {
 	let i = 10;
 	let msg = "Другие планеты:\n";
 	for (var [key, value] of Users) {
-		msg += `Планета №${key}: деньги ${value.money}, шахта ${value.plant.level}\n`;
+		msg += `Планета №${key}: деньги ${value.money}, шахта ${value.plant.level}, база ${value.facility.level}\n`;
 	}
 	Telegram.send(chat_id, msg);
 }
@@ -267,4 +317,8 @@ function loadUsers() {
 
 function on_buttonLoad_clicked() {
 	Users = loadUsers();
+}
+
+function on_buttonReset_clicked() {
+	Users = new Map();
 }
