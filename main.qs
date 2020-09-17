@@ -163,8 +163,7 @@ Telegram.disablePassword();
 Telegram.addCommand("планета🌍/инфа🏙", "planet_info");
 Telegram.addCommand("планета🌍/строить шахту⛏", "build_plant");
 Telegram.addCommand("планета🌍/строить хранилище⛏", "build_storage");
-Telegram.addCommand("планета🌍/исследования/добыча", "res_mining");
-Telegram.addCommand("планета🌍/исследования/строительство", "res_building");
+Telegram.addCommand("исследования", "research");
 Telegram.addCommand("карта🌌", "map_info");
 
 Telegram["receiveCommand"].connect(function(id, cmd, script) {this[script](id);});
@@ -178,9 +177,12 @@ timer["timeout"].connect(timerDone);
 timer.start(1000);
 
 
+// Исследования
+let research_base = ["добыча", "строительство"];
  // Здесь вся БД
 let Users = loadUsers();
 save_timer.start(timer.interval*10);
+
 
 
 function telegramConnect() {
@@ -201,6 +203,9 @@ function timerDone() {
 
 function received(chat_id, msg) {
 	//print(msg);
+	if (msg == "отмена") {
+		Telegram.send(chat_id, "Принято");
+	}
 	if (!Users.has(chat_id)) {
 		Users.set(chat_id, new Planet(chat_id));
 	}
@@ -221,16 +226,11 @@ function build_storage(chat_id) {
 	p.buildStorage();
 	Users.set(chat_id, p);
 }
-function res_mining(chat_id) {
-	let p = Users.get(chat_id);
-	p.researchMining();
-	Users.set(chat_id, p);
+
+function research(chat_id) {
+	Telegram.sendButtons(chat_id, "Доступные исследования", research_base.concat(["отмена"]));
 }
-function res_building(chat_id) {
-	let p = Users.get(chat_id);
-	p.researchBuilding();
-	Users.set(chat_id, p);
-}
+
 
 function map_info(chat_id) {
 	let i = 10;
