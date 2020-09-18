@@ -52,11 +52,11 @@ class Building {
 		return this.build_progress != 0;
 	}
 	infoHeader() {
-		return `${this.name()} ур. ${this.level}:`;
+		return `${this.name()} ур. ${this.level}\n`;
 	}
 	infoFooter() {
-		let msg = `(Стоимость: ${this.cost()}💰 ${this.buildTime()}⏳)\n`;
-		if (this.build_progress > 0) msg += `  Идёт строительство, осталось - ${this.build_progress}⏳\n`;
+		let msg = `(${this.cost()}💰 ${this.buildTime()}⏳)\n`;
+		if (this.build_progress > 0) msg += `    Идёт строительство, осталось ${this.build_progress}⏳\n`;
 		return msg;
 	}
 }
@@ -73,8 +73,8 @@ class Storage extends Building {
 	}
 	info() {
 		let msg = this.infoHeader();
-		msg += ` вместимость ${this.capacity(this.level)}💰`;
-		msg += `  След. ур. ${this.level+1}:  вместимость ${this.capacity(this.level+1)}💰 `;
+		msg += `    Вместимость ${this.capacity(this.level)}💰\n`;
+		msg += `    След. ур. ${this.level+1}:  вместимость ${this.capacity(this.level+1)}💰 `;
 		return msg + this.infoFooter();
 	}
 }
@@ -89,8 +89,8 @@ class Plant extends Building {
 	}
 	info() {
 		let msg = this.infoHeader();
-		msg += ` доход +${this.level}💰`;
-		msg += `  След. ур. ${this.level+1}:  доход +${this.level+1}💰 `;
+		msg += `    Доход +${this.level}💰\n`;
+		msg += `    След. ур. ${this.level+1}:  доход +${this.level+1}💰 `;
 		return msg + this.infoFooter();
 	}
 }
@@ -105,7 +105,7 @@ class Facility extends Building {
 	}
 	info() {
 		let msg = this.infoHeader();
-		msg += `  След. ур. ${this.level+1} `;
+		msg += `    След. ур. ${this.level+1} `;
 		return msg + this.infoFooter();
 		return msg;
 	}
@@ -134,7 +134,7 @@ class Planet {
 		}
 	}
 	info() { // отобразить текущее состояние планеты
-		let msg = `Деньги = ${this.money}💰\n`;
+		let msg = `Деньги:  ${this.money}💰\n`;
 		let bds = this.getBuildings();
 		for (var value of bds) {
 			msg += value.info();
