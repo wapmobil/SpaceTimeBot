@@ -43,7 +43,7 @@ class Building {
 		return money;
 	}
 	buildTime() {
-		return 0;
+		return Math.floor((this.level+2*Math.pow(Math.sin(this.level), 3))*100+10);
 	}
 	cost() {
 		return 0;
@@ -51,14 +51,19 @@ class Building {
 	isBuilding() {
 		return this.build_progress != 0;
 	}
+	infoHeader() {
+		return `${this.name()} ур. ${this.level}:`;
+	}
+	infoFooter() {
+		let msg = `(Стоимость: ${this.cost()}💰 ${this.buildTime()}⏳)\n`;
+		if (this.build_progress > 0) msg += `  Идёт строительство, осталось - ${this.build_progress}⏳\n`;
+		return msg;
+	}
 }
 // Хранилище
 class Storage extends Building {
 	name() {
-		return "Хранилище";
-	}
-	buildTime() {
-		return 10*(this.level*this.level*this.level+1);
+		return "📦Хранилище";
 	}
 	capacity(lvl) {
 		return (Math.pow(2, lvl)*1000);
@@ -67,55 +72,41 @@ class Storage extends Building {
 		return (this.level*this.level+1)*100;
 	}
 	info() {
-		let msg = `${this.name()}:\n`;
-		msg += `  Хранилище: вместимость ${this.capacity(this.level)}💰\n`;
-		msg += `  Следующий: вместимость ${this.capacity(this.level+1)}💰\n`;
-		msg += `  Стоимость: ${this.cost()}💰\n`;
-		msg += `  Время: ${this.buildTime()}⏳\n`;
-		if (this.build_progress > 0) msg += `  Идёт строительство, осталось - ${this.build_progress}🛠\n`;
-		return msg;
+		let msg = this.infoHeader();
+		msg += ` вместимость ${this.capacity(this.level)}💰`;
+		msg += `  След. ур. ${this.level+1}:  вместимость ${this.capacity(this.level+1)}💰 `;
+		return msg + this.infoFooter();
 	}
 }
 
 // Шахта
 class Plant extends Building {
 	name() {
-		return "Шахта";
-	}
-	buildTime() {
-		return 10*(this.level*this.level+1);
+		return "⛏Шахта";
 	}
 	cost() {
 		return (this.level*this.level*this.level*20 + 100);
 	}
 	info() {
-		let msg = `${this.name()}:\n`;
-		msg += `  Доход +${this.level}💰\n`;
-		msg += `  Следующий: доход +${this.level+1}💰\n`;
-		msg += `  Стоимость: ${this.cost()}💰\n`;
-		msg += `  Время: ${this.buildTime()}⏳\n`;
-		if (this.build_progress > 0) msg += `  Идёт строительство, осталось - ${this.build_progress}🛠\n`;
-		return msg;
+		let msg = this.infoHeader();
+		msg += ` доход +${this.level}💰`;
+		msg += `  След. ур. ${this.level+1}:  доход +${this.level+1}💰 `;
+		return msg + this.infoFooter();
 	}
 }
 
 // База
 class Facility extends Building {
 	name() {
-		return "База";
-	}
-	buildTime() {
-		return this.cost();
+		return "🏢База";
 	}
 	cost() {
 		return Math.pow(10, (this.level+3));
 	}
 	info() {
-		let msg = `${this.name()}:\n`;
-		msg += `  Уровень базы ${this.level}🏢\n`;
-		msg += `  Стоимость: ${this.cost()}💰\n`;
-		msg += `  Время: ${this.buildTime()}⏳\n`;
-		if (this.build_progress > 0) msg += `  Идёт строительство, осталось - ${this.build_progress}🛠\n`;
+		let msg = this.infoHeader();
+		msg += `  След. ур. ${this.level+1} `;
+		return msg + this.infoFooter();
 		return msg;
 	}
 }
@@ -187,24 +178,24 @@ save_timer["timeout"].connect(on_buttonSave_clicked);
 
 Telegram.clearCommands();
 Telegram.disablePassword();
-Telegram.addCommand("карта🌌", "map_info");
-Telegram.addCommand("поискать 💰", "find_money");
-Telegram.addCommand("планета🌍", "planet_info");
-Telegram.addCommand("планета🌍/исследования🔍", "research");
-Telegram.addCommand("планета🌍/строительство🛠/инфа", "planet_info");
-Telegram.addCommand("планета🌍/строительство🛠/строить шахту⛏", "build_plant");
-Telegram.addCommand("планета🌍/строительство🛠/строить хранилище📦", "build_storage");
-Telegram.addCommand("планета🌍/строительство🛠/строить базу🏢", "build_facility");
+Telegram.addCommand("🌌Сканер планет", "map_info");
+Telegram.addCommand("Поискать 💰", "find_money");
+Telegram.addCommand("🌍Планета", "planet_info");
+Telegram.addCommand("🌍Планета/🔍Исследования", "research");
+Telegram.addCommand("🌍Планета/🛠Строительство/Инфо", "planet_info");
+Telegram.addCommand("🌍Планета/🛠Строительство/Строить ⛏Шахту", "build_plant");
+Telegram.addCommand("🌍Планета/🛠Строительство/Строить 📦Хранилище", "build_storage");
+Telegram.addCommand("🌍Планета/🛠Строительство/Строить 🏢Базу", "build_facility");
 
 Telegram["receiveCommand"].connect(function(id, cmd, script) {this[script](id);});
 Telegram["receiveMessage"].connect(received);
 Telegram["connected"].connect(telegramConnect);
 Telegram["disconnected"].connect(telegramDisconnect);
-Telegram.start("733272349:AAFUM4UUYlKepYilMt2q3s27g5L5sAoEmVE");
+Telegram.start("1248527509:AAHQhKqMWjtApOdUYFXmMCzEBpJeyc1sY-c");
 
 
 // Исследования
-let research_base = ["добыча⛏", "стройтехника🛠"];
+let research_base = ["⛏Добыча", "🛠Стройтехника"];
  // Здесь вся БД
 let Users = loadUsers();
 
@@ -291,7 +282,7 @@ function research(chat_id) {
 	if (p.facility.level > 1) {
 		Telegram.sendButtons(chat_id, "Доступные исследования", research_base.concat(["отмена"]));
 	} else {
-		Telegram.send(chat_id, "Требуется база 2🏢 уровня");
+		Telegram.send(chat_id, "Требуется 🏢База 2 уровня");
 	}
 }
 
@@ -306,7 +297,7 @@ function map_info(chat_id) {
 		}
 		Telegram.send(chat_id, msg);
 	} else {
-		Telegram.send(chat_id, "Требуется база 1🏢 уровня");
+		Telegram.send(chat_id, "Требуется 🏢База 1 уровня");
 	}
 }
 
