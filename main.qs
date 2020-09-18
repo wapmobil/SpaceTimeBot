@@ -17,12 +17,13 @@ class Building {
 			}
 		}
 	}
-	step() { // эта функция вызывается каждый timerDone
+	step(bs) { // эта функция вызывается каждый timerDone
 		if (this.build_progress > 0) {
-			this.build_progress -= 1;
+			this.build_progress -= bs;
 			//print(`build=${this.build_progress}`)
-			if (this.build_progress == 0) {
+			if (this.build_progress <= 0) {
 				this.level += 1;
+				this.build_progress = 0;
 				Telegram.send(this.chat_id, this.name() + " - строительство завершено");
 			}
 		}
@@ -63,7 +64,7 @@ class Storage extends Building {
 		return (Math.pow(2, lvl)*1000);
 	}
 	cost() {
-		return ((this.level*this.level+1)*1000);
+		return (this.level*this.level+1)*100;
 	}
 	info() {
 		let msg = `${this.name()}:\n`;
@@ -127,6 +128,10 @@ class Planet {
 		this.storage = new Storage(id);
 		this.facility = new Facility(id);
 		this.chat_id = id;
+		this.build_speed = 1;
+	}
+	getBuildings() {
+		return [this.plant, this.storage, this.facility];
 	}
 	load(o) {
 		for (const [key, value] of Object.entries(o)) {
@@ -139,15 +144,16 @@ class Planet {
 	}
 	info() { // отобразить текущее состояние планеты
 		let msg = `Деньги = ${this.money}💰\n`;
-		msg += this.plant.info();
-		msg += this.storage.info();
-		msg += this.facility.info();
+		let bds = this.getBuildings();
+		for (var value of bds) {
+			msg += value.info();
+		}
 		Telegram.send(this.chat_id, msg);
 	}
 	step() { // эта функция вызывается каждый timerDone
-		this.plant.step();
-		this.storage.step();
-		this.facility.step();
+		this.plant.step(this.build_speed);
+		this.storage.step(this.build_speed);
+		this.facility.step(this.build_speed);
 		if (this.money < this.storage.capacity(this.storage.level)) {
 			this.money += this.plant.level;
 			if (this.money > this.storage.capacity(this.storage.level)) {
@@ -156,20 +162,18 @@ class Planet {
 			}
 		}
 	}
-	buildPlant() { // построить шахту
-		this.money = this.plant.build(this.money);
-	}
-	buildStorage() { // построить шахту
-		this.money = this.storage.build(this.money);
-	}
-	buildFacility() { // построить шахту
-		this.money = this.facility.build(this.money);
-	}
 	researchMining() {
 		Telegram.send(this.chat_id, "В разработке...");
 	}
 	researchBuilding() {
 		Telegram.send(this.chat_id, "В разработке...");
+	}
+	isBuilding() {
+		let bds = this.getBuildings();
+		for (var value of bds) {
+			if (value.isBuilding()) return true;
+		}
+		return false;
 	}
 }
 
@@ -185,9 +189,9 @@ Telegram.clearCommands();
 Telegram.disablePassword();
 Telegram.addCommand("карта🌌", "map_info");
 Telegram.addCommand("поискать 💰", "find_money");
-Telegram.addCommand("планета🌍/инфа🏙", "planet_info");
+Telegram.addCommand("планета🌍", "planet_info");
 Telegram.addCommand("планета🌍/исследования🔍", "research");
-Telegram.addCommand("планета🌍/строительство🛠", "planet_info");
+Telegram.addCommand("планета🌍/строительство🛠/инфа", "planet_info");
 Telegram.addCommand("планета🌍/строительство🛠/строить шахту⛏", "build_plant");
 Telegram.addCommand("планета🌍/строительство🛠/строить хранилище📦", "build_storage");
 Telegram.addCommand("планета🌍/строительство🛠/строить базу🏢", "build_facility");
@@ -198,15 +202,16 @@ Telegram["connected"].connect(telegramConnect);
 Telegram["disconnected"].connect(telegramDisconnect);
 Telegram.start("733272349:AAFUM4UUYlKepYilMt2q3s27g5L5sAoEmVE");
 
+
+// Исследования
+let research_base = ["добыча⛏", "стройтехника🛠"];
+ // Здесь вся БД
+let Users = loadUsers();
+
+//Старт
 let timer = new QTimer();
 timer["timeout"].connect(timerDone);
 timer.start(1000);
-
-
-// Исследования
-let research_base = ["добыча", "строительство"];
- // Здесь вся БД
-let Users = loadUsers();
 save_timer.start(timer.interval*10);
 
 
@@ -236,28 +241,35 @@ function received(chat_id, msg) {
 	if (msg == "отмена") {
 		Telegram.send(chat_id, "Принято");
 	}
+	if (research_base.indexOf(msg) >= 0) {
+		Telegram.send(chat_id, "В разработке...");
+	}
 }
 
 function planet_info(chat_id) {
 	Users.get(chat_id).info();
 }
 
-function build_plant(chat_id) {
+function buildSomething(chat_id, bl) {
 	let p = Users.get(chat_id);
-	p.buildPlant();
-	Users.set(chat_id, p);
+	if (p.isBuilding()) {
+		Telegram.send(chat_id, "Строители заняты");
+	} else {
+		p.money = p[bl].build(p.money);
+		Users.set(chat_id, p);
+	}
+}
+
+function build_plant(chat_id) {
+	buildSomething(chat_id, "plant");
 }
 
 function build_storage(chat_id) {
-	let p = Users.get(chat_id);
-	p.buildStorage();
-	Users.set(chat_id, p);
+	buildSomething(chat_id, "storage");
 }
 
 function build_facility(chat_id) {
-	let p = Users.get(chat_id);
-	p.buildFacility();
-	Users.set(chat_id, p);
+	buildSomething(chat_id, "facility");
 }
 
 function getRandom(max) {
@@ -267,7 +279,9 @@ function getRandom(max) {
 function find_money(chat_id) {
 	let p = Users.get(chat_id);
 	let pr = getRandom(3);
-	p.money += pr * (p.facility.level*2+1);
+	pr *= p.facility.level*p.facility.level+1;
+	pr += getRandom(3);
+	p.money += pr;
 	Users.set(chat_id, p);
 	Telegram.send(chat_id, `Ты заработал ${pr}💰`);
 }
@@ -283,12 +297,17 @@ function research(chat_id) {
 
 
 function map_info(chat_id) {
-	let i = 10;
-	let msg = "Другие планеты:\n";
-	for (var [key, value] of Users) {
-		msg += `Планета №${key}: деньги ${value.money}, шахта ${value.plant.level}, база ${value.facility.level}\n`;
+	let p = Users.get(chat_id);
+	if (p.facility.level > 0) {
+		let msg = "Список планет:\n";
+		for (var [key, value] of Users) {
+			if (key == chat_id) msg += "Ты: ";
+			msg += `Планета №${key}: ${value.money}💰, ${value.plant.level}⛏, ${value.facility.level}🏢\n`;
+		}
+		Telegram.send(chat_id, msg);
+	} else {
+		Telegram.send(chat_id, "Требуется база 1🏢 уровня");
 	}
-	Telegram.send(chat_id, msg);
 }
 
 function on_buttonSave_clicked() {
@@ -319,6 +338,7 @@ function on_buttonLoad_clicked() {
 	Users = loadUsers();
 }
 
+// очистить всё, полный сброс
 function on_buttonReset_clicked() {
 	Users = new Map();
 }
