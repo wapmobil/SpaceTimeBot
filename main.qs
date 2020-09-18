@@ -56,7 +56,7 @@ class Building {
 	}
 	infoFooter() {
 		let msg = `(${this.cost()}💰 ${this.buildTime()}⏳)\n`;
-		if (this.build_progress > 0) msg += `    Идёт строительство, осталось ${this.build_progress}⏳\n`;
+		if (this.build_progress > 0) msg += `    Идёт 🛠строительство, осталось ${this.build_progress}⏳\n`;
 		return msg;
 	}
 }
@@ -273,6 +273,10 @@ function find_money(chat_id) {
 	pr *= p.facility.level*p.facility.level+1;
 	pr += getRandom(3);
 	p.money += pr;
+	if (p.money > p.storage.capacity(p.storage.level)) {
+		p.money = p.storage.capacity(p.storage.level);
+		Telegram.send(chat_id, "Хранилище заполнено");
+	}
 	Users.set(chat_id, p);
 	Telegram.send(chat_id, `Ты заработал ${pr}💰`);
 }
