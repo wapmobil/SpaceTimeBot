@@ -1,11 +1,11 @@
 include("building.qs")
 
-class Facility extends Building {
+class Spaceyard extends Building {
 	name() {
-		return "🏢База";
+		return "🏗Верфь";
 	}
 	cost() {
-		return Math.pow(10, (this.level+3));
+		return Math.pow(7, (this.level+7));
 	}
 	info() {
 		let msg = this.infoHeader();

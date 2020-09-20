@@ -48,7 +48,7 @@ save_timer.start(timer.interval*10);
 
 
 function telegramConnect() {
-	Telegram.sendAll("Server started");
+	Telegram.sendAll("Server <b>started</b>");
 	print("telegram bot connected");
 }
 
@@ -88,7 +88,6 @@ function received(chat_id, msg) {
 		print(research_list);
 		if (research_list.indexOf(msg) >= 0) {
 			Planets.get(chat_id).sienceStart(msg);
-			Telegram.send(chat_id, "Исследование началось");
 		} else {
 			Telegram.send(chat_id, "Исследование недоступно");
 		}
@@ -100,12 +99,15 @@ function planet_info(chat_id) {
 }
 
 function infoSomething(chat_id, bl) {
-	Telegram.send(chat_id, Planets.get(chat_id)[bl].info());
+	Telegram.send(chat_id, Planets.get(chat_id).infoResources() + Planets.get(chat_id)[bl].info());
 }
 function info_plant(chat_id) {infoSomething(chat_id, "plant");}
 function info_storage(chat_id) {infoSomething(chat_id, "storage");}
 function info_facility(chat_id) {infoSomething(chat_id, "facility");}
-function info_factory(chat_id) {infoSomething(chat_id, "factory");}
+function info_factory(chat_id) {
+	if(Planets.get(chat_id).factory.locked) Telegram.send(chat_id, "Требуется исследование");
+	else infoSomething(chat_id, "factory");
+}
 function info_accum(chat_id) {infoSomething(chat_id, "accum");}
 function info_solar(chat_id) {infoSomething(chat_id, "solar");}
 
@@ -145,11 +147,11 @@ function find_money(chat_id) {
 
 function research(chat_id) {
 	let p = Planets.get(chat_id);
-	//if (p.facility.level > 1) {
+	if (p.facility.level > 1) {
 		Telegram.sendButtons(chat_id, "Доступные исследования", p.sienceList().concat(["отмена"]));
-	//} else {
-	//	Telegram.send(chat_id, "Требуется 🏢База 2 уровня");
-	//}
+	} else {
+		Telegram.send(chat_id, "Требуется 🏢База 2 уровня");
+	}
 }
 
 

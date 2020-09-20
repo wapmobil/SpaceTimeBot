@@ -1,5 +1,5 @@
 include("building.qs")
-// Шахта
+
 class Plant extends Building {
 	name() {
 		return "⛏Шахта";

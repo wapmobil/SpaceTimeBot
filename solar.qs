@@ -1,5 +1,5 @@
 include("building.qs")
-// Шахта
+
 class Solar extends Building {
 	name() {
 		return "⚡Электростанция";

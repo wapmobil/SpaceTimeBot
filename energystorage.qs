@@ -1,5 +1,5 @@
 include("building.qs")
-// Хранилище
+
 class EnergyStorage extends Building {
 	name() {
 		return "🔋Аккумуляторы";

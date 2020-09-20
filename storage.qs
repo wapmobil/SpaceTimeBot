@@ -1,5 +1,5 @@
 include("building.qs")
-// Хранилище
+
 class Storage extends Building {
 	name() {
 		return "📦Хранилище";

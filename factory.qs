@@ -1,5 +1,5 @@
 include("building.qs")
-// Шахта
+
 class Factory extends Building {
 	name() {
 		return "🏭Завод";

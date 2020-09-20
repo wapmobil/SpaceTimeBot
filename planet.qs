@@ -1,3 +1,4 @@
+include("spaceyard.qs")
 include("solar.qs")
 include("factory.qs")
 include("research.qs")
@@ -6,10 +7,35 @@ include("facility.qs")
 include("plant.qs")
 include("energystorage.qs")
 
+const Resources  = [{
+	name : "material",
+	desc : "Композиты",
+	icon : "🧱"
+}, {
+	name : "plasma",
+	desc : "Плазма",
+	icon : "🔆"
+}, {
+	name : "chips",
+	desc : "Электроника",
+	icon : "📺"
+}];
+
+function getResourceInfo(r, c) {
+	return Resources[r].desc + `: ${c}` + Resources[r].icon;
+}
+
+function getResourceCont(r, c) {
+	return `${c}` + Resources[r].icon;
+}
+
 // Планета
 class Planet {
 	constructor(id){
 		this.money = 200;
+		this[Resources[0].name] = 0;
+		this[Resources[1].name] = 0;
+		this[Resources[2].name] = 0;
 		this.plant = new Plant(id);
 		this.storage = new Storage(id);
 		this.facility = new Facility(id);
@@ -18,17 +44,21 @@ class Planet {
 		this.accum.locked = true;
 		this.factory = new Factory(id);
 		this.factory.locked = true;
+		this.spaceyard = new Spaceyard(id);
+		this.spaceyard.locked = true;
 		this.chat_id = id;
 		this.build_speed = 1;
 		this.sience_speed = 1;
 		this.energy_eco = 1;
 		this.sience = createSienceTree();
 		this.factory_type = getRandom(2);
+		this.factory_step = 0;
 	}
 	getBuildings() {
 		let a = [this.plant, this.storage, this.facility, this.solar];
 		if (!this.factory.locked) a.push(this.factory);
 		if (!this.accum.locked) a.push(this.accum);
+		if (!this.spaceyard.locked) a.push(this.spaceyard);
 		return a;
 	}
 	load(o) {
@@ -41,12 +71,15 @@ class Planet {
 		}
 	}
 	infoResources() {
-		let msg = `Деньги:  ${this.money}💰\n`;
-		msg += `Энергия:  ${this.energy(2)}/${this.energy(1)}⚡`;
+		let msg  = `Деньги: ${this.money}💰\n`;
+		    msg += `Энергия: ${this.energy(2)}/${this.energy(1)}⚡\n`;
+		    msg += getResourceInfo(0, this[Resources[0].name]) + '\n';
+		    msg += getResourceInfo(1, this[Resources[1].name]) + '\n';
+		    msg += getResourceInfo(2, this[Resources[2].name]) + '\n';
 		return msg;
 	}
 	info() { // отобразить текущее состояние планеты
-		let msg = this.infoResources() + '\n';
+		let msg = this.infoResources();
 		let bds = this.getBuildings();
 		for (var value of bds) {
 			msg += value.info();
@@ -65,6 +98,13 @@ class Planet {
 			if (this.money > this.storage.capacity(this.storage.level)) {
 				this.money = this.storage.capacity(this.storage.level);
 				Telegram.send(this.chat_id, "Хранилище заполнено");
+			}
+		}
+		if (this.factory.level > 0) {
+			this.factory_step += 10 + this.factory.level;
+			if (this.factory_step > 6000) {
+				this.factory_step = 0;
+				this[Resources[0].name] += 1;
 			}
 		}
 		let rs_done = this.sience.reduce((a,r) => {
@@ -102,10 +142,7 @@ class Planet {
 		return (ep - em);
 	}
 	sienceInfo() {
-		//print(this.sience.name);
-		let msg = this.sience.reduce(sienceTree, "Исследования:\n");
-		//print("sienceInfo", msg)
-		return msg;
+		return this.sience.reduce(sienceTree, "Исследования:\n");
 	}
 	sienceList() {
 		return this.sience.reduce(sienceArray, [], Research.Traversal.Actual);
@@ -114,12 +151,32 @@ class Planet {
 		let m = this.money;
 		m = this.sience.reduce((a,r) => {
 			if (r.name == s) {
-				r.start();
 				a -= r.cost;
+				if (a >= 0) {
+					r.start();
+				}
+				return a;
 			}
 		}, m);
+		if (m >= 0 && m < this.money) {
+			this.money = m;
+			Telegram.send(this.chat_id, "Исследование началось");
+		} else {
+			Telegram.send(this.chat_id, "Недостаточно денег");
+		}
 	}
-	survey() {
+	enable_factory() {
+		Telegram.send(this.chat_id, "Поздравляем теперь ты можешь построить завод по производству ресурса - "
+			 + Resources[this.factory_type].icon + Resources[this.factory_type].decs);
 		this.factory.locked = false;
+	}
+	enable_accum() {
+		this.accum.locked = false;
+	}
+	eco_power() {
+		this.energy_eco += 1;
+	}
+	fastbuild() {
+		this.build_speed += 1;
 	}
 }
