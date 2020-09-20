@@ -7,6 +7,7 @@ class Building {
 		this.level = 0;
 		this.build_progress = 0;
 		this.chat_id = id;
+		this.locked = false;
 	}
 	load(o) {
 		for (const [key, value] of Object.entries(o)) {
@@ -28,18 +29,26 @@ class Building {
 			}
 		}
 	}
-	build(money) {
-		if (money >= this.cost()) {
-			if (this.build_progress == 0) {
-				money -= this.cost();
-				this.build_progress = this.buildTime();
-				Telegram.send(this.chat_id, "Строительство началось");
-			} else {
-				Telegram.send(this.chat_id, `Строительство ещё в процессе, осталось - ${this.build_progress}🛠`);
-			}
-		} else {
-			Telegram.send(this.chat_id, "Недостаточно денег");
+	build(money, energy) {
+		if (this.locked) {
+			Telegram.send(this.chat_id, "Необходимо исследование");
+			return money;
 		}
+		if (energy < this.consumption()) {
+			Telegram.send(this.chat_id, "Недостаточно электроэнергии,\n нужно больше электростанций");
+			return money;
+		}
+		if (money < this.cost()) {
+			Telegram.send(this.chat_id, "Недостаточно денег");
+			return money;
+		}
+		if (this.build_progress != 0) {
+			Telegram.send(this.chat_id, `Строительство ещё в процессе, осталось - ${this.build_progress}🛠`);
+			return money;
+		}
+		money -= this.cost();
+		this.build_progress = this.buildTime();
+		Telegram.send(this.chat_id, "Строительство началось");
 		return money;
 	}
 	buildTime() {
@@ -52,11 +61,17 @@ class Building {
 		return this.build_progress != 0;
 	}
 	infoHeader() {
-		return `${this.name()} ур. ${this.level}\n`;
+		let z = this.consumption() > 0 ? `${this.consumption()*this.level}⚡️` : "";
+		if (this.consumption() == 0 || this.level == 0) z = "";
+		return `${this.name()} ур. ${this.level} : ${z}\n`;
 	}
 	infoFooter() {
-		let msg = `(${this.cost()}💰 ${this.buildTime()}⏳)\n`;
+		let z = this.consumption() > 0 ? `${this.consumption()}⚡️` : "";
+		let msg = `(${this.cost()}💰 ${this.buildTime()}⏳ ${z})\n`;
 		if (this.build_progress > 0) msg += `    Идёт 🛠строительство, осталось ${this.build_progress}⏳\n`;
 		return msg;
+	}
+	consumption() {
+		return 0;
 	}
 }

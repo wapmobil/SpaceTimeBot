@@ -1,32 +1,53 @@
 class Research {
-  constructor (name, func, children = [], lock = false) {
-    this.name = name;
-    this.locked = lock;
-    this.done = false;
-    this.func = func;
-    this.children = children; 
-  }
+	constructor (name, func, time, cost, children = [], locked = false) {
+		this.name = name;
+		this.locked = locked;
+		this.func = func;
+		this.children = children;
+		this.time = time;
+		this.cost = cost;
+		this.active = false;
+	}
+	
+	start() {
+		this.active = true;
+	}
+	
+	step(st) {
+		if (this.active) {
+			this.time -= st;
+			if (this.time <= 0) {
+				this.time = 0;
+				this.active = false;
+				return this.func;
+			}
+		}
+		return undefined;
+	}
 
-  clone () {
-    let that = Object.assign(new Research(), this);
-    that.children = this.children.map(n => n.clone());
-    return that;
-  }
-  
-  load(o) {
+	clone () {
+		let that = Object.assign(new Research(), this);
+		that.children = this.children.map(n => n.clone());
+		return that;
+	}
+
+	load(o) {
 		for (const [key, value] of Object.entries(o)) {
+			//print(key, value);
 			if (key == 'children') {
-        for (let child of value) {
-          let n = new Research("","");
-          n.load(child);
-				  this.children.push(n);
-        }
+				for (let i = 0; i < this.children.length; i++) {
+					for (let child of value) {
+						if (this.children[i].name == child.name) {
+							this.children[i].load(child);
+						}
+					}
+				}
 			} else {
 				this[key] = value;
 			}
 		}
 	}
-  
+
   add (...children) {
     for (let child of children) {
       this.children.push(child);
@@ -47,7 +68,8 @@ class Research {
   reduce (callback, initial, mode) {
     let acc = initial;
     let depth = 0;
-    this.traverse((n,d) => acc = callback(acc, n, d), mode, depth);
+    this.traverse((n,d) => {acc = callback(acc, n, d)}, mode, depth);
+    //print("reduce->", acc);
     return acc;
   }
 
@@ -83,7 +105,7 @@ Research.Traversal = {
         this.children.forEach(n => n.traverse(callback, Research.Traversal.DepthFirst, depth+1));
     },
     Actual: function(callback, depth = 0) {
-        if (!this.done) {
+        if (this.time > 0) {
           callback(this, depth);
         } else {
           let nodes = this.children.filter(v => !v.locked);
@@ -93,26 +115,33 @@ Research.Traversal = {
 };
 
 
-var sience_tree =
-  new Research('A', "", [
-    new Research('B', "", [
-      new Research('D', ""),
-      new Research('E', "", [
-        new Research('G', "", []),
-      ], true),
-      new Research('F', "", [])
-    ]),
-    new Research('C', "", []) 
-  ]
-)
-sience_tree.children[0].children[1].addNext(new Research('H', "")).addNext(new Research('I', ""))
+//sience_tree.children[0].children[1].addNext(new Research('H', "")).addNext(new Research('I', ""))
 
 
-const sienceLog = function(a, r, d) {
-  for (var i = 0; i < d; i++) a += "-"; 
-  a += `+${r.name}`;
-  a += r.locked ? "[o]" : (r.done ? "[x]" : "[ ]");
-  a += "\n";
-  return a;
+const sienceTree = function(a, r, d) {
+	//print(a, r, d);
+	for (var i = 0; i < d; i++) a += "--"; 
+	a += `+${r.name}`;
+	a += r.locked ? "[-]" : (r.time > 0  ? "[ ]" : "[x]");
+	a += '\n';
+	for (var i = 0; i < d; i++) a += "  ";
+	a += `   => ${r.time}⏳ ${r.cost}💰`;
+	if (r.active) a += " - исследуется";
+	a += "\n";
+	//print("=====",a);
+	return a;
+}
+
+const sienceArray = function(a, r) {
+	a.push(r.name);
+	return a;
+}
+
+function createSienceTree() {
+	let s = new Research("🔍🌍Разведка планеты", "survey", 10, 250000);
+	s.addNext(new Research("🔍🔋Аккумуляторы", "accum", 50, 1000000)).addNext(new Research("🔍🔌Экономия энергии", "eco_power", 100, 2000000));
+	s.addNext(new Research("🔍🛠Быстрое строительство", "fastbuild", 40, 3000000));
+	s.addNext(new Research("🔍🚀Корабли", "enable_ships", 20, 400000)).addNext(new Research("🔍💸Торговля", "eco_power", 60, 700000));
+	return s;
 }
 

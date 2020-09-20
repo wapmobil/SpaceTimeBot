@@ -1,3 +1,4 @@
+include("building.qs")
 // База
 class Facility extends Building {
 	name() {
@@ -8,8 +9,11 @@ class Facility extends Building {
 	}
 	info() {
 		let msg = this.infoHeader();
-		msg += `    След. ур. ${this.level+1} `;
+		msg += `    🛠${this.level+1} `;
 		return msg + this.infoFooter();
 		return msg;
+	}
+	consumption() {
+		return 0;
 	}
 }

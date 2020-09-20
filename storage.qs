@@ -1,3 +1,4 @@
+include("building.qs")
 // Хранилище
 class Storage extends Building {
 	name() {
@@ -12,7 +13,10 @@ class Storage extends Building {
 	info() {
 		let msg = this.infoHeader();
 		msg += `    Вместимость ${this.capacity(this.level)}💰\n`;
-		msg += `    След. ур. ${this.level+1}:  вместимость ${this.capacity(this.level+1)}💰 `;
+		msg += `    🛠${this.level+1}:  вместимость ${this.capacity(this.level+1)}💰 `;
 		return msg + this.infoFooter();
+	}
+	consumption() {
+		return 2;
 	}
 }
