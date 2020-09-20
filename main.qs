@@ -1,3 +1,4 @@
+pushButton["clicked()"].connect(on_pushButton_clicked);
 include("building.qs")
 include("storage.qs")
 include("facility.qs")
@@ -170,4 +171,8 @@ function on_buttonLoad_clicked() {
 // очистить всё, полный сброс
 function on_buttonReset_clicked() {
 	Users = new Map();
+}
+
+function on_pushButton_clicked() {
+	Telegram.sendAll(lineEdit.text);
 }
