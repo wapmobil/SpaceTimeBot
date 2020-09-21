@@ -1,9 +1,9 @@
 include("building.qs")
 
 class EnergyStorage extends Building {
-	name() {
-		return "🔋Аккумуляторы";
-	}
+	name() {return "🔋Аккумуляторы";}
+	icon() {return "🔋";}
+	description() {return "Обеспечивает хранение ⚡энергии, необходимой для заправки кораблей. Требует ⚡ для работы";}
 	capacity(lvl) {
 		return (lvl*1000);
 	}
@@ -13,10 +13,9 @@ class EnergyStorage extends Building {
 	info() {
 		let msg = this.infoHeader();
 		msg += `    Вместимость ${this.capacity(this.level)}⚡\n`;
-		msg += `    След. ур. ${this.level+1}:  вместимость ${this.capacity(this.level+1)}⚡ `;
+		msg += `    🛠${this.level+1}:  вместимость ${this.capacity(this.level+1)}⚡ `;
 		return msg + this.infoFooter();
 	}
-	consumption() {
-		return 2;
-	}
+	consumption() {return 2;}
+	buildTimeAdd() {return 1000;}
 }

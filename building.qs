@@ -1,14 +1,14 @@
 // Базовый класс строения
 class Building {
-	name() {
-		return "";
-	}
 	constructor(id){
 		this.level = 0;
 		this.build_progress = 0;
 		this.chat_id = id;
 		this.locked = false;
 	}
+	name() {return "";}
+	icon() {return "";}
+	description() {return "";}
 	load(o) {
 		for (const [key, value] of Object.entries(o)) {
 			if (typeof value == 'object') {
@@ -52,7 +52,7 @@ class Building {
 		return money;
 	}
 	buildTime() {
-		return Math.floor((this.level+2*Math.pow(Math.sin(this.level), 3))*100+10);
+		return Math.floor((this.level+2*Math.pow(Math.sin(this.level), 3))*100+10) + this.buildTimeAdd();
 	}
 	cost() {
 		return 0;
@@ -63,7 +63,7 @@ class Building {
 	infoHeader() {
 		let z = this.consumption() > 0 ? `${this.consumption()*this.level}⚡️` : "";
 		if (this.consumption() == 0 || this.level == 0) z = "";
-		return `${this.name()} ур. ${this.level} : ${z}\n`;
+		return `<b>${this.name()} ур. ${this.level}:</b> ${z}\n`;
 	}
 	infoFooter() {
 		let z = this.consumption() > 0 ? `${this.consumption()}⚡️` : "";
@@ -74,4 +74,5 @@ class Building {
 	consumption() {
 		return 0;
 	}
+	buildTimeAdd() {return 0;}
 }

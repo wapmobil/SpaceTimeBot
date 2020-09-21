@@ -1,3 +1,4 @@
+include("resources.qs")
 include("spaceyard.qs")
 include("solar.qs")
 include("factory.qs")
@@ -7,35 +8,12 @@ include("facility.qs")
 include("plant.qs")
 include("energystorage.qs")
 
-const Resources  = [{
-	name : "material",
-	desc : "Композиты",
-	icon : "🧱"
-}, {
-	name : "plasma",
-	desc : "Плазма",
-	icon : "🔆"
-}, {
-	name : "chips",
-	desc : "Электроника",
-	icon : "📺"
-}];
-
-function getResourceInfo(r, c) {
-	return Resources[r].desc + `: ${c}` + Resources[r].icon;
-}
-
-function getResourceCount(r, c) {
-	return `${c}` + Resources[r].icon;
-}
-
 // Планета
 class Planet {
 	constructor(id){
 		this.money = 200;
-		this[Resources[0].name] = 0;
-		this[Resources[1].name] = 0;
-		this[Resources[2].name] = 0;
+		for(let i=0; i<Resources.length; i++)
+			this[Resources[i].name] = 0;
 		this.plant = new Plant(id);
 		this.storage = new Storage(id);
 		this.facility = new Facility(id);
@@ -58,7 +36,7 @@ class Planet {
 			this.plant.level = 30;
 			this.solar.level = 30;
 			this.storage.level = 30;
-			this.facility.level = 3;
+			this.facility.level = 0;
 			this.build_speed = 100;
 			this.sience_speed = 200;
 		}
@@ -79,12 +57,13 @@ class Planet {
 			}
 		}
 	}
-	infoResources() {
+	infoResources(all = true) {
 		let msg  = `Деньги: ${money2text(this.money)}\n`;
 		    msg += `Энергия: ${this.energy(2)}/${this.energy(1)}⚡\n`;
-		    msg += getResourceInfo(0, this[Resources[0].name]) + '\n';
-		    msg += getResourceInfo(1, this[Resources[1].name]) + '\n';
-		    msg += getResourceInfo(2, this[Resources[2].name]) + '\n';
+		if (all) {
+			for(let i=0; i<Resources.length; i++)
+				msg += getResourceInfo(i, this[Resources[i].name]) + '\n';
+		}
 		return msg;
 	}
 	info() { // отобразить текущее состояние планеты
@@ -102,6 +81,7 @@ class Planet {
 		this.facility.step(this.build_speed);
 		this.factory.step(this.build_speed);
 		this.accum.step(this.build_speed);
+		this.spaceyard.step(this.build_speed);
 		if (this.money < this.storage.capacity(this.storage.level)) {
 			this.money += this.plant.level;
 			if (this.money > this.storage.capacity(this.storage.level)) {
@@ -154,6 +134,10 @@ class Planet {
 		return this.sience.reduce(sienceDetail, "", Research.Traversal.Actual);
 	}
 	sienceStart(s) {
+		if (this.sience.some(r => r.active)) {
+			Telegram.send(this.chat_id, "Сейчас нельзя, исследование уже идёт");
+			return;
+		}
 		let m = this.money;
 		m = this.sience.reduce((a,r) => {
 			if (r.name == s) {
@@ -164,13 +148,18 @@ class Planet {
 			}
 			return a;
 		}, m);
-		//print(m, this.money);
 		if (m >= 0 && m < this.money) {
 			this.money = m;
 			Telegram.send(this.chat_id, "Исследование началось");
 		} else {
 			Telegram.send(this.chat_id, "Недостаточно денег");
 		}
+	}
+	checkSience() {
+		let b1 = (this.facility.level >= 3);
+		this.sience.traverse(r => {
+			if (r.name == "🔍🚀Корабли") r.unlock(b1);
+		});
 	}
 	enable_factory() {
 		Telegram.send(this.chat_id, "Поздравляем теперь ты можешь построить завод по производству ресурса - "

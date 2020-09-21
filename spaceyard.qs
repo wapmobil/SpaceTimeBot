@@ -1,9 +1,9 @@
 include("building.qs")
 
 class Spaceyard extends Building {
-	name() {
-		return "🏗Верфь";
-	}
+	name() {return "🏗Верфь";}
+	icon() {return "🏗";}
+	description() {return "Здесь можно будет строить космические корабли. В разработке....";}
 	cost() {
 		return Math.pow(7, (this.level+7));
 	}
@@ -16,4 +16,5 @@ class Spaceyard extends Building {
 	consumption() {
 		return 16;
 	}
+	buildTimeAdd() {return 3000;}
 }
