@@ -5,15 +5,16 @@ class Storage extends Building {
 		return "📦Хранилище";
 	}
 	capacity(lvl) {
-		return (Math.pow(2, lvl)*1000);
+		if (lvl < 10) return (Math.pow(2, lvl)*1000);
+		else return lvl*1000000;
 	}
 	cost() {
 		return (this.level*this.level+1)*100;
 	}
 	info() {
 		let msg = this.infoHeader();
-		msg += `    Вместимость ${this.capacity(this.level)}💰\n`;
-		msg += `    🛠${this.level+1}:  вместимость ${this.capacity(this.level+1)}💰 `;
+		msg += `    Вместимость ${money2text(this.capacity(this.level))}\n`;
+		msg += `    🛠${this.level+1}:  вместимость ${money2text(this.capacity(this.level+1))} `;
 		return msg + this.infoFooter();
 	}
 	consumption() {

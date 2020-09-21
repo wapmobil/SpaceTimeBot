@@ -43,7 +43,7 @@ class Building {
 			return money;
 		}
 		if (this.build_progress != 0) {
-			Telegram.send(this.chat_id, `Строительство ещё в процессе, осталось - ${this.build_progress}🛠`);
+			Telegram.send(this.chat_id, `Строительство ещё в процессе, осталось ${time2text(this.build_progress)}`);
 			return money;
 		}
 		money -= this.cost();
@@ -67,8 +67,8 @@ class Building {
 	}
 	infoFooter() {
 		let z = this.consumption() > 0 ? `${this.consumption()}⚡️` : "";
-		let msg = `(${this.cost()}💰 ${this.buildTime()}⏳ ${z})\n`;
-		if (this.build_progress > 0) msg += `    Идёт 🛠строительство, осталось ${this.build_progress}⏳\n`;
+		let msg = `(${money2text(this.cost())} ${time2text(this.buildTime())} ${z})\n`;
+		if (this.build_progress > 0) msg += `    Идёт 🛠строительство, осталось ${time2text(this.build_progress)}\n`;
 		return msg;
 	}
 	consumption() {

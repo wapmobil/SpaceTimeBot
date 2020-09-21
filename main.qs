@@ -1,12 +1,14 @@
 include("planet.qs")
 
+const isProduction = false;
+
 buttonLoad["clicked()"].connect(on_buttonLoad_clicked);
 buttonSave["clicked()"].connect(on_buttonSave_clicked);
 buttonReset["clicked()"].connect(on_buttonReset_clicked);
 pushButton["clicked()"].connect(on_pushButton_clicked);
 let save_timer = new QTimer();
 save_timer["timeout"].connect(on_buttonSave_clicked);
-buttonReset.enabled = true;
+
 
 Telegram.clearCommands();
 Telegram.disablePassword();
@@ -15,7 +17,7 @@ Telegram.addCommand("Поискать 💰", "find_money");
 Telegram.addCommand("🔍Исследования", "research");
 Telegram.addCommand("📖Инфо/🌍Планета", "planet_info");
 Telegram.addCommand("📖Инфо/💻Дерево исследований", "research_map");
-Telegram.addCommand("🛠Строительство", "planet_info");
+Telegram.addCommand("🛠Строительство/📖Инфо", "planet_info");
 Telegram.addCommand("🛠Строительство/⛏Шахта", "info_plant");
 Telegram.addCommand("🛠Строительство/⛏Шахта/🛠Cтроить", "build_plant");
 Telegram.addCommand("🛠Строительство/⚡️Электростанция", "info_solar");
@@ -33,7 +35,12 @@ Telegram["receiveCommand"].connect(function(id, cmd, script) {this[script](id);}
 Telegram["receiveMessage"].connect(received);
 Telegram["connected"].connect(telegramConnect);
 Telegram["disconnected"].connect(telegramDisconnect);
-Telegram.start("1248527509:AAHQhKqMWjtApOdUYFXmMCzEBpJeyc1sY-c");
+if (isProduction) {
+	Telegram.start("1248527509:AAHQhKqMWjtApOdUYFXmMCzEBpJeyc1sY-c");
+} else {
+	buttonReset.enabled = true;
+	Telegram.start("733272349:AAH9YTSyy3RmGV4A6OWKz1b3CeKnPI2ROd8");
+}
 
 
  // Здесь вся БД
@@ -108,7 +115,10 @@ function info_factory(chat_id) {
 	if(Planets.get(chat_id).factory.locked) Telegram.send(chat_id, "Требуется исследование");
 	else infoSomething(chat_id, "factory");
 }
-function info_accum(chat_id) {infoSomething(chat_id, "accum");}
+function info_accum(chat_id) {
+	if(Planets.get(chat_id).accum.locked) Telegram.send(chat_id, "Требуется исследование");
+	else infoSomething(chat_id, "accum");
+}
 function info_solar(chat_id) {infoSomething(chat_id, "solar");}
 
 function buildSomething(chat_id, bl) {
@@ -142,7 +152,7 @@ function find_money(chat_id) {
 		Telegram.send(chat_id, "Хранилище заполнено");
 	}
 	Planets.set(chat_id, p);
-	Telegram.send(chat_id, `Ты заработал ${pr}💰`);
+	Telegram.send(chat_id, `Ты заработал ${money2text(pr)}`);
 }
 
 function research(chat_id) {
@@ -161,7 +171,13 @@ function map_info(chat_id) {
 		let msg = "Список планет:\n";
 		for (var [key, value] of Planets) {
 			if (key == chat_id) msg += "Ты: ";
-			msg += `Планета №${key}: ${value.money}💰, ${value.plant.level}⛏, ${value.facility.level}🏢\n`;
+			msg += `Планета №${key}: ${money2text(value.money)}, ${value.facility.level}🏢`;
+			if (p.facility.level > 1) {
+				msg += `${getResourceInfo(0, value[Resources[0].name])}`;
+				msg += `${getResourceInfo(1, value[Resources[1].name])}`;
+				msg += `${getResourceInfo(2, value[Resources[2].name])}`;
+			}
+			msg += '\n';
 		}
 		Telegram.send(chat_id, msg);
 	} else {
@@ -211,4 +227,12 @@ function on_buttonReset_clicked() {
 
 function on_pushButton_clicked() {
 	Telegram.sendAll(lineEdit.text);
+}
+
+function money2text(m) {
+	return `${m}💰`;
+}
+
+function time2text(t) {
+	return `${t}⏳`;
 }

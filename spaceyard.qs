@@ -14,6 +14,6 @@ class Spaceyard extends Building {
 		return msg;
 	}
 	consumption() {
-		return 0;
+		return 16;
 	}
 }

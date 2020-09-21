@@ -101,7 +101,6 @@ Research.Traversal = {
 	},
 	DepthFirst: function(callback, depth = 0, index = 0, count = 1, prefix = "") {
 		callback(this, depth, index, count, prefix);
-		let nd = depth+1;
 		if (prefix.length >= 1) {
 			if (prefix[prefix.length - 1] == "├") prefix = prefix.slice(0, -1) + "│";
 			if (prefix[prefix.length - 1] == "└") prefix = prefix.slice(0, -1) + " ";
@@ -110,7 +109,7 @@ Research.Traversal = {
 			let pref = prefix;
 			if (i == this.children.length-1) pref += " └";
 			else pref += " ├"
-			this.children[i].traverse(callback, Research.Traversal.DepthFirst, nd, i, this.children.length, pref);
+			this.children[i].traverse(callback, Research.Traversal.DepthFirst, depth+1, i, this.children.length, pref);
 		}
 	},
 	Actual: function(callback, depth = 0, index = 0, count = 1, prefix = "") {
@@ -118,12 +117,6 @@ Research.Traversal = {
 			callback(this, depth, index, count, prefix);
 		} else {
 			let nodes = this.children.filter(v => !v.locked);
-			for (let i = 0; i < nodes.length; i++) {
-				let pref = prefix;
-				if (i == nodes.length-1) pref += " └";
-				else pref += " ├"
-				nodes[i].traverse(callback, Research.Traversal.DepthFirst, nd, i, nodes.length, pref);
-			}
 			nodes.forEach(n => n.traverse(callback, Research.Traversal.Actual, depth+1));
 		}
 	}
@@ -139,7 +132,7 @@ const sienceTree = function(ret, res, depth, index, count, prefix) {
 		
 	ret += pref_main;
 	ret += "[";
-	ret += res.locked ? "▒" : (res.time > 0  ? " " : "▇");
+	ret += res.locked ? "X" : (res.time > 0 ? (res.active ? "▒" : "   ") : "▇");
 	ret += "]";
 	ret += `${res.name}`;
 	ret += '\n';
@@ -151,7 +144,7 @@ const sienceTree = function(ret, res, depth, index, count, prefix) {
 			pref_price = " │";
 		ret += pref_price + "   ";
 		if (depth > 0) ret += "  ";
-		ret += `${res.cost}💰 ${res.time}⏳`;
+		ret += `${money2text(res.cost)} ${time2text(res.time)}`;
 		ret += '\n';
 	}
 	return ret;
@@ -163,9 +156,12 @@ const sienceArray = function(a, r) {
 }
 
 const sienceDetail = function(a, r) {
-	a += `${r.name} - ${r.cost}💰 ${r.time}⏳ \n`;
-	return a;
+	a += `${r.name} - ${money2text(r.cost)}`
+	if (r.active) a += "исследуется, осталось";
+	a += ` ${time2text(r.time)}`;
+	return a + '\n';
 }
+
 function createSienceTree() {
 	let s = new Research("🔍🌍Разведка планеты", "enable_factory", 2000, 250000);
 	s.addNext(new Research("🔍🔋Аккумуляторы", "enable_accum", 5000, 1000000)).addNext(new Research("🔍🔌Экономия энергии", "eco_power", 10000, 2000000));

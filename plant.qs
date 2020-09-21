@@ -9,8 +9,8 @@ class Plant extends Building {
 	}
 	info() {
 		let msg = this.infoHeader();
-		msg += `    Доход +${this.level}💰\n`;
-		msg += `    🛠${this.level+1}:  доход +${this.level+1}💰 `;
+		msg += `    Доход ${money2text(this.level)}\n`;
+		msg += `    🛠${this.level+1}:  доход ${money2text(this.level+1)} `;
 		return msg + this.infoFooter();
 	}
 	consumption() {

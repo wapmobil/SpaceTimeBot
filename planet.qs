@@ -51,13 +51,22 @@ class Planet {
 		this.sience_speed = 1;
 		this.energy_eco = 1;
 		this.sience = createSienceTree();
-		this.factory_type = getRandom(2);
-		this.factory_step = 0;
+		this.factory.type = getRandom(2);
+		this.factory.prod_cnt = 0;
+		if (!isProduction) {
+			this.money = 9999999;
+			this.plant.level = 30;
+			this.solar.level = 30;
+			this.storage.level = 30;
+			this.facility.level = 3;
+			this.build_speed = 100;
+			this.sience_speed = 200;
+		}
 	}
 	getBuildings() {
-		let a = [this.plant, this.storage, this.facility, this.solar];
-		if (!this.factory.locked) a.push(this.factory);
+		let a = [this.facility, this.plant, this.storage, this.solar];
 		if (!this.accum.locked) a.push(this.accum);
+		if (!this.factory.locked) a.push(this.factory);
 		if (!this.spaceyard.locked) a.push(this.spaceyard);
 		return a;
 	}
@@ -71,7 +80,7 @@ class Planet {
 		}
 	}
 	infoResources() {
-		let msg  = `Деньги: ${this.money}💰\n`;
+		let msg  = `Деньги: ${money2text(this.money)}\n`;
 		    msg += `Энергия: ${this.energy(2)}/${this.energy(1)}⚡\n`;
 		    msg += getResourceInfo(0, this[Resources[0].name]) + '\n';
 		    msg += getResourceInfo(1, this[Resources[1].name]) + '\n';
@@ -100,13 +109,7 @@ class Planet {
 				Telegram.send(this.chat_id, "Хранилище заполнено");
 			}
 		}
-		if (this.factory.level > 0) {
-			this.factory_step += 10 + this.factory.level;
-			if (this.factory_step > 6000) {
-				this.factory_step = 0;
-				this[Resources[0].name] += 1;
-			}
-		}
+		this[Resources[this.factory.type].name] += this.factory.product();
 		let rs_done = this.sience.reduce((a,r) => {
 			let x = r.step(this.sience_speed);
 			if (x) a = x;
@@ -158,9 +161,10 @@ class Planet {
 				if (a >= 0) {
 					r.start();
 				}
-				return a;
 			}
+			return a;
 		}, m);
+		//print(m, this.money);
 		if (m >= 0 && m < this.money) {
 			this.money = m;
 			Telegram.send(this.chat_id, "Исследование началось");
@@ -170,7 +174,7 @@ class Planet {
 	}
 	enable_factory() {
 		Telegram.send(this.chat_id, "Поздравляем теперь ты можешь построить завод по производству ресурса - "
-			 + Resources[this.factory_type].icon + Resources[this.factory_type].decs);
+			 + Resources[this.factory.type].icon + Resources[this.factory.type].desc);
 		this.factory.locked = false;
 	}
 	enable_accum() {
