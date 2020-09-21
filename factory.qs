@@ -1,17 +1,15 @@
 include("building.qs")
 
 class Factory extends Building {
-	name() {
-		return "🏭Завод";
-	}
+	name() {return "🏭Завод";}
+	icon() {return "🏭";}
+	description() {return `Производит ${Resources[this.type].icon}${Resources[this.type].desc} - один из ресурсов для постройки кораблей, требует ⚡ для работы`;}
 	cost() {
-		return (this.level*2+1)*1000000;
+		return (this.level*2+1)*100000;
 	}
 	info() {
 		let msg = this.infoHeader();
-		const p = "";
-		
-		msg += `    Доход +1${Resources[this.type].icon} за ${time2text(this.incomingTime(this.level))}\n`;
+		if (this.level > 0) msg += `    Доход +1${Resources[this.type].icon} за ${time2text(this.incomingTime(this.level))}\n`;
 		msg += `    🛠${this.level+1}:  доход +1${Resources[this.type].icon} за ${time2text(this.incomingTime(this.level+1))}`;
 		return msg + this.infoFooter();
 	}
@@ -41,4 +39,5 @@ class Factory extends Building {
 		}
 		return 0;
 	}
+	buildTimeAdd() {return 1000;}
 }

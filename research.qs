@@ -1,5 +1,5 @@
 class Research {
-	constructor (name, func, time, cost, children = [], locked = false) {
+	constructor (name, func, time, cost, locked = false, children = []) {
 		this.name = name;
 		this.locked = locked;
 		this.func = func;
@@ -25,24 +25,17 @@ class Research {
 		return undefined;
 	}
 
-	clone () {
-		let that = Object.assign(new Research(), this);
-		that.children = this.children.map(n => n.clone());
-		return that;
-	}
+	unlock(l) {this.locked = !l;}
 
 	load(o) {
-		for (const [key, value] of Object.entries(o)) {
-			if (key == 'children') {
-				for (let i = 0; i < this.children.length; i++) {
-					for (let child of value) {
-						if (this.children[i].name == child.name) {
-							this.children[i].load(child);
-						}
-					}
+		this.active = o.active;
+		this.locked = o.locked;
+		if (o.time == 0 || o.active) this.time = o.time;
+		for (let i = 0; i < this.children.length; i++) {
+			for (let child of o.children) {
+				if (this.children[i].name == child.name) {
+					this.children[i].load(child);
 				}
-			} else {
-				this[key] = value;
 			}
 		}
 	}
@@ -59,15 +52,15 @@ class Research {
 		return this.children[this.children.length-1];
 	}
 
-	traverse (callback, traversal = Research.Traversal.DepthFirst, depth = 0, index = 0, count = 1, prefix = "") {
-		traversal.call(this, callback, depth, index, count, prefix);
+	traverse (callback, traversal = Research.Traversal.DepthFirst, depth = 0, prefix = "") {
+		traversal.call(this, callback, depth, prefix);
 		return this;
 	}
 
 	reduce (callback, initial, mode) {
 		let acc = initial;
 		let depth = 0;
-		this.traverse((n, d, i, c, p) => {acc = callback(acc, n, d, i, c, p)}, mode, depth);
+		this.traverse((n, d, p) => {acc = callback(acc, n, d, p)}, mode, depth);
 		return acc;
 	}
 
@@ -99,8 +92,8 @@ Research.Traversal = {
 			nodes = nodes.concat(current.children,  Research.Traversal.BreadthFirst);
 		}
 	},
-	DepthFirst: function(callback, depth = 0, index = 0, count = 1, prefix = "") {
-		callback(this, depth, index, count, prefix);
+	DepthFirst: function(callback, depth = 0, prefix = "") {
+		callback(this, depth, prefix);
 		if (prefix.length >= 1) {
 			if (prefix[prefix.length - 1] == "├") prefix = prefix.slice(0, -1) + "│";
 			if (prefix[prefix.length - 1] == "└") prefix = prefix.slice(0, -1) + " ";
@@ -109,12 +102,12 @@ Research.Traversal = {
 			let pref = prefix;
 			if (i == this.children.length-1) pref += " └";
 			else pref += " ├"
-			this.children[i].traverse(callback, Research.Traversal.DepthFirst, depth+1, i, this.children.length, pref);
+			this.children[i].traverse(callback, Research.Traversal.DepthFirst, depth+1, pref);
 		}
 	},
-	Actual: function(callback, depth = 0, index = 0, count = 1, prefix = "") {
+	Actual: function(callback, depth = 0, prefix = "") {
 		if (this.time > 0) {
-			callback(this, depth, index, count, prefix);
+			callback(this, depth, prefix);
 		} else {
 			let nodes = this.children.filter(v => !v.locked);
 			nodes.forEach(n => n.traverse(callback, Research.Traversal.Actual, depth+1));
@@ -123,7 +116,7 @@ Research.Traversal = {
 };
 
 
-const sienceTree = function(ret, res, depth, index, count, prefix) {
+const sienceTree = function(ret, res, depth, prefix) {
 	const with_price = false;
 	let pref_main = prefix;
 	if (with_price)
@@ -132,7 +125,7 @@ const sienceTree = function(ret, res, depth, index, count, prefix) {
 		
 	ret += "<code>" + pref_main;
 	ret += "[";
-	ret += res.locked ? "X" : (res.time > 0 ? (res.active ? "▒" : " ") : "▇");
+	ret += res.locked ? "🚫" : (res.time > 0 ? (res.active ? "⏳" : "⚪️") : "✅");
 	ret += "]" + "</code>";
 	ret += `${res.name}`;
 	ret += '\n';
@@ -162,11 +155,14 @@ const sienceDetail = function(a, r) {
 	return a + '\n';
 }
 
+
 function createSienceTree() {
-	let s = new Research("🔍🌍Разведка планеты", "enable_factory", 2000, 250000);
-	s.addNext(new Research("🔍🔋Аккумуляторы", "enable_accum", 5000, 1000000)).addNext(new Research("🔍🔌Экономия энергии", "eco_power", 10000, 2000000));
-	s.addNext(new Research("🔍🛠Быстрое строительство", "fastbuild", 4000, 3000000));
-	s.addNext(new Research("🔍🚀Корабли", "enable_ships", 9000, 400000)).addNext(new Research("🔍💸Торговля", "enable_trading", 12000, 700000));
+	let s = new Research("🔍🌍Разведка планеты", "enable_factory", 2000, 25000);
+	s.addNext(new Research("🔍🔋Аккумуляторы", "enable_accum", 5000, 100000)).
+	  addNext(new Research("🔍🔌Экономия энергии", "eco_power", 10000, 2000000));
+	s.children[0].addNext(new Research("🔍🚀Корабли", "enable_ships", 9000, 400000, true)).
+	              addNext(new Research("🔍💸Торговля", "enable_trading", 12000, 700000));
+	s.addNext(new Research("🔍🛠Быстрое строительство", "fastbuild", 4000, 1000000));
 	return s;
 }
 

@@ -17,32 +17,36 @@ Telegram.addCommand("🔍Исследования", "research");
 Telegram.addCommand("📖Инфо/🌍Планета", "planet_info");
 Telegram.addCommand("📖Инфо/💻Дерево исследований", "research_map");
 Telegram.addCommand("📖Инфо/🌌Сканер планет", "map_info");
-Telegram.addCommand("🛠Строительство/📖Инфо", "planet_info");
+//Telegram.addCommand("🛠Строительство/📖Инфо", "planet_info");
 Telegram.addCommand("🛠Строительство/⛏Шахта", "info_plant");
 Telegram.addCommand("🛠Строительство/⛏Шахта/📖Инфо", "info_plant");
-Telegram.addCommand("🛠Строительство/⛏Шахта/🛠Cтроить", "build_plant");
+Telegram.addCommand("🛠Строительство/⛏Шахта/🛠Cтроить ⛏Шахту", "build_plant");
 Telegram.addCommand("🛠Строительство/⚡️Электростанция", "info_solar");
 Telegram.addCommand("🛠Строительство/⚡️Электростанция/📖Инфо", "info_solar");
-Telegram.addCommand("🛠Строительство/⚡️Электростанция/🛠Cтроить", "build_solar");
+Telegram.addCommand("🛠Строительство/⚡️Электростанция/🛠Cтроить ⚡️Электростанцию", "build_solar");
 Telegram.addCommand("🛠Строительство/🔋Аккумулятор", "info_accum");
 Telegram.addCommand("🛠Строительство/🔋Аккумулятор/📖Инфо", "info_accum");
-Telegram.addCommand("🛠Строительство/🔋Аккумулятор/🛠Cтроить", "build_accum");
+Telegram.addCommand("🛠Строительство/🔋Аккумулятор/🛠Cтроить 🔋Аккумулятор", "build_accum");
 Telegram.addCommand("🛠Строительство/📦Хранилище", "info_storage");
 Telegram.addCommand("🛠Строительство/📦Хранилище/📖Инфо", "info_storage");
-Telegram.addCommand("🛠Строительство/📦Хранилище/🛠Cтроить", "build_storage");
+Telegram.addCommand("🛠Строительство/📦Хранилище/🛠Cтроить 📦Хранилище", "build_storage");
 Telegram.addCommand("🛠Строительство/🏢База", "info_facility");
 Telegram.addCommand("🛠Строительство/🏢База/📖Инфо", "info_facility");
-Telegram.addCommand("🛠Строительство/🏢База/🛠Cтроить", "build_facility");
+Telegram.addCommand("🛠Строительство/🏢База/🛠Cтроить 🏢Базу", "build_facility");
 Telegram.addCommand("🛠Строительство/🏭Завод", "info_factory");
 Telegram.addCommand("🛠Строительство/🏭Завод/📖Инфо", "info_factory");
-Telegram.addCommand("🛠Строительство/🏭Завод/🛠Cтроить", "build_factory");
+Telegram.addCommand("🛠Строительство/🏭Завод/🛠Cтроить 🏭Завод", "build_factory");
+Telegram.addCommand("🛠Строительство/🏗Верфь", "info_spaceyard");
+Telegram.addCommand("🛠Строительство/🏗Верфь/📖Инфо", "info_spaceyard");
+Telegram.addCommand("🛠Строительство/🏗Верфь/🛠Cтроить 🏗Верфь", "build_spaceyard");
 
 Telegram["receiveCommand"].connect(function(id, cmd, script) {this[script](id);});
 Telegram["receiveMessage"].connect(received);
 Telegram["connected"].connect(telegramConnect);
 Telegram["disconnected"].connect(telegramDisconnect);
 if (isProduction) {
-	Telegram.start("1248527509:AAHQhKqMWjtApOdUYFXmMCzEBpJeyc1sY-c");
+	Telegram.start(SHS.load(77));
+	label.hide();
 } else {
 	buttonReset.enabled = true;
 	Telegram.start("733272349:AAH9YTSyy3RmGV4A6OWKz1b3CeKnPI2ROd8");
@@ -98,7 +102,7 @@ function received(chat_id, msg) {
 	//print(msg.substring(0,2));
 	if (msg.substring(0,2) == "🔍" && msg != "🔍Исследования") {
 		let research_list = Planets.get(chat_id).sienceList();
-		print(research_list);
+		//print(research_list);
 		if (research_list.indexOf(msg) >= 0) {
 			Planets.get(chat_id).sienceStart(msg);
 		} else {
@@ -112,20 +116,17 @@ function planet_info(chat_id) {
 }
 
 function infoSomething(chat_id, bl) {
-	Telegram.send(chat_id, Planets.get(chat_id).infoResources() + Planets.get(chat_id)[bl].info());
+	let p = Planets.get(chat_id);
+	if (p[bl].locked) Telegram.send(chat_id, "Требуется исследование");
+	else Telegram.send(chat_id, p.infoResources(false) + p[bl].description() + '\n' + p[bl].info());
 }
 function info_plant(chat_id) {infoSomething(chat_id, "plant");}
 function info_storage(chat_id) {infoSomething(chat_id, "storage");}
 function info_facility(chat_id) {infoSomething(chat_id, "facility");}
-function info_factory(chat_id) {
-	if(Planets.get(chat_id).factory.locked) Telegram.send(chat_id, "Требуется исследование");
-	else infoSomething(chat_id, "factory");
-}
-function info_accum(chat_id) {
-	if(Planets.get(chat_id).accum.locked) Telegram.send(chat_id, "Требуется исследование");
-	else infoSomething(chat_id, "accum");
-}
 function info_solar(chat_id) {infoSomething(chat_id, "solar");}
+function info_factory(chat_id) {infoSomething(chat_id, "factory");}
+function info_accum(chat_id) {infoSomething(chat_id, "accum");}
+function info_spaceyard(chat_id) {infoSomething(chat_id, "spaceyard");}
 
 function buildSomething(chat_id, bl) {
 	//let p = Planets.get(chat_id);
@@ -142,6 +143,7 @@ function build_facility(chat_id) {buildSomething(chat_id, "facility");}
 function build_factory(chat_id) {buildSomething(chat_id, "factory");}
 function build_accum(chat_id) {buildSomething(chat_id, "accum");}
 function build_solar(chat_id) {buildSomething(chat_id, "solar");}
+function build_spaceyard(chat_id) {buildSomething(chat_id, "spaceyard");}
 
 function getRandom(max) {
   return Math.floor(Math.random() * Math.floor(max));
@@ -162,6 +164,7 @@ function find_money(chat_id) {
 }
 
 function research(chat_id) {
+	Planets.get(chat_id).checkSience();
 	let p = Planets.get(chat_id);
 	if (p.facility.level > 1) {
 		Telegram.sendButtons(chat_id, "Доступные исследования:\n" + p.sienceListExt(), p.sienceList().concat(["отмена"]));
@@ -173,15 +176,20 @@ function research(chat_id) {
 
 function map_info(chat_id) {
 	let p = Planets.get(chat_id);
-	if (p.facility.level > 0) {
+	if (p.facility.level >= 1) {
 		let msg = "Список планет:\n";
 		for (var [key, value] of Planets) {
 			if (key == chat_id) msg += "Ты: ";
-			msg += `Планета №${key}: ${money2text(value.money)}, ${value.facility.level}🏢`;
-			if (p.facility.level > 1) {
-				msg += `${getResourceCount(0, value[Resources[0].name])}`;
-				msg += `${getResourceCount(1, value[Resources[1].name])}`;
-				msg += `${getResourceCount(2, value[Resources[2].name])}`;
+			msg += `<b>Планета №${key}:</b> ${value.facility.level}🏢|${money2text(value.money)}`;
+			if (p.facility.level >= 2) {
+				for(let i=0; i<Resources.length; i++)
+					msg += `|${getResourceCount(i, value[Resources[i].name])}`;
+			}
+			if (p.facility.level >= 4) {
+				let bds = value.getBuildings();
+				for (var b of bds) {
+					if (b.icon() != "🏢") msg += `|${b.level}${b.icon()}`;
+				}
 			}
 			msg += '\n';
 		}
@@ -192,9 +200,7 @@ function map_info(chat_id) {
 }
 
 function research_map(chat_id) {
-	//print("vsfdvfsdvf");
-	//let p = Planets.get(chat_id);
-	//print(Planets.get(chat_id).sienceInfo());
+	Planets.get(chat_id).checkSience();
 	Telegram.send(chat_id, Planets.get(chat_id).sienceInfo());
 }
 
@@ -203,12 +209,12 @@ function on_buttonSave_clicked() {
 	for (var value of Planets.values()) {
 		a.push(value);
 	}
-	SHS.save(1, JSON.stringify(a));
+	SHS.save(isProduction ? 1 : 101, JSON.stringify(a));
 	//print(SHS.load(1));
 }
 
 function loadPlanets() {
-	let data = SHS.load(1);
+	let data = SHS.load(isProduction ? 1 : 101);
 	//print(data);
 	let m = new Map();
 	if (typeof data == 'string') {
