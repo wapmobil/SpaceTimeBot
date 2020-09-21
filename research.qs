@@ -130,21 +130,21 @@ const sienceTree = function(ret, res, depth, index, count, prefix) {
 		if (pref_main.length >= 1)
 			pref_main = pref_main.slice(0, -1) + "├";
 		
-	ret += pref_main;
+	ret += "<code>" + pref_main;
 	ret += "[";
-	ret += res.locked ? "X" : (res.time > 0 ? (res.active ? "▒" : "   ") : "▇");
-	ret += "]";
+	ret += res.locked ? "X" : (res.time > 0 ? (res.active ? "▒" : " ") : "▇");
+	ret += "]" + "</code>";
 	ret += `${res.name}`;
 	ret += '\n';
 	if (with_price){
-		let pref_price = prefix;
+		let pref_price = "<code>" + prefix;
 		if (pref_price.length >= 1) {
 			if (pref_price[pref_price.length - 1] == "├") pref_price = pref_price.slice(0, -1) + "│";
 		} else
 			pref_price = " │";
 		ret += pref_price + "   ";
 		if (depth > 0) ret += "  ";
-		ret += `${money2text(res.cost)} ${time2text(res.time)}`;
+		ret += "</code>" + `${money2text(res.cost)} ${time2text(res.time)}`;
 		ret += '\n';
 	}
 	return ret;
