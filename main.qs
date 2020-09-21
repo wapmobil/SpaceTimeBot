@@ -236,17 +236,30 @@ function on_pushButton_clicked() {
 }
 
 function money2text(m) {
-	var s = `${m}`;
-	if(s.length > 3) {
-		var p = s.substring(0, s.length - Math.floor(s.length / 3)*3);
-		s = s.substring(p.length);
-		s = s.replace(/\d{3}()/g, i => i+"\'");
-		p += (p.length > 0 ? "\'" : "") + s.substring(0, s.length -1);
-		s = p;
+	let s = `${m}`, ret = "", dc = Math.floor((s.length - 1) / 3), of = s.length - (dc*3);
+	for (let j = 0; j <= dc; ++j) {
+		if (j == 0) ret += s.substring(0, of);
+		else {
+			ret += "\'" + s.substr(of + (3*(j-1)), 3);
+		}
 	}
-	return s + "💰";
+	return ret + "💰";
 }
 
 function time2text(t) {
-	return `${t}⏳`;
+	function num2g(v, align) {
+		let ret = `${v}`
+		if (align && ret.length < 2)
+			ret = `0${ret}`;
+		return ret;
+	}
+	let h = Math.floor(t / 3600);
+	t -= h * 3600;
+	let m = Math.floor(t / 60);
+	t -= m * 60;
+	let ret = "";
+	if (h > 0) ret += `${h}:`;
+	if (h > 0 || m > 0) ret += num2g(m, h > 0) + ":";
+	ret += num2g(t, h > 0 || m > 0);
+	return ret + "⏳";
 }
