@@ -33,7 +33,7 @@ Telegram["receiveCommand"].connect(function(id, cmd, script) {this[script](id);}
 Telegram["receiveMessage"].connect(received);
 Telegram["connected"].connect(telegramConnect);
 Telegram["disconnected"].connect(telegramDisconnect);
-Telegram.start("733272349:AAH9YTSyy3RmGV4A6OWKz1b3CeKnPI2ROd8");
+Telegram.start("1248527509:AAHQhKqMWjtApOdUYFXmMCzEBpJeyc1sY-c");
 
 
  // Здесь вся БД
@@ -42,7 +42,7 @@ let Planets = loadPlanets();
 //Старт
 let timer = new QTimer();
 timer["timeout"].connect(timerDone);
-timer.start(100);
+timer.start(1000);
 save_timer.start(timer.interval*10);
 
 
