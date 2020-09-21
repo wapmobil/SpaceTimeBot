@@ -5,12 +5,12 @@ class Solar extends Building {
 		return "⚡Электростанция";
 	}
 	cost() {
-		return ((this.level*this.level*this.level+1)*100);
+		return ((this.level*this.level)*200+80);
 	}
 	info() {
 		let msg = this.infoHeader();
-		msg += `    энергия +${-this.level*this.consumption()}⚡\n`;
-		msg += `    🛠${this.level+1}:  энергия +${-(this.level+1)*this.consumption()}⚡ `;
+		msg += `    энергия ${-this.level*this.consumption()}⚡\n`;
+		msg += `    🛠${this.level+1}:  энергия +${-this.consumption()}⚡ `;
 		return msg + this.infoFooter();
 	}
 	consumption() {

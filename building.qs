@@ -34,7 +34,7 @@ class Building {
 			Telegram.send(this.chat_id, "Необходимо исследование");
 			return money;
 		}
-		if (energy < this.consumption()) {
+		if (energy < this.consumption() && this.consumption() > 0) {
 			Telegram.send(this.chat_id, "Недостаточно электроэнергии,\n нужно больше электростанций");
 			return money;
 		}

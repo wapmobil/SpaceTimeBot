@@ -147,6 +147,9 @@ class Planet {
 	sienceList() {
 		return this.sience.reduce(sienceArray, [], Research.Traversal.Actual);
 	}
+	sienceListExt() {
+		return this.sience.reduce(sienceDetail, "", Research.Traversal.Actual);
+	}
 	sienceStart(s) {
 		let m = this.money;
 		m = this.sience.reduce((a,r) => {

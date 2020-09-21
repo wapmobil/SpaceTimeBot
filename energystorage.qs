@@ -17,6 +17,6 @@ class EnergyStorage extends Building {
 		return msg + this.infoFooter();
 	}
 	consumption() {
-		return 2;
+		return 0;
 	}
 }

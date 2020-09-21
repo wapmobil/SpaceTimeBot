@@ -15,7 +15,7 @@ Telegram.addCommand("Поискать 💰", "find_money");
 Telegram.addCommand("🔍Исследования", "research");
 Telegram.addCommand("📖Инфо/🌍Планета", "planet_info");
 Telegram.addCommand("📖Инфо/💻Дерево исследований", "research_map");
-//Telegram.addCommand("🛠Строительство", "planet_info");
+Telegram.addCommand("🛠Строительство", "planet_info");
 Telegram.addCommand("🛠Строительство/⛏Шахта", "info_plant");
 Telegram.addCommand("🛠Строительство/⛏Шахта/🛠Cтроить", "build_plant");
 Telegram.addCommand("🛠Строительство/⚡️Электростанция", "info_solar");
@@ -42,7 +42,7 @@ let Planets = loadPlanets();
 //Старт
 let timer = new QTimer();
 timer["timeout"].connect(timerDone);
-timer.start(1000);
+timer.start(100);
 save_timer.start(timer.interval*10);
 
 
@@ -148,7 +148,7 @@ function find_money(chat_id) {
 function research(chat_id) {
 	let p = Planets.get(chat_id);
 	if (p.facility.level > 1) {
-		Telegram.sendButtons(chat_id, "Доступные исследования", p.sienceList().concat(["отмена"]));
+		Telegram.sendButtons(chat_id, "Доступные исследования:\n" + p.sienceListExt(), p.sienceList().concat(["отмена"]));
 	} else {
 		Telegram.send(chat_id, "Требуется 🏢База 2 уровня");
 	}

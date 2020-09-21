@@ -14,6 +14,6 @@ class Facility extends Building {
 		return msg;
 	}
 	consumption() {
-		return 0;
+		return 20;
 	}
 }
