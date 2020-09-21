@@ -1,6 +1,6 @@
 include("planet.qs")
 
-const isProduction = false;
+const isProduction = true;
 
 buttonLoad["clicked()"].connect(on_buttonLoad_clicked);
 buttonSave["clicked()"].connect(on_buttonSave_clicked);
@@ -12,23 +12,29 @@ save_timer["timeout"].connect(on_buttonSave_clicked);
 
 Telegram.clearCommands();
 Telegram.disablePassword();
-Telegram.addCommand("🌌Сканер планет", "map_info");
 Telegram.addCommand("Поискать 💰", "find_money");
 Telegram.addCommand("🔍Исследования", "research");
 Telegram.addCommand("📖Инфо/🌍Планета", "planet_info");
 Telegram.addCommand("📖Инфо/💻Дерево исследований", "research_map");
+Telegram.addCommand("📖Инфо/🌌Сканер планет", "map_info");
 Telegram.addCommand("🛠Строительство/📖Инфо", "planet_info");
 Telegram.addCommand("🛠Строительство/⛏Шахта", "info_plant");
+Telegram.addCommand("🛠Строительство/⛏Шахта/📖Инфо", "info_plant");
 Telegram.addCommand("🛠Строительство/⛏Шахта/🛠Cтроить", "build_plant");
 Telegram.addCommand("🛠Строительство/⚡️Электростанция", "info_solar");
+Telegram.addCommand("🛠Строительство/⚡️Электростанция/📖Инфо", "info_solar");
 Telegram.addCommand("🛠Строительство/⚡️Электростанция/🛠Cтроить", "build_solar");
 Telegram.addCommand("🛠Строительство/🔋Аккумулятор", "info_accum");
+Telegram.addCommand("🛠Строительство/🔋Аккумулятор/📖Инфо", "info_accum");
 Telegram.addCommand("🛠Строительство/🔋Аккумулятор/🛠Cтроить", "build_accum");
 Telegram.addCommand("🛠Строительство/📦Хранилище", "info_storage");
+Telegram.addCommand("🛠Строительство/📦Хранилище/📖Инфо", "info_storage");
 Telegram.addCommand("🛠Строительство/📦Хранилище/🛠Cтроить", "build_storage");
 Telegram.addCommand("🛠Строительство/🏢База", "info_facility");
+Telegram.addCommand("🛠Строительство/🏢База/📖Инфо", "info_facility");
 Telegram.addCommand("🛠Строительство/🏢База/🛠Cтроить", "build_facility");
 Telegram.addCommand("🛠Строительство/🏭Завод", "info_factory");
+Telegram.addCommand("🛠Строительство/🏭Завод/📖Инфо", "info_factory");
 Telegram.addCommand("🛠Строительство/🏭Завод/🛠Cтроить", "build_factory");
 
 Telegram["receiveCommand"].connect(function(id, cmd, script) {this[script](id);});
@@ -173,9 +179,9 @@ function map_info(chat_id) {
 			if (key == chat_id) msg += "Ты: ";
 			msg += `Планета №${key}: ${money2text(value.money)}, ${value.facility.level}🏢`;
 			if (p.facility.level > 1) {
-				msg += `${getResourceInfo(0, value[Resources[0].name])}`;
-				msg += `${getResourceInfo(1, value[Resources[1].name])}`;
-				msg += `${getResourceInfo(2, value[Resources[2].name])}`;
+				msg += `${getResourceCount(0, value[Resources[0].name])}`;
+				msg += `${getResourceCount(1, value[Resources[1].name])}`;
+				msg += `${getResourceCount(2, value[Resources[2].name])}`;
 			}
 			msg += '\n';
 		}
@@ -230,7 +236,15 @@ function on_pushButton_clicked() {
 }
 
 function money2text(m) {
-	return `${m}💰`;
+	var s = `${m}`;
+	if(s.length > 3) {
+		var p = s.substring(0, s.length - Math.floor(s.length / 3)*3);
+		s = s.substring(p.length);
+		s = s.replace(/\d{3}()/g, i => i+"\'");
+		p += (p.length > 0 ? "\'" : "") + s.substring(0, s.length -1);
+		s = p;
+	}
+	return s + "💰";
 }
 
 function time2text(t) {

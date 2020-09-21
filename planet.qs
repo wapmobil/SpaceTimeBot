@@ -25,7 +25,7 @@ function getResourceInfo(r, c) {
 	return Resources[r].desc + `: ${c}` + Resources[r].icon;
 }
 
-function getResourceCont(r, c) {
+function getResourceCount(r, c) {
 	return `${c}` + Resources[r].icon;
 }
 
