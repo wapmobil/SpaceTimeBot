@@ -21,7 +21,7 @@ class EnergyStorage extends Building {
 	add(e) {
 		if (this.level > 0) {
 			this.acc_cnt += 1;
-			if (acc_cnt > 60) {
+			if (this.acc_cnt > 60) {
 				this.acc_cnt = 0;
 				this.energy += e;
 				if (this.energy < 0) this.energy = 0;

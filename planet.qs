@@ -63,7 +63,7 @@ class Planet {
 		let msg  = `Деньги: ${money2text(this.money)}\n`;
 		    msg += `Энергия: ${this.energy(2)}/${this.energy(1)}⚡\n`;
 		if (this.accum.level > 0)
-			msg += `Аккум.: ${this.accum.energy}/${this.accum.capacity(this.accum.level)}🔋`
+			msg += `Аккум.: ${this.accum.energy}/${this.accum.capacity(this.accum.level)}🔋\n`
 		if (all) {
 			for(let i=0; i<Resources.length; i++)
 				msg += getResourceInfo(i, this[Resources[i].name]) + '\n';
@@ -86,7 +86,7 @@ class Planet {
 		this.factory.step(this.build_speed);
 		this.accum.step(this.build_speed);
 		this.spaceyard.step(this.build_speed);
-		this.accum.add(energy());
+		this.accum.add(this.energy());
 		if (this.money < this.storage.capacity(this.storage.level)) {
 			this.money += this.plant.level;
 			if (this.money > this.storage.capacity(this.storage.level)) {
@@ -124,7 +124,7 @@ class Planet {
 			if (value.consumption()*l < 0)
 				ep -= value.consumption()*l;
 		}
-		em *= this.energy_eco;
+		em = Math.round(em / this.energy_eco);
 		if (status == 1) return ep;
 		if (status == 2) return em;
 		return (ep - em);

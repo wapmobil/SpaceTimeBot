@@ -1,6 +1,6 @@
 include("planet.qs")
 
-const isProduction = true;
+const isProduction = false;
 
 buttonLoad["clicked()"].connect(on_buttonLoad_clicked);
 buttonSave["clicked()"].connect(on_buttonSave_clicked);
@@ -195,7 +195,7 @@ function map_info(chat_id) {
 			}
 			msg += '\n';
 		}
-		Telegram.send(chat_id, msg);
+		Telegram.sendEditable(chat_id, chat_id, msg);
 	} else {
 		Telegram.send(chat_id, "Требуется 🏢База 1 уровня");
 	}

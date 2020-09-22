@@ -1,11 +1,12 @@
 class Research {
-	constructor (name, func, time, cost, locked = false, children = []) {
+	constructor (name, desc, func, time, cost, locked = false, children = []) {
 		this.name = name;
-		this.locked = locked;
+		this.desc = desc;
 		this.func = func;
-		this.children = children;
 		this.time = time;
 		this.cost = cost;
+		this.locked = locked;
+		this.children = children;
 		this.active = false;
 	}
 	
@@ -148,20 +149,21 @@ const sienceArray = function(a, r) {
 }
 
 const sienceDetail = function(a, r) {
-	a += `${r.name} - ${money2text(r.cost)}`
-	if (r.active) a += "исследуется, осталось";
-	a += ` ${time2text(r.time)}`;
-	return a + '\n';
+	a += `<b>${r.name}</b> - ${money2text(r.cost)}`
+	if (r.active) a += "\n    исследуется, осталось";
+	a += ` ${time2text(r.time)}\n`;
+	a += `    ${r.desc}\n`;
+	return a;
 }
 
 
 function createSienceTree() {
-	let s = new Research("🔍🌍Разведка планеты", "enable_factory", 2000, 25000);
-	s.addNext(new Research("🔍🔋Аккумуляторы", "enable_accum", 5000, 100000)).
-	  addNext(new Research("🔍🔌Экономия энергии", "eco_power", 10000, 2000000));
-	s.children[0].addNext(new Research("🔍🚀Корабли", "enable_ships", 9000, 400000, true)).
-	              addNext(new Research("🔍💸Торговля", "enable_trading", 12000, 700000));
-	s.addNext(new Research("🔍🛠Быстрое строительство", "fastbuild", 4000, 1000000));
+	let s = new Research("🔍🌍Разведка планеты", "Исследует планету на наличие полезных ресурсов, открывает доступ к строительству завода.", "enable_factory", 2000, 25000);
+	s.addNext(new Research("🔍🔋Аккумуляторы", "Открывает доступ к строительству аккумуляторов", "enable_accum", 5000, 100000)).
+	  addNext(new Research("🔍🔌Экономия энергии", "В 2 раза сокращает потребление электричества", "eco_power", 10000, 2000000));
+	s.children[0].addNext(new Research("🔍🚀Корабли", "Открывет доступ к постройке верфи", "enable_ships", 9000, 400000, true)).
+	              addNext(new Research("🔍💸Торговля", "В разработке...", "enable_trading", 12000, 700000));
+	s.addNext(new Research("🔍🛠Быстрое строительство", "В 2 раза ускоряет постройку зданий", "fastbuild", 4000, 1000000));
 	return s;
 }
 
