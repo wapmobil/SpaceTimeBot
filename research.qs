@@ -30,7 +30,7 @@ class Research {
 
 	load(o) {
 		this.active = o.active;
-		this.locked = o.locked;
+		if (this.locked) this.locked = o.locked;
 		if (o.time == 0 || o.active) this.time = o.time;
 		for (let i = 0; i < this.children.length; i++) {
 			for (let child of o.children) {
@@ -162,7 +162,7 @@ function createSienceTree() {
 	s.addNext(new Research("🔍🔋Аккумуляторы", "Открывает доступ к строительству аккумуляторов", "enable_accum", 5000, 100000)).
 	  addNext(new Research("🔍🔌Экономия энергии", "В 2 раза сокращает потребление электричества", "eco_power", 10000, 2000000));
 	s.children[0].addNext(new Research("🔍🚀Корабли", "Открывет доступ к постройке верфи", "enable_ships", 9000, 400000, true)).
-	              addNext(new Research("🔍💸Торговля", "В разработке...", "enable_trading", 12000, 700000));
+	              addNext(new Research("🔍💸Торговля", "В разработке...", "enable_trading", 12000, 700000, true));
 	s.addNext(new Research("🔍🛠Быстрое строительство", "В 2 раза ускоряет постройку зданий", "fastbuild", 4000, 1000000));
 	return s;
 }

@@ -137,12 +137,12 @@ function buildSomething(chat_id, bl) {
 		//Planets.set(chat_id, p);
 	}
 }
-function build_plant(chat_id) {buildSomething(chat_id, "plant");}
-function build_storage(chat_id) {buildSomething(chat_id, "storage");}
-function build_facility(chat_id) {buildSomething(chat_id, "facility");}
-function build_factory(chat_id) {buildSomething(chat_id, "factory");}
-function build_accum(chat_id) {buildSomething(chat_id, "accum");}
-function build_solar(chat_id) {buildSomething(chat_id, "solar");}
+function build_plant(chat_id)     {buildSomething(chat_id, "plant");}
+function build_storage(chat_id)   {buildSomething(chat_id, "storage");}
+function build_facility(chat_id)  {buildSomething(chat_id, "facility");}
+function build_factory(chat_id)   {buildSomething(chat_id, "factory");}
+function build_accum(chat_id)     {buildSomething(chat_id, "accum");}
+function build_solar(chat_id)     {buildSomething(chat_id, "solar");}
 function build_spaceyard(chat_id) {buildSomething(chat_id, "spaceyard");}
 
 function getRandom(max) {
@@ -195,7 +195,7 @@ function map_info(chat_id) {
 			}
 			msg += '\n';
 		}
-		Telegram.sendEditable(chat_id, chat_id, msg);
+		Telegram.send(chat_id, msg);
 	} else {
 		Telegram.send(chat_id, "Требуется 🏢База 1 уровня");
 	}
@@ -224,6 +224,7 @@ function loadPlanets() {
 		arr.forEach(function(item) {
 			let p = new Planet(item.chat_id);
 			p.load(item);
+			p.fixSience();
 	  		m.set(item.chat_id, p);
 		});
 	}

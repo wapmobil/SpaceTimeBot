@@ -166,6 +166,12 @@ class Planet {
 			if (r.name == "🔍🚀Корабли") r.unlock(b1);
 		});
 	}
+	fixSience() {
+		this.sience.traverse(r => {
+			if (r.name == "🔍💸Торговля") 
+				r.unlock(false);
+		});
+	}
 	enable_factory() {
 		Telegram.send(this.chat_id, "Поздравляем теперь ты можешь построить завод по производству ресурса - "
 			 + Resources[this.factory.type].icon + Resources[this.factory.type].desc);
@@ -179,5 +185,8 @@ class Planet {
 	}
 	fastbuild() {
 		this.build_speed += 1;
+	}
+	enable_ships() {
+		this.spaceyard.locked = false;
 	}
 }
