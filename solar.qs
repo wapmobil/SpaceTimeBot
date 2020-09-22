@@ -9,8 +9,8 @@ class Solar extends Building {
 	}
 	info() {
 		let msg = this.infoHeader();
-		msg += `    энергия +${-this.level*this.consumption()}⚡\n`;
-		msg += `    🛠${this.level+1}:  энергия +${-(this.level+1)*this.consumption()}⚡ `;
+		msg += `    энергия ${-this.level*this.consumption()}⚡\n`;
+		msg += `    🛠${this.level+1}:  энергия ${-(this.level+1)*this.consumption()}⚡(+${-this.consumption()}⚡) `;
 		return msg + this.infoFooter();
 	}
 	consumption() {

@@ -124,9 +124,7 @@ const sienceTree = function(ret, res, depth, prefix) {
 			pref_main = pref_main.slice(0, -1) + "├";
 		
 	ret += "<code>" + pref_main;
-	//ret += "[";
-	ret += res.locked ? "🚫" : (res.time > 0 ? (res.active ? "⏳" : "⚪️") : "✅");
-	//ret += "]"
+	ret += res.locked ? "🚫" : (res.time > 0 ? (res.active ? "⏳" : "🔘") : "✅");
 	ret += "</code>";
 	ret += `${res.name}`;
 	ret += '\n';

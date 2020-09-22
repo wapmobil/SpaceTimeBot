@@ -31,6 +31,8 @@ class Planet {
 		this.sience = createSienceTree();
 		this.factory.type = getRandom(2);
 		this.factory.prod_cnt = 0;
+		this.accum.energy = 0;
+		this.accum.acc_cnt = 0;
 		if (!isProduction) {
 			this.money = 9999999;
 			this.plant.level = 30;
@@ -60,6 +62,8 @@ class Planet {
 	infoResources(all = true) {
 		let msg  = `Деньги: ${money2text(this.money)}\n`;
 		    msg += `Энергия: ${this.energy(2)}/${this.energy(1)}⚡\n`;
+		if (this.accum.level > 0)
+			msg += `Аккум.: ${this.accum.energy}/${this.accum.capacity(this.accum.level)}🔋`
 		if (all) {
 			for(let i=0; i<Resources.length; i++)
 				msg += getResourceInfo(i, this[Resources[i].name]) + '\n';
@@ -82,6 +86,7 @@ class Planet {
 		this.factory.step(this.build_speed);
 		this.accum.step(this.build_speed);
 		this.spaceyard.step(this.build_speed);
+		this.accum.add(energy());
 		if (this.money < this.storage.capacity(this.storage.level)) {
 			this.money += this.plant.level;
 			if (this.money > this.storage.capacity(this.storage.level)) {

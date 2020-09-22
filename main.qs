@@ -180,12 +180,14 @@ function map_info(chat_id) {
 		let msg = "Список планет:\n";
 		for (var [key, value] of Planets) {
 			if (key == chat_id) msg += "Ты: ";
-			msg += `<b>Планета №${key}:</b> ${value.facility.level}🏢|${money2text(value.money)}`;
+			msg += `<b>Планета №${key}:</b> ${value.facility.level}🏢\n`
+			msg += `    ${money2text(value.money)}`;
 			if (p.facility.level >= 2) {
 				for(let i=0; i<Resources.length; i++)
 					msg += `|${getResourceCount(i, value[Resources[i].name])}`;
 			}
 			if (p.facility.level >= 4) {
+				msg += '\n    ';
 				let bds = value.getBuildings();
 				for (var b of bds) {
 					if (b.icon() != "🏢") msg += `|${b.level}${b.icon()}`;
