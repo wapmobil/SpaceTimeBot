@@ -1,6 +1,6 @@
 include("planet.qs")
 
-const isProduction = false;
+const isProduction = true;
 
 buttonLoad["clicked()"].connect(on_buttonLoad_clicked);
 buttonSave["clicked()"].connect(on_buttonSave_clicked);
@@ -45,7 +45,7 @@ Telegram["receiveMessage"].connect(received);
 Telegram["buttonPressed"].connect(telegramButton);
 Telegram["connected"].connect(telegramConnect);
 Telegram["disconnected"].connect(telegramDisconnect);
-Telegram["messageSent"].connect(telegramSent);
+//Telegram["messageSent"].connect(telegramSent);
 
 if (isProduction) {
 	Telegram.start(SHS.load(77));
