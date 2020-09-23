@@ -38,7 +38,7 @@ class Planet {
 			this.plant.level = 30;
 			this.solar.level = 30;
 			this.storage.level = 30;
-			this.facility.level = 0;
+			this.facility.level = 3;
 			this.build_speed = 100;
 			this.sience_speed = 200;
 		}

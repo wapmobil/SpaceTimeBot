@@ -17,7 +17,7 @@ Telegram.addCommand("🔍Исследования", "research");
 Telegram.addCommand("📖Инфо/🌍Планета", "planet_info");
 Telegram.addCommand("📖Инфо/💻Дерево исследований", "research_map");
 Telegram.addCommand("📖Инфо/🌌Сканер планет", "map_info");
-//Telegram.addCommand("🛠Строительство/📖Инфо", "planet_info");
+Telegram.addCommand("🛠Строительство/📖Инфо", "planet_info");
 Telegram.addCommand("🛠Строительство/⛏Шахта", "info_plant");
 Telegram.addCommand("🛠Строительство/⛏Шахта/📖Инфо", "info_plant");
 Telegram.addCommand("🛠Строительство/⛏Шахта/🛠Cтроить ⛏Шахту", "build_plant");
@@ -42,8 +42,11 @@ Telegram.addCommand("🛠Строительство/🏗Верфь/🛠Cтрои
 
 Telegram["receiveCommand"].connect(function(id, cmd, script) {this[script](id);});
 Telegram["receiveMessage"].connect(received);
+Telegram["buttonPressed"].connect(telegramButton);
 Telegram["connected"].connect(telegramConnect);
 Telegram["disconnected"].connect(telegramDisconnect);
+Telegram["messageSent"].connect(telegramSent);
+
 if (isProduction) {
 	Telegram.start(SHS.load(77));
 	label.hide();
@@ -94,21 +97,24 @@ function received(chat_id, msg) {
 		Telegram.cancelCommand();
 		return;
 	}
-	if (msg == "отмена") {
-		Telegram.send(chat_id, "Принято");
-		//Telegram.cancelCommand();
-		return;
-	}
-	//print(msg.substring(0,2));
-	if (msg.substring(0,2) == "🔍" && msg != "🔍Исследования") {
+}
+
+function telegramButton(chat_id, msg_id, button, msg) {
+	//print(msg);
+	let s = "Доступные исследования:";
+	if (msg.substring(0,s.length) == s) {
 		let research_list = Planets.get(chat_id).sienceList();
 		//print(research_list);
-		if (research_list.indexOf(msg) >= 0) {
-			Planets.get(chat_id).sienceStart(msg);
+		if (research_list.indexOf(button) >= 0) {
+			Planets.get(chat_id).sienceStart(button);
 		} else {
 			Telegram.send(chat_id, "Исследование недоступно");
 		}
 	}
+}
+
+function telegramSent(chat_id, msg_id, msg) {
+	print("messageSended:" + msg);
 }
 
 function planet_info(chat_id) {
@@ -167,7 +173,7 @@ function research(chat_id) {
 	Planets.get(chat_id).checkSience();
 	let p = Planets.get(chat_id);
 	if (p.facility.level > 1) {
-		Telegram.sendButtons(chat_id, "Доступные исследования:\n" + p.sienceListExt(), p.sienceList().concat(["отмена"]));
+		Telegram.sendButtons(chat_id, "Доступные исследования:\n" + p.sienceListExt(), p.sienceList());
 	} else {
 		Telegram.send(chat_id, "Требуется 🏢База 2 уровня");
 	}
