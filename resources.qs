@@ -1,7 +1,7 @@
 const Resources  = [{
 	name : "resource1",
 	desc : "Композиты",
-	icon : "🧱"
+	icon : "🧱",
 }, {
 	name : "resource2",
 	desc : "Механизмы",
@@ -19,3 +19,5 @@ function getResourceInfo(r, c) {
 function getResourceCount(r, c) {
 	return `${c}` + Resources[r].icon;
 }
+
+for(let Resources_index=0; Resources_index<Resources.length; Resources_index++) Resources[Resources_index].index = Resources_index;

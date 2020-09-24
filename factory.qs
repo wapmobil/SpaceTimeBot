@@ -26,7 +26,7 @@ class Factory extends Building {
 		else return 0;
 	}
 	period() {
-		if (isProduction) return 6000;
+		if (isProduction) return 10000;
 		else return 60;
 	}
 	product() {

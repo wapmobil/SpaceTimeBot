@@ -1,6 +1,6 @@
 include("planet.qs")
 
-const isProduction = true;
+const isProduction = false;
 
 buttonLoad["clicked()"].connect(on_buttonLoad_clicked);
 buttonSave["clicked()"].connect(on_buttonSave_clicked);
@@ -14,6 +14,9 @@ Telegram.clearCommands();
 Telegram.disablePassword();
 Telegram.addCommand("Поискать 💰", "find_money");
 Telegram.addCommand("🔍Исследования", "research");
+Telegram.addCommand("💸Торговля/Купить ресурсы", "buy_resources");
+Telegram.addCommand("💸Торговля/Продать ресурсы", "sell_resources");
+Telegram.addCommand("💸Торговля/Биржа ресурсов", "trade_resources");
 Telegram.addCommand("📖Инфо/🌍Планета", "planet_info");
 Telegram.addCommand("📖Инфо/💻Дерево исследований", "research_map");
 Telegram.addCommand("📖Инфо/🌌Сканер планет", "map_info");
@@ -85,6 +88,7 @@ function timerDone() {
 
 function received(chat_id, msg) {
 	//print(msg);
+	if (msg == "💸Торговля") check_trading(chat_id);
 	if (!Planets.has(chat_id)) {
 		Planets.set(chat_id, new Planet(chat_id));
 		Telegram.send(chat_id,
@@ -111,10 +115,14 @@ function telegramButton(chat_id, msg_id, button, msg) {
 			Telegram.send(chat_id, "Исследование недоступно");
 		}
 	}
+	s = "Продажа ресурсов";
+	if (msg.substring(0,s.length) == s) {
+		Planets.get(chat_id);
+	}
 }
 
 function telegramSent(chat_id, msg_id, msg) {
-	print("messageSended:" + msg);
+	//print("messageSended:" + msg);
 }
 
 function planet_info(chat_id) {
@@ -277,4 +285,50 @@ function time2text(t) {
 	if (h > 0 || m > 0) ret += num2g(m, h > 0) + ":";
 	ret += num2g(t, h > 0 || m > 0);
 	return ret + "⏳";
+}
+
+
+function check_trading(chat_id) {
+	let p = Planets.get(chat_id);
+	if (!p.trading) {
+		Telegram.cancelCommand();
+		Telegram.send(chat_id, "Требуется исследование");
+	}
+}
+
+function buy_resources(chat_id) {
+	let p = Planets.get(chat_id);
+	if (p.trading) {
+		Telegram.sendButtons(chat_id, "Покупка ресурсов:\n" + p.infoResourcesOnly(), createTradeButtons() ,3);
+	} else {
+		Telegram.send(chat_id, "Требуется исследование");
+	}
+}
+
+function sell_resources(chat_id) {
+	let p = Planets.get(chat_id);
+	if (p.trading) {
+		Telegram.sendButtons(chat_id, "Продажа ресурсов:\n" + p.infoResourcesOnly(), createTradeButtons() ,3);
+	} else {
+		Telegram.send(chat_id, "Требуется исследование");
+	}
+}
+
+function createTradeButtons() {
+	let arr = [];
+	for(let i=0; i<Resources.length; i++) {
+		for(let j=0; j<3; j++) {
+			arr.push(`${Math.pow(10, j)} ` + Resources[i].icon);
+		}
+	}
+	return arr;
+}
+
+function trade_resources(chat_id) {
+	let p = Planets.get(chat_id);
+	if (p.trading) {
+		Telegram.send(chat_id, "В разработке");
+	} else {
+		Telegram.send(chat_id, "Требуется исследование");
+	}
 }
