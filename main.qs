@@ -1,6 +1,6 @@
 include("planet.qs")
 
-const isProduction = false;
+const isProduction = true;
 
 buttonLoad["clicked()"].connect(on_buttonLoad_clicked);
 buttonSave["clicked()"].connect(on_buttonSave_clicked);
@@ -115,9 +115,18 @@ function telegramButton(chat_id, msg_id, button, msg) {
 			Telegram.send(chat_id, "Исследование недоступно");
 		}
 	}
-	s = "Продажа ресурсов";
-	if (msg.substring(0,s.length) == s) {
-		Planets.get(chat_id);
+	let tbi = TradeButtons.indexOf(button);
+	if (tbi >= 0) {
+		s = "Продажа ресурсов:\n";
+		if (msg.substring(0,s.length) == s) {
+			Planets.get(chat_id).sellResources(tbi%3, Math.pow(10,Math.floor(tbi/3)));
+			Telegram.edit(chat_id, msg_id, s + Planets.get(chat_id).infoResources(true) + sellResFooter, TradeButtons, Resources.length);
+		}
+		s = "Покупка ресурсов:\n";
+		if (msg.substring(0,s.length) == s) {
+			Planets.get(chat_id).buyResources(tbi%3, Math.pow(10,Math.floor(tbi/3)));
+			Telegram.edit(chat_id, msg_id, s + Planets.get(chat_id).infoResources(true) + buyResFooter, TradeButtons, Resources.length);
+		}
 	}
 }
 
@@ -299,7 +308,7 @@ function check_trading(chat_id) {
 function buy_resources(chat_id) {
 	let p = Planets.get(chat_id);
 	if (p.trading) {
-		Telegram.sendButtons(chat_id, "Покупка ресурсов:\n" + p.infoResourcesOnly(), createTradeButtons() ,3);
+		Telegram.sendButtons(chat_id, "Покупка ресурсов:\n" + p.infoResources(true) + buyResFooter, TradeButtons, Resources.length);
 	} else {
 		Telegram.send(chat_id, "Требуется исследование");
 	}
@@ -308,7 +317,7 @@ function buy_resources(chat_id) {
 function sell_resources(chat_id) {
 	let p = Planets.get(chat_id);
 	if (p.trading) {
-		Telegram.sendButtons(chat_id, "Продажа ресурсов:\n" + p.infoResourcesOnly(), createTradeButtons() ,3);
+		Telegram.sendButtons(chat_id, "Продажа ресурсов:\n" + p.infoResources(true) + sellResFooter, TradeButtons, Resources.length);
 	} else {
 		Telegram.send(chat_id, "Требуется исследование");
 	}
@@ -316,13 +325,17 @@ function sell_resources(chat_id) {
 
 function createTradeButtons() {
 	let arr = [];
-	for(let i=0; i<Resources.length; i++) {
-		for(let j=0; j<3; j++) {
-			arr.push(`${Math.pow(10, j)} ` + Resources[i].icon);
+	for(let j=0; j<3; j++) {
+		for(let i=0; i<Resources.length; i++) {
+			arr.push(`${Math.pow(10, j)} ${Resources_icons[i]}`);
 		}
 	}
 	return arr;
 }
+
+const TradeButtons = createTradeButtons();
+const sellResFooter = `\nСтоимость продажи 1 ресурса ${money2text(2000)}`;
+const buyResFooter = `\nСтоимость покупки 1 ресурса ${money2text(200000)}`;
 
 function trade_resources(chat_id) {
 	let p = Planets.get(chat_id);

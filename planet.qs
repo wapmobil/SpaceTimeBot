@@ -33,6 +33,7 @@ class Planet {
 		this.factory.prod_cnt = 0;
 		this.accum.energy = 0;
 		this.accum.upgrade = 1;
+		this.taxes = 0;
 		this.trading = false;
 		if (!isProduction) {
 			this.money = 9999999;
@@ -61,26 +62,34 @@ class Planet {
 		}
 	}
 	infoResources(all = true) {
-		let msg  = `Деньги: ${money2text(this.money)}\n`;
+		let msg  = `Деньги: ${money2text(this.money)} (+${money2text(this.plant.level + this.taxes * this.facility.level)})\n`;
 		    msg += `Энергия: ${this.energy(2)}/${this.energy(1)}⚡\n`;
 		if (this.accum.level > 0)
-			msg += `Аккум.: ${Math.floor(this.accum.energy)}/${this.accum.capacity(this.accum.level)}🔋\n`
+			msg += `Аккум.: ${Math.floor(this.accum.energy)}/${this.accum.capacity(this.accum.level)}🔋 (+${this.energy()}🔋 за 100⏳)\n`
 		if (all) {
-			msg += this.infoResourcesOnly();
+			for(let i=0; i<Resources.length; i++)
+				msg += getResourceInfo(i, this[Resources[i].name]) + '\n';
+			msg += `Склад: ${this.totalResources()}/${this.storage.capacityProd(this.storage.level)}📦\n`
 		}
-		return msg;
-	}
-	infoResourcesOnly() {
-		let msg = "";
-		for(let i=0; i<Resources.length; i++)
-			msg += getResourceInfo(i, this[Resources[i].name]) + '\n';
-		msg += `Склад: ${this.totalResources()}/${this.storage.capacityProd(this.storage.level)}📦\n`
 		return msg;
 	}
 	totalResources() {
 		let total_res = 0;
 		for(let i=0; i<Resources.length; i++) total_res += this[Resources[i].name];
 		return total_res;
+	}
+	sellResources(r, cnt) {
+		if (!this.trading) {Telegram.send(this.chat_id, "Недоступно"); return;}
+		if (this[Resources[r].name] < cnt) {Telegram.send(this.chat_id, `Недостаточно ${Resources[r].desc}`); return;}
+		this[Resources[r].name] -= cnt;
+		this.money += cnt*2000;
+	}
+	buyResources(r, cnt) {
+		if (!this.trading) {Telegram.send(this.chat_id, "Недоступно"); return;}
+		if (this.money < cnt*200000) {Telegram.send(this.chat_id, `Недостаточно 💰`); return;}
+		if (this.storage.capacityProd(this.storage.level) < (this.totalResources()+cnt)) {Telegram.send(this.chat_id, "Не хватает места в хранилище📦"); return;}
+		this[Resources[r].name] += cnt;
+		this.money -= cnt*200000;
 	}
 	info() { // отобразить текущее состояние планеты
 		let msg = this.infoResources();
@@ -100,7 +109,7 @@ class Planet {
 		this.spaceyard.step(this.build_speed);
 		this.accum.add(this.energy());
 		if (this.money < this.storage.capacity(this.storage.level)) {
-			this.money += this.plant.level;
+			this.money += this.plant.level + this.taxes * this.facility.level;
 			if (this.money > this.storage.capacity(this.storage.level)) {
 				this.money = this.storage.capacity(this.storage.level);
 				Telegram.send(this.chat_id, "Хранилище заполнено");
@@ -184,11 +193,13 @@ class Planet {
 		});
 	}
 	fixSience() {
+		//this.factory.type = getRandom(2);
 		//this.energy_eco = 1;
-		//this.sience.traverse(r => {
-		//	if (r.name == "🔍🔌Экономия энергии") 
-		//		if (r.time == 0) this.eco_power();
-		//});
+		//this.money += 750000;
+//		this.sience.traverse(r => {
+//			if (r.name == "🔍🔌Экономия энергии 1") 
+//				if (r.time == 0) this.eco_power();
+//		});
 	}
 	enable_factory() {
 		Telegram.send(this.chat_id, "Поздравляем теперь ты можешь построить завод по производству ресурса - "
@@ -199,7 +210,7 @@ class Planet {
 		this.accum.locked = false;
 	}
 	eco_power() {
-		this.energy_eco *= 0.75;
+		this.energy_eco *= 0.9;
 	}
 	fastbuild() {
 		this.build_speed += 1;
@@ -212,5 +223,8 @@ class Planet {
 	}
 	enable_trading() {
 		this.trading = true;
+	}
+	enable_taxes() {
+		this.taxes += 2;
 	}
 }
