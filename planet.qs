@@ -65,7 +65,7 @@ class Planet {
 		let msg  = `Деньги: ${money2text(this.money)} (+${money2text(this.plant.level + this.taxes * this.facility.level)})\n`;
 		    msg += `Энергия: ${this.energy(2)}/${this.energy(1)}⚡\n`;
 		if (this.accum.level > 0)
-			msg += `Аккум.: ${Math.floor(this.accum.energy)}/${this.accum.capacity(this.accum.level)}🔋 (+${this.energy()}🔋 за 100⏳)\n`
+			msg += `Аккум.: ${Math.floor(this.accum.energy)}/${this.accum.capacity(this.accum.level)}🔋 (+${Math.round(this.energy())}🔋 за 100⏳)\n`
 		if (all) {
 			for(let i=0; i<Resources.length; i++)
 				msg += getResourceInfo(i, this[Resources[i].name]) + '\n';
