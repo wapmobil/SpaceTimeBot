@@ -35,6 +35,7 @@ class Planet {
 		this.accum.upgrade = 1;
 		this.taxes = 0;
 		this.trading = false;
+		this.storage.mult = 1;
 		if (!isProduction) {
 			this.money = 9999999;
 			this.plant.level = 30;
@@ -226,5 +227,8 @@ class Planet {
 	}
 	enable_taxes() {
 		this.taxes += 2;
+	}
+	upgrade_capacity() {
+		this.storage.mult *= 2;
 	}
 }

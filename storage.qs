@@ -5,8 +5,8 @@ class Storage extends Building {
 	icon() {return "📦";}
 	description() {return "Обеспечивает хранение 💰 и ресурсов, если достигнут максимум вместимости, то дальнейшее производство прекращается";}
 	capacity(lvl) {
-		if (lvl < 9) return (Math.pow(2, lvl)*1000);
-		else return ((lvl*2-10)*50000);
+		if (lvl < 9) return (Math.pow(2, lvl)*1000)*this.mult;
+		else return Math.floor((Math.sqrt(lvl)*lvl-10)*20000)*this.mult;
 	}
 	capacityProd(lvl) {
 		return lvl*10;
