@@ -38,12 +38,12 @@ const spawnMiningCells = [
 		new MiningCell ("home", "🚪", 0,0),
 		new MiningCell ("MiningPlayer", "🤠", 0,0),
 		new MiningCell ("heart", "❤️", 25,1),
-		new MiningCell ("bomb",  "🧨",25,1),
-		new MiningCell ("money", "💰",10,50),
-		new MiningCell ("bigmoney", "💵",500,5000),
-		new MiningCell ("ant",   "🐜",15,1),
-		new MiningCell ("rat",   "🐀",50,2),
-		new MiningCell ("alien", "👽",100,3)
+		new MiningCell ("bomb",  "🧨",40,1),
+		new MiningCell ("money", "💰",10,5),
+		new MiningCell ("bigmoney", "💵",500,50),
+		new MiningCell ("rat",   "🐀",50,1),
+		new MiningCell ("spider",   "🦇",15,2),
+		new MiningCell ("alien", "👽",100,5)
 		];
 		
 class MiningLabyrinth {
