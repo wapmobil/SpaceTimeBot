@@ -29,27 +29,27 @@ class Building {
 			}
 		}
 	}
-	build(money, energy) {
+	build(food, energy) {
 		if (this.locked) {
 			Telegram.send(this.chat_id, "Необходимо исследование");
-			return money;
+			return food;
 		}
 		if (energy < this.consumption() && this.consumption() > 0) {
-			Telegram.send(this.chat_id, "Недостаточно электроэнергии,\n нужно больше электростанций");
-			return money;
+			Telegram.send(this.chat_id, "Недостаточно ⚡электроэнергии,\n нужно больше электростанций");
+			return food;
 		}
-		if (money < this.cost()) {
-			Telegram.send(this.chat_id, "Недостаточно денег");
-			return money;
+		if (food < this.cost()) {
+			Telegram.send(this.chat_id, "Недостаточно 🍍");
+			return food;
 		}
 		if (this.build_progress != 0) {
 			Telegram.send(this.chat_id, `Строительство ещё в процессе, осталось ${time2text(this.build_progress)}`);
-			return money;
+			return food;
 		}
-		money -= this.cost();
+		food -= this.cost();
 		this.build_progress = this.buildTime();
 		Telegram.send(this.chat_id, "Строительство началось");
-		return money;
+		return food;
 	}
 	buildTime() {
 		return Math.floor((this.level+2*Math.pow(Math.sin(this.level), 3))*100+10) + this.buildTimeAdd();
@@ -67,7 +67,7 @@ class Building {
 	}
 	infoFooter() {
 		let z = this.consumption() > 0 ? `${this.consumption()}⚡️` : "";
-		let msg = `(${money2text(this.cost())} ${time2text(this.buildTime())} ${z})\n`;
+		let msg = `(${food2text(this.cost())} ${time2text(this.buildTime())} ${z})\n`;
 		if (this.build_progress > 0) msg += `    Идёт 🛠строительство, осталось ${time2text(this.build_progress)}\n`;
 		return msg;
 	}

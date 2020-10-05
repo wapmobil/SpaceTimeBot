@@ -3,7 +3,7 @@ include("building.qs")
 class Storage extends Building {
 	name() {return "📦Хранилище";}
 	icon() {return "📦";}
-	description() {return "Обеспечивает хранение 💰 и ресурсов, если достигнут максимум вместимости, то дальнейшее производство прекращается";}
+	description() {return "Обеспечивает хранение 🍍 и ресурсов, если достигнут максимум вместимости, то дальнейшее производство прекращается";}
 	capacity(lvl) {
 		if (lvl < 9) return (Math.pow(2, lvl)*1000)*this.mult;
 		else return Math.floor((Math.sqrt(lvl)*lvl-10)*20000)*this.mult;
@@ -16,8 +16,8 @@ class Storage extends Building {
 	}
 	info() {
 		let msg = this.infoHeader();
-		msg += `    Вместимость ${money2text(this.capacity(this.level))}, ${this.capacityProd(this.level)}📦\n`;
-		msg += `    🛠${this.level+1}:  вместимость ${money2text(this.capacity(this.level+1))}, ${this.capacityProd(this.level+1)}📦 `;
+		msg += `    Вместимость ${food2text(this.capacity(this.level))}, ${this.capacityProd(this.level)}📦\n`;
+		msg += `    🛠${this.level+1}:  вместимость ${food2text(this.capacity(this.level+1))}, ${this.capacityProd(this.level+1)}📦 `;
 		return msg + this.infoFooter();
 	}
 	consumption() {return 0;}

@@ -1,6 +1,6 @@
 include("planet.qs")
 
-const isProduction = true;
+const isProduction = false;
 
 buttonLoad["clicked()"].connect(on_buttonLoad_clicked);
 buttonSave["clicked()"].connect(on_buttonSave_clicked);
@@ -14,16 +14,16 @@ Telegram.clearCommands();
 Telegram.disablePassword();
 Telegram.addCommand("Поискать 💰", "find_money");
 Telegram.addCommand("🔍Исследования", "research");
-Telegram.addCommand("💸Торговля/Купить ресурсы", "buy_resources");
-Telegram.addCommand("💸Торговля/Продать ресурсы", "sell_resources");
+Telegram.addCommand("💸Торговля/Купить 🍍", "buy_food");
+//Telegram.addCommand("💸Торговля/Продать ресурсы", "sell_resources");
 Telegram.addCommand("💸Торговля/Биржа ресурсов", "trade_resources");
 Telegram.addCommand("📖Инфо/🌍Планета", "planet_info");
 Telegram.addCommand("📖Инфо/💻Дерево исследований", "research_map");
 Telegram.addCommand("📖Инфо/🌌Сканер планет", "map_info");
 Telegram.addCommand("🛠Строительство/📖Инфо", "planet_info");
-Telegram.addCommand("🛠Строительство/⛏Шахта", "info_plant");
-Telegram.addCommand("🛠Строительство/⛏Шахта/📖Инфо", "info_plant");
-Telegram.addCommand("🛠Строительство/⛏Шахта/🛠Cтроить ⛏Шахту", "build_plant");
+Telegram.addCommand("🛠Строительство/🍍Ферма", "info_farm");
+Telegram.addCommand("🛠Строительство/🍍Ферма/📖Инфо", "info_farm");
+Telegram.addCommand("🛠Строительство/🍍Ферма/🛠Cтроить 🍍Ферму", "build_farm");
 Telegram.addCommand("🛠Строительство/⚡️Электростанция", "info_solar");
 Telegram.addCommand("🛠Строительство/⚡️Электростанция/📖Инфо", "info_solar");
 Telegram.addCommand("🛠Строительство/⚡️Электростанция/🛠Cтроить ⚡️Электростанцию", "build_solar");
@@ -88,7 +88,7 @@ function timerDone() {
 
 function received(chat_id, msg) {
 	//print(msg);
-	if (msg == "💸Торговля") check_trading(chat_id);
+	//if (msg == "💸Торговля") check_trading(chat_id);
 	if (!Planets.has(chat_id)) {
 		Planets.set(chat_id, new Planet(chat_id));
 		Telegram.send(chat_id,
@@ -115,19 +115,21 @@ function telegramButton(chat_id, msg_id, button, msg) {
 			Telegram.send(chat_id, "Исследование недоступно");
 		}
 	}
-	let tbi = TradeButtons.indexOf(button);
+	let tbi = TradeFoodButtons.indexOf(button);
 	if (tbi >= 0) {
-		s = "Продажа ресурсов:\n";
+		//s = "Продажа ресурсов:\n";
+		//if (msg.substring(0,s.length) == s) {
+		//	Planets.get(chat_id).sellResources(tbi%3, Math.pow(10,Math.floor(tbi/3)));
+		//	Telegram.edit(chat_id, msg_id, s + Planets.get(chat_id).infoResources(true) + sellResFooter, TradeButtons, Resources.length);
+		//}
+		s = "Покупка 🍍еды:\n";
 		if (msg.substring(0,s.length) == s) {
-			Planets.get(chat_id).sellResources(tbi%3, Math.pow(10,Math.floor(tbi/3)));
-			Telegram.edit(chat_id, msg_id, s + Planets.get(chat_id).infoResources(true) + sellResFooter, TradeButtons, Resources.length);
-		}
-		s = "Покупка ресурсов:\n";
-		if (msg.substring(0,s.length) == s) {
-			Planets.get(chat_id).buyResources(tbi%3, Math.pow(10,Math.floor(tbi/3)));
-			Telegram.edit(chat_id, msg_id, s + Planets.get(chat_id).infoResources(true) + buyResFooter, TradeButtons, Resources.length);
+			Planets.get(chat_id).buyFood(Math.pow(10,Math.floor(tbi)+2));
+			Telegram.edit(chat_id, msg_id, s + Planets.get(chat_id).infoResources(false) + buyFoodFooter, TradeFoodButtons, 2);
 		}
 	}
+	s = "Подземелье:\n";
+	if (msg.substring(0,s.length) == s) processMiningButton(chat_id, msg_id, button);
 }
 
 function telegramSent(chat_id, msg_id, msg) {
@@ -143,7 +145,7 @@ function infoSomething(chat_id, bl) {
 	if (p[bl].locked) Telegram.send(chat_id, "Требуется исследование");
 	else Telegram.send(chat_id, p.infoResources(false) + p[bl].description() + '\n' + p[bl].info());
 }
-function info_plant(chat_id) {infoSomething(chat_id, "plant");}
+function info_farm(chat_id) {infoSomething(chat_id, "farm");}
 function info_storage(chat_id) {infoSomething(chat_id, "storage");}
 function info_facility(chat_id) {infoSomething(chat_id, "facility");}
 function info_solar(chat_id) {infoSomething(chat_id, "solar");}
@@ -156,11 +158,11 @@ function buildSomething(chat_id, bl) {
 	if (Planets.get(chat_id).isBuilding()) {
 		Telegram.send(chat_id, "Строители заняты");
 	} else {
-		Planets.get(chat_id).money = Planets.get(chat_id)[bl].build(Planets.get(chat_id).money, Planets.get(chat_id).energy());
+		Planets.get(chat_id).food = Planets.get(chat_id)[bl].build(Planets.get(chat_id).food, Planets.get(chat_id).energy());
 		//Planets.set(chat_id, p);
 	}
 }
-function build_plant(chat_id)     {buildSomething(chat_id, "plant");}
+function build_farm(chat_id)      {buildSomething(chat_id, "farm");}
 function build_storage(chat_id)   {buildSomething(chat_id, "storage");}
 function build_facility(chat_id)  {buildSomething(chat_id, "facility");}
 function build_factory(chat_id)   {buildSomething(chat_id, "factory");}
@@ -173,17 +175,17 @@ function getRandom(max) {
 }
 
 function find_money(chat_id) {
-	let p = Planets.get(chat_id);
-	let pr = getRandom(3);
-	pr *= p.facility.level*p.facility.level+1;
-	pr += getRandom(3);
-	p.money += pr;
-	if (p.money > p.storage.capacity(p.storage.level)) {
-		p.money = p.storage.capacity(p.storage.level);
-		Telegram.send(chat_id, "Хранилище заполнено");
-	}
-	Planets.set(chat_id, p);
-	Telegram.send(chat_id, `Ты заработал ${money2text(pr)}`);
+	Telegram.sendButtons(chat_id, "Подземелье:\n" + Planets.get(chat_id).miningGame(true).show(), miningButtons, 2);
+	//let pr = getRandom(3);
+	//pr *= p.facility.level*p.facility.level+1;
+	//pr += getRandom(3);
+	//p.money += pr;
+	//if (p.money > p.storage.capacity(p.storage.level)) {
+	//	p.money = p.storage.capacity(p.storage.level);
+	//	Telegram.send(chat_id, "Хранилище заполнено");
+	//}
+	//Planets.set(chat_id, p);
+	//Telegram.send(chat_id, `Ты заработал ${money2text(pr)}`);
 }
 
 function research(chat_id) {
@@ -204,7 +206,7 @@ function map_info(chat_id) {
 		for (var [key, value] of Planets) {
 			if (key == chat_id) msg += "Ты: ";
 			msg += `<b>Планета №${key}:</b> ${value.facility.level}🏢\n`
-			msg += `    ${money2text(value.money)}`;
+			msg += `    ${food2text(value.food)}`;
 			if (p.facility.level >= 2) {
 				for(let i=0; i<Resources.length; i++)
 					msg += `|${getResourceCount(i, value[Resources[i].name])}`;
@@ -267,7 +269,7 @@ function on_pushButton_clicked() {
 	Telegram.sendAll(lineEdit.text);
 }
 
-function money2text(m) {
+function count2text(m) {
 	let s = `${m}`, ret = "", dc = Math.floor((s.length - 1) / 3), of = s.length - (dc*3);
 	for (let j = 0; j <= dc; ++j) {
 		if (j == 0) ret += s.substring(0, of);
@@ -275,7 +277,15 @@ function money2text(m) {
 			ret += "\'" + s.substr(of + (3*(j-1)), 3);
 		}
 	}
-	return ret + "💰";
+	return ret;
+}
+
+function food2text(m) {
+	return count2text(m) + "🍍";
+}
+
+function money2text(m) {
+	return count2text(m) + "💰";
 }
 
 function time2text(t) {
@@ -300,42 +310,38 @@ function time2text(t) {
 function check_trading(chat_id) {
 	let p = Planets.get(chat_id);
 	if (!p.trading) {
+		Telegram.send(chat_id, "Требуется исследование");
 		Telegram.cancelCommand();
-		Telegram.send(chat_id, "Требуется исследование");
 	}
 }
 
-function buy_resources(chat_id) {
+function buy_food(chat_id) {
 	let p = Planets.get(chat_id);
-	if (p.trading) {
-		Telegram.sendButtons(chat_id, "Покупка ресурсов:\n" + p.infoResources(true) + buyResFooter, TradeButtons, Resources.length);
-	} else {
-		Telegram.send(chat_id, "Требуется исследование");
-	}
+	Telegram.sendButtons(chat_id, "Покупка 🍍еды:\n" + p.infoResources(false) + buyFoodFooter, TradeFoodButtons, 2);
 }
 
-function sell_resources(chat_id) {
-	let p = Planets.get(chat_id);
-	if (p.trading) {
-		Telegram.sendButtons(chat_id, "Продажа ресурсов:\n" + p.infoResources(true) + sellResFooter, TradeButtons, Resources.length);
-	} else {
-		Telegram.send(chat_id, "Требуется исследование");
-	}
-}
+//function sell_resources(chat_id) {
+//	let p = Planets.get(chat_id);
+//	if (p.trading) {
+//		Telegram.sendButtons(chat_id, "Продажа ресурсов:\n" + p.infoResources(true) + sellResFooter, TradeButtons, Resources.length);
+//	} else {
+//		Telegram.send(chat_id, "Требуется исследование");
+//	}
+//}
 
 function createTradeButtons() {
 	let arr = [];
-	for(let j=0; j<3; j++) {
-		for(let i=0; i<Resources.length; i++) {
-			arr.push(`${Math.pow(10, j)} ${Resources_icons[i]}`);
-		}
+	for(let j=2; j<6; j++) {
+		//for(let i=0; i<Resources.length; i++) {
+			arr.push(`${food2text(Math.pow(10, j))}`);
+		//}
 	}
 	return arr;
 }
 
-const TradeButtons = createTradeButtons();
-const sellResFooter = `\nСтоимость продажи 1 ресурса ${money2text(2000)}`;
-const buyResFooter = `\nСтоимость покупки 1 ресурса ${money2text(200000)}`;
+const TradeFoodButtons = createTradeButtons();
+//const sellResFooter = `\nСтоимость продажи 1 ресурса ${money2text(2000)}`;
+const buyFoodFooter = `\nСтоимость покупки 100🍍 - 1💰`;
 
 function trade_resources(chat_id) {
 	let p = Planets.get(chat_id);
@@ -343,5 +349,34 @@ function trade_resources(chat_id) {
 		Telegram.send(chat_id, "В разработке");
 	} else {
 		Telegram.send(chat_id, "Требуется исследование");
+	}
+}
+
+function processMiningButton(chat_id, msg_id, button) {
+	let ind = miningButtons.indexOf(button);
+	if (ind >= 0 && ind < 4) {
+		switch (Planets.get(chat_id).miningGame().move(ind+1)) {
+			case 1:
+				Planets.get(chat_id).money += Planets.get(chat_id).miningGame().pl.money;
+				let finishMsg = "Вы выбрались из подземелья!\n";
+				finishMsg +="Денег собрано:";
+				finishMsg +=`${Planets.get(chat_id).miningGame().pl.money}`;
+				finishMsg += "💰";
+			Telegram.edit(chat_id, msg_id, finishMsg);
+			break;
+			case 2:
+				let deathMsg ="Ты пал в бою\n";
+				deathMsg += "Ты потерял ресурсов: ";
+				deathMsg += `${Planets.get(chat_id).miningGame().pl.money}`;
+				deathMsg += "💰";
+				Telegram.edit(chat_id, msg_id, deathMsg);
+			break;
+			case 0:
+			Telegram.edit(chat_id, msg_id, "Подземелье:\n" + Planets.get(chat_id).miningGame().show(), miningButtons, 2);
+			break;
+		}
+	}
+	if (ind == 4) {
+		Planets.get(chat_id).miningGame().blow();
 	}
 }
