@@ -175,7 +175,7 @@ function getRandom(max) {
 }
 
 function find_money(chat_id) {
-	Telegram.sendButtons(chat_id, "Подземелье:\n" + Planets.get(chat_id).miningGame(true).show(), miningButtons, 2);
+	Telegram.sendButtons(chat_id, "Подземелье:\n" + Planets.get(chat_id).miningGame(true).show(), miningButtons, 3);
 	//let pr = getRandom(3);
 	//pr *= p.facility.level*p.facility.level+1;
 	//pr += getRandom(3);
@@ -353,7 +353,7 @@ function trade_resources(chat_id) {
 }
 
 function processMiningButton(chat_id, msg_id, button) {
-	let ind = miningButtons.indexOf(button);
+	let ind = miningButtonsRole[miningButtons.indexOf(button)];
 	if (ind >= 0 && ind < 4) {
 		switch (Planets.get(chat_id).miningGame().move(ind+1)) {
 			case 1:
@@ -372,7 +372,7 @@ function processMiningButton(chat_id, msg_id, button) {
 				Telegram.edit(chat_id, msg_id, deathMsg);
 			break;
 			case 0:
-			Telegram.edit(chat_id, msg_id, "Подземелье:\n" + Planets.get(chat_id).miningGame().show(), miningButtons, 2);
+			Telegram.edit(chat_id, msg_id, "Подземелье:\n" + Planets.get(chat_id).miningGame().show(), miningButtons, 3);
 			break;
 		}
 	}
