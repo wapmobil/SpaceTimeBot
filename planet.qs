@@ -181,7 +181,7 @@ class Planet {
 			this.food = m;
 			Telegram.send(this.chat_id, "Исследование началось");
 		} else {
-			Telegram.send(this.chat_id, "Недостаточно денег");
+			Telegram.send(this.chat_id, "Недостаточно 🍍еды");
 		}
 	}
 	checkSience() {

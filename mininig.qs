@@ -69,7 +69,7 @@ class MiningLabyrinth {
 		this.tractor();
 		this.spawnres();
 		this.dig(this.mapsize-2, this.mapsize-1, 2);
-		print("map created");
+		//print("map created");
 	}
 	
 	show() { //(return map in String)
