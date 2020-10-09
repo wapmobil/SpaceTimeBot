@@ -186,7 +186,7 @@ function getRandom(max) {
 
 function find_money(chat_id) {
 	MiningGames.set(chat_id, new MiningGame(chat_id));
-	Telegram.sendButtons(chat_id, "Подземелье.\n" + MiningGames.get(chat_id).show(), miningButtons, 2);
+	Telegram.sendButtons(chat_id, "Подземелье.\n" + MiningGames.get(chat_id).show(), miningButtons, 3);
 	//let pr = getRandom(3);
 	//pr *= p.facility.level*p.facility.level+1;
 	//pr += getRandom(3);
@@ -349,7 +349,7 @@ const buyFoodFooter = `\nСтоимость покупки 100🍍 - 1💰`;
 
 
 function processMiningButton(chat_id, msg_id, button) {
-	const ind = miningButtons.indexOf(button);
+	const ind = miningButtonsRole[miningButtons.indexOf(button)];
 	if (ind >= 0 && ind < 4) {
 		switch (MiningGames.get(chat_id).move(ind+1)) {
 			case 1:
@@ -368,7 +368,7 @@ function processMiningButton(chat_id, msg_id, button) {
 				Telegram.edit(chat_id, msg_id, deathMsg);
 			break;
 			case 0:
-			Telegram.edit(chat_id, msg_id, "Подземелье.\n" + MiningGames.get(chat_id).show(), miningButtons, 2);
+			Telegram.edit(chat_id, msg_id, "Подземелье.\n" + MiningGames.get(chat_id).show(), miningButtons, 3);
 			break;
 		}
 	}
