@@ -15,11 +15,11 @@ class Facility extends Building {
 		return Math.pow(10, (this.level+3));
 	}
 	info() {
-		let msg = this.infoHeader();
-		msg += `    🛠${this.level+1} (-${food2text(this.eat_food())})`;
+		let msg = this.infoHeader()+`(-${food2text(this.eat_food(this.level))})\n`;
+		msg += `    🛠${this.level+1} (-${food2text(this.taxes)})`;
 		return msg + this.infoFooter();
 	}
 	consumption() {return 20;}
 	buildTimeAdd() {return 100;}
-	eat_food() {return this.taxes*this.level;}
+	eat_food(l) {return this.taxes*l;}
 }

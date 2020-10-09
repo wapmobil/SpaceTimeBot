@@ -8,7 +8,7 @@ class Farm extends Building {
 		return (this.level*this.level*this.level*20 + 100);
 	}
 	info() {
-		let msg = this.infoHeader();
+		let msg = this.infoHeader()+"\n";
 		msg += `    Доход ${food2text(this.level)}\n`;
 		msg += `    🛠${this.level+1}:  доход ${food2text(this.level+1)}(+1🍍) `;
 		return msg + this.infoFooter();

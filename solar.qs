@@ -8,7 +8,7 @@ class Solar extends Building {
 		return ((this.level*this.level)*200+80);
 	}
 	info() {
-		let msg = this.infoHeader();
+		let msg = this.infoHeader()+"\n";
 		msg += `    энергия ${-this.level*this.consumption()}⚡\n`;
 		msg += `    🛠${this.level+1}:  энергия ${-(this.level+1)*this.consumption()}⚡(+${-this.consumption()}⚡) `;
 		return msg + this.infoFooter();

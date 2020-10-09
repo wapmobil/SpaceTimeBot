@@ -1,5 +1,4 @@
-include("mininig.qs")
-include("resources.qs")
+include("navy.qs")
 include("spaceyard.qs")
 include("solar.qs")
 include("factory.qs")
@@ -8,6 +7,7 @@ include("storage.qs")
 include("facility.qs")
 include("farm.qs")
 include("energystorage.qs")
+include("stock.qs")
 
 // Планета
 class Planet {
@@ -30,21 +30,23 @@ class Planet {
 		this.build_speed = 1;
 		this.sience_speed = 1;
 		this.energy_eco = 1;
-		this.sience = createSienceTree();
-		this.factory.type = getRandom(2);
+		this.sience = new Array();
+		this.factory.type = getRandom(3);
 		this.factory.prod_cnt = 0;
 		this.accum.energy = 0;
 		this.accum.upgrade = 1;
 		this.facility.taxes = 1;
 		this.trading = false;
 		this.storage.mult = 1;
+		this.ships = new Navy(id);
+		this.stock = new Stock(id);
 		if (!isProduction) {
-			//this.money = 9999999;
-			//this.food = 9999999;
-			//this.farm.level = 30;
-			//this.solar.level = 30;
-			//this.storage.level = 30;
-			//this.facility.level = 3;
+			this.money = 9999999;
+			this.food = 9999999;
+			this.farm.level = 30;
+			this.solar.level = 30;
+			this.storage.level = 30;
+			this.facility.level = 3;
 			this.build_speed = 100;
 			this.sience_speed = 200;
 		}
@@ -58,40 +60,53 @@ class Planet {
 	}
 	load(o) {
 		for (const [key, value] of Object.entries(o)) {
-			if (typeof value == 'object') {
-				if (this[key]) this[key].load(value);
+			if (typeof value == 'object' && this[key] && key != 'sience') {
+				if (this[key].load) this[key].load(value);
 			} else {
 				this[key] = value;
 			}
 		}
 	}
 	infoResources(all = true) {
-		let msg  = `Деньги: ${money2text(this.money)}\n`;
-		    msg += `Еда: ${food2text(this.food)} (+${food2text(this.farm.level + this.facility.taxes * this.facility.level)})\n`;
-		    msg += `Энергия: ${this.energy(2)}/${this.energy(1)}⚡\n`;
-		if (this.accum.level > 0)
+		const sm = this.stock.money();
+		let msg = `Деньги: ${money2text(this.money - sm)}`
+		if (sm > 0) msg += `(📈 ${money2text(sm)})\n`;
+		else msg += "\n";
+		msg += `Еда: ${food2text(this.food)} (+${food2text(this.farm.level - this.facility.eat_food(this.facility.level))})\n`;
+		msg += `Энергия: ${this.energy(2)}/${this.energy(1)}⚡\n`;
+		if (this.accum.level > 0 && all)
 			msg += `Аккум.: ${Math.floor(this.accum.energy)}/${this.accum.capacity(this.accum.level)}🔋 (+${Math.round(this.energy())}🔋 за 100⏳)\n`
 		if (all) {
-			for(let i=0; i<Resources.length; i++)
-				msg += getResourceInfo(i, this[Resources[i].name]) + '\n';
+			for(let i=0; i<Resources.length; i++) {
+				msg += getResourceInfo(i, this.resourceCount(i));
+				const b = this.stock.reserved(i);
+				if(b > 0) msg += `(📈 ${getResourceCount(i, b)})`;
+				msg += '\n';
+			}
 			msg += `Склад: ${this.totalResources()}/${this.storage.capacityProd(this.storage.level)}📦\n`
 		}
 		return msg;
+	}
+	resourceCount(res) {
+		return this[Resources[res].name] - this.stock.reserved(res);
 	}
 	totalResources() {
 		let total_res = 0;
 		for(let i=0; i<Resources.length; i++) total_res += this[Resources[i].name];
 		return total_res;
 	}
+	hasMoney(m) {
+		return ((this.money - this.stock.money()) >= m);
+	}
 	buyFood(cnt) {
-		if (this.money < cnt/100) {Telegram.send(this.chat_id, `Недостаточно 💰`); return;}
+		if (!this.hasMoney(cnt/100)) {Telegram.send(this.chat_id, `Недостаточно 💰`); return;}
 		if (this.storage.capacity(this.storage.level) < (this.food+cnt)) {Telegram.send(this.chat_id, "Не хватает места в хранилище📦"); return;}
 		this.food += cnt;
 		this.money -= cnt/100;
 	}
 	info() { // отобразить текущее состояние планеты
 		let msg = this.infoResources();
-		let bds = this.getBuildings();
+		const bds = this.getBuildings();
 		for (var value of bds) {
 			msg += value.info();
 		}
@@ -107,27 +122,41 @@ class Planet {
 		this.spaceyard.step(this.build_speed);
 		this.accum.add(this.energy());
 		if (this.food < this.storage.capacity(this.storage.level)) {
-			this.food += this.farm.level - this.facility.taxes * this.facility.level;
+			this.food += this.farm.level - this.facility.eat_food(this.facility.level);
 			if (this.food > this.storage.capacity(this.storage.level)) {
 				this.food = this.storage.capacity(this.storage.level);
-				Telegram.send(this.chat_id, "Хранилище заполнено");
+				Telegram.send(this.chat_id, "Хранилище 🍍 заполнено");
 			}
 		}
 		if (this.totalResources() < this.storage.capacityProd(this.storage.level))
 			this[Resources[this.factory.type].name] += this.factory.product();
 		else {
+			if (this.totalResources() > this.storage.capacityProd(this.storage.level)) {
+				Telegram.send(this.chat_id, "Хранилище 📦 заполнено");
+			}
 			this[Resources[this.factory.type].name] -= this.totalResources() - this.storage.capacityProd(this.storage.level);
 			if (this[Resources[this.factory.type].name] < 0) this[Resources[this.factory.type].name] = 0;
 		}
-		let rs_done = this.sience.reduce((a,r) => {
-			let x = r.step(this.sience_speed);
-			if (x) a = x;
-			return a;
-		});
-		if (rs_done) {
-			this[rs_done]();
-			Telegram.send(this.chat_id, "Исследование завершено");
+		const cs = this.sience.findIndex(r => r.time > 0);
+		if (cs >= 0) {
+			this.sience[cs].time -= this.sience_speed;
+			if (this.sience[cs].time <= 0) {
+				this.sience[cs].time = 0;
+				const csid = this.sience[cs].id;
+				this[SieceTree.find(r => r.id == csid).func]();
+				Telegram.send(this.chat_id, "Исследование завершено");
+				//return this.func;
+			}
 		}
+		//let rs_done = this.sience.reduce((a,r) => {
+		//	let x = r.step(this.sience_speed);
+		//	if (x) a = x;
+		//	return a;
+		//});
+		//if (rs_done) {
+		//	this[rs_done]();
+		//	Telegram.send(this.chat_id, "Исследование завершено");
+		//}
 	}
 	isBuilding() {
 		let bds = this.getBuildings();
@@ -154,50 +183,50 @@ class Planet {
 		return (ep - em);
 	}
 	sienceInfo() {
-		return this.sience.reduce(sienceTree, "Исследования:\n");
+		return SieceTree.reduce(printSienceTree, "Исследования:\n", Research.Traversal.DepthFirst, this.sience);
 	}
 	sienceList() {
-		return this.sience.reduce(sienceArray, [], Research.Traversal.Actual);
+		return SieceTree.reduce(getSienceButtons, [], Research.Traversal.Actual, this.sience);
 	}
 	sienceListExt() {
-		return this.sience.reduce(sienceDetail, "", Research.Traversal.Actual);
+		return SieceTree.reduce(printSienceDetail, "", Research.Traversal.Actual, this.sience);
 	}
 	sienceStart(s) {
-		if (this.sience.some(r => r.active)) {
+		if (this.sience.some(r => r.time > 0)) {
 			Telegram.send(this.chat_id, "Сейчас нельзя, исследование уже идёт");
 			return;
 		}
-		let m = this.food;
-		m = this.sience.reduce((a,r) => {
-			if (r.name == s) {
-				a -= r.cost;
-				if (a >= 0) {
-					r.start();
-				}
-			}
-			return a;
-		}, m);
-		if (m >= 0 && m < this.food) {
-			this.food = m;
-			Telegram.send(this.chat_id, "Исследование началось");
-		} else {
+		const bs = SieceTree.find(r => r.name == s);
+		if (this.food <= bs.cost) {
 			Telegram.send(this.chat_id, "Недостаточно 🍍еды");
+			return;
 		}
-	}
-	checkSience() {
-		let b1 = (this.facility.level >= 3);
-		this.sience.traverse(r => {
-			if (r.name == "🔍🚀Корабли") r.unlock(b1);
-		});
+		if (!this.hasMoney(bs.money)) {
+			Telegram.send(this.chat_id, "Недостаточно 💰денег");
+			return;
+		}
+		let ns = new Object();
+		ns.id = bs.id;
+		ns.time = bs.time;
+		//print(bs.name, ns.id);
+		this.food -= bs.food;
+		this.money -= bs.money;
+		this.sience.push(ns);
+		Telegram.send(this.chat_id, "Исследование началось");
 	}
 	fixSience() {
-		//this.factory.type = getRandom(2);
 		//this.energy_eco = 1;
-		//this.food += 750000;
-//		this.sience.traverse(r => {
-//			if (r.name == "🔍🔌Экономия энергии 1") 
-//				if (r.time == 0) this.eco_power();
-//		});
+		//this.build_speed = 1;
+		//this.food = this.money;
+		//this.spaceyard.locked = true;
+		//this.accum.locked = true;
+		//this.money = 0;
+		//this.factory.type = getRandom(3);
+		//this.storage.mult = 1;
+		//this.sience.forEach(r => {
+		//	if (r.id == 1) 
+		//		this.eco_power();
+		//});
 	}
 	enable_factory() {
 		Telegram.send(this.chat_id, "Поздравляем теперь ты можешь построить завод по производству ресурса - "
@@ -221,6 +250,7 @@ class Planet {
 	}
 	enable_trading() {
 		this.trading = true;
+		this.ships.m.get("trade").count += 1;
 	}
 	more_taxes() {
 		this.facility.taxes *= 2;
@@ -228,10 +258,34 @@ class Planet {
 	upgrade_capacity() {
 		this.storage.mult *= 2;
 	}
-	miningGame(n) {
-		if (n) {
-			this.miningame = new MiningGame();
+	
+	addStockTask(sell, res, count, price) {
+		if (sell) {
+			if (count > this.resourceCount(res)) {
+				Telegram.send(this.chat_id, `Не хватает ${Resources_icons[res]}`);
+				return false;
+			}
+		} else {
+			if (!this.hasMoney(count*price)) {
+				Telegram.send(this.chat_id, `Не хватает 💰`);
+				return false;
+			}
 		}
-		return this.miningame;
+		if (this.accum.energy < 100) {
+			Telegram.send(this.chat_id, `Не хватает 🔋 для публикации заказа, дождитесь зарядки аккумуляторов`);
+			return false;
+		}
+		this.accum.energy -= 100;
+		this.stock.add(sell, res, count, price);
+		return true;
+	}
+	removeStockTask(ind) {
+		if (this.accum.energy < 100) {
+			Telegram.send(this.chat_id, `Не хватает 🔋 для публикации заказа, дождитесь зарядки аккумуляторов`);
+			return false;
+		}
+		this.accum.energy -= 100;
+		this.stock.remove(ind);
+		return true;
 	}
 }

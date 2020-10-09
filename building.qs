@@ -63,7 +63,7 @@ class Building {
 	infoHeader() {
 		let z = this.consumption() > 0 ? `${this.consumption()*this.level}⚡️` : "";
 		if (this.consumption() == 0 || this.level == 0) z = "";
-		return `<b>${this.name()} ур. ${this.level}:</b> ${z}\n`;
+		return `<b>${this.name()} ур. ${this.level}:</b> ${z}`;
 	}
 	infoFooter() {
 		let z = this.consumption() > 0 ? `${this.consumption()}⚡️` : "";

@@ -8,7 +8,7 @@ class Factory extends Building {
 		return (this.level*2+1)*100000;
 	}
 	info() {
-		let msg = this.infoHeader();
+		let msg = this.infoHeader()+"\n";
 		if (this.level > 0) msg += `    Доход +1${Resources[this.type].icon} за ${time2text(this.incomingTime(this.level))}\n`;
 		msg += `    🛠${this.level+1}:  доход +1${Resources[this.type].icon} за ${time2text(this.incomingTime(this.level+1))}`;
 		return msg + this.infoFooter();

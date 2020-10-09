@@ -11,7 +11,7 @@ class EnergyStorage extends Building {
 		return (Math.floor(Math.sqrt((this.level+1)*100)))*1000;
 	}
 	info() {
-		let msg = this.infoHeader();
+		let msg = this.infoHeader()+"\n";
 		msg += `    Вместимость ${this.capacity(this.level)}⚡\n`;
 		msg += `    🛠${this.level+1}:  вместимость ${this.capacity(this.level+1)}⚡ `;
 		return msg + this.infoFooter();
