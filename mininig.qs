@@ -288,7 +288,7 @@ class MiningGame {
 }
 
 var miningButtons = [" ", "↑" , " ",
-					 "←", "🔥", "→",
+					 "←", "🧨", "→",
 					 " ", "↓" , " "];
 var miningButtonsRole = [-1,  0, -1,
 						  1,  4,  3,

@@ -412,7 +412,7 @@ function processStockAdd(chat_id, msg_id, button) {
 	const rind = Resources_desc.indexOf(button);
 	if (rind >= 0) {
 		t.res = rind;
-		t.cnt = 1;
+		t.cnt = 10;
 		t.price = 100;
 		t.step = 1;
 	}

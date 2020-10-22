@@ -139,16 +139,13 @@ const getSienceButtons = function(a, r) {
 }
 
 const printSienceDetail = function(a, r, cursience) {
-	a += `<b>${r.name}</b> - ${food2text(r.cost)} ${r.moneyCost()}`;
+	a += `<b>${r.name}</b> - ${food2text(r.cost)} ${r.moneyCost()} ${time2text(r.time)}\n`;
 	const er = cursience.find(cr => cr.id == r.id);
-	let t = r.time;
 	if (er) {
-		if (er.time > 0) {
-			a += "\n    ➡️ исследуется, осталось";
-			t = er.time;
-		}
+		if (er.time > 0)
+			a += `    ➡️ исследуется, осталось ${time2text(er.time)}\n`;
 	}
-	a += ` ${time2text(t)}\n`;
+	a += ``;
 	a += `    ${r.desc}\n`;
 	return a;
 }

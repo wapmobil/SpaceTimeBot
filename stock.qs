@@ -1,5 +1,40 @@
 include("resources.qs")
 
+class StockItem {
+	constructor(id, chat, res, count, price) {
+		this.id = id;
+		this.owner = chat;
+		this.client = 0;
+		this.res = res;
+		this.count = count;
+		this.price = price;
+	}
+	load(o) {
+		for (const [key, value] of Object.entries(o)) {
+			this[key] = value;
+		}
+	}
+}
+
+class Marketplace {
+	constructor() {
+		this.gid = 1;
+		this.items = new Map();
+	}
+	load(o) {
+		for (const [key, value] of Object.entries(o)) {
+			if (key == 'gid') this.gid = value;
+			if (key == 'items') {
+				for (const [k, v] of value) {
+					let si = new StockItem();
+					si.load(v);
+					this.items.set(k, si);
+				}
+			}
+		}
+	}
+}
+
 class Stock {
 	constructor(id) {
 		this.chat_id = id;

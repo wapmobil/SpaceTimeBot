@@ -209,7 +209,7 @@ class Planet {
 		ns.id = bs.id;
 		ns.time = bs.time;
 		//print(bs.name, ns.id);
-		this.food -= bs.food;
+		this.food -= bs.cost;
 		this.money -= bs.money;
 		this.sience.push(ns);
 		Telegram.send(this.chat_id, "Исследование началось");
