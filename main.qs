@@ -67,6 +67,7 @@ if (isProduction) {
 let Planets = loadPlanets();
 let MiningGames = new Map();
 let StockTasks = new Map();
+let GlobalMarket = loadMarket();
 
 //Старт
 let timer = new QTimer();
@@ -246,6 +247,8 @@ function on_buttonSave_clicked() {
 		a.push(value);
 	}
 	SHS.save(isProduction ? 1 : 101, JSON.stringify(a));
+	let g = GlobalMarket;
+	SHS.save(isProduction ? 2 : 102, JSON.stringify(g));
 	//print(SHS.load(isProduction ? 1 : 101));
 }
 
@@ -265,8 +268,19 @@ function loadPlanets() {
 	return m;
 }
 
+function loadMarket() {
+	let m = new Marketplace();
+	let data = SHS.load(isProduction ? 2 : 102);
+	print(data);
+	if (typeof data == 'string') {
+		m.load(JSON.parse(data));
+	}
+	return m;
+}
+
 function on_buttonLoad_clicked() {
 	Planets = loadPlanets();
+	GlobalMarket = loadMarket();
 }
 
 // очистить всё, полный сброс
@@ -397,8 +411,7 @@ function new_stock(chat_id) {
 	Telegram.sendButtons(chat_id, "Создание заявки:", ["Купить", "Продать"], 2);
 }
 function processStockRemove(chat_id, msg_id, button) {
-	const ind = Planets.get(chat_id).stock.info(true).buttons.indexOf(button);
-	Planets.get(chat_id).removeStockTask(ind);
+	Planets.get(chat_id).removeStockTask(button);
 	const m = Planets.get(chat_id).stock.info(true);
 	Telegram.edit(chat_id, msg_id, "Мои заявки:\n" + m.msg, m.buttons);
 }
@@ -480,6 +493,6 @@ function help_stock(chat_id) {
 	msg += "На бирже можно размешать заказы на покупку или продажу ресурсов.\n";
 	msg += "При создании заказа автоматически резирвируются средства и ресурсы для его выполнения.\n";
 	msg += "Заказ можно отменить если ещё никто не принял его и не отправил свои корабли.\n";
-	msg += "За создание или удаление заказа расходуется энергия из аккумуляторов в количестве 100🔋.\n";
+	msg += "За создание или удаление заказа расходуется энергия из аккумуляторов в количестве 50🔋.\n";
 	Telegram.send(chat_id, msg);
 }

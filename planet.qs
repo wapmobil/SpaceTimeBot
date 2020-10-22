@@ -95,6 +95,12 @@ class Planet {
 		for(let i=0; i<Resources.length; i++) total_res += this[Resources[i].name];
 		return total_res;
 	}
+	freeStorage() {
+		let free = this.storage.capacityProd(this.storage.level);
+		free -= this.totalResources();
+		free -= this.stock.reservedStorage();
+		return free;
+	}
 	hasMoney(m) {
 		return ((this.money - this.stock.money()) >= m);
 	}
@@ -123,18 +129,18 @@ class Planet {
 		this.accum.add(this.energy());
 		if (this.food < this.storage.capacity(this.storage.level)) {
 			this.food += this.farm.level - this.facility.eat_food(this.facility.level);
-			if (this.food > this.storage.capacity(this.storage.level)) {
+			if (this.food >= this.storage.capacity(this.storage.level)) {
 				this.food = this.storage.capacity(this.storage.level);
 				Telegram.send(this.chat_id, "Хранилище 🍍 заполнено");
 			}
 		}
-		if (this.totalResources() < this.storage.capacityProd(this.storage.level))
+		if (this.freeStorage() > 0) {
 			this[Resources[this.factory.type].name] += this.factory.product();
-		else {
-			if (this.totalResources() > this.storage.capacityProd(this.storage.level)) {
+			if (this.freeStorage() <= 0) {
 				Telegram.send(this.chat_id, "Хранилище 📦 заполнено");
 			}
-			this[Resources[this.factory.type].name] -= this.totalResources() - this.storage.capacityProd(this.storage.level);
+		} else {
+			this[Resources[this.factory.type].name] += this.freeStorage();
 			if (this[Resources[this.factory.type].name] < 0) this[Resources[this.factory.type].name] = 0;
 		}
 		const cs = this.sience.findIndex(r => r.time > 0);
@@ -270,22 +276,25 @@ class Planet {
 				Telegram.send(this.chat_id, `Не хватает 💰`);
 				return false;
 			}
+			if (this.freeStorage() < count) {
+				Telegram.send(this.chat_id, `Не достаточно места в 📦хранилище для ${Resources_icons[res]}`);
+				return false;
+			}
 		}
-		if (this.accum.energy < 100) {
+		if (this.accum.energy < 50 && isProduction) {
 			Telegram.send(this.chat_id, `Не хватает 🔋 для публикации заказа, дождитесь зарядки аккумуляторов`);
 			return false;
 		}
-		this.accum.energy -= 100;
+		if (isProduction) this.accum.energy -= 50;
 		this.stock.add(sell, res, count, price);
 		return true;
 	}
 	removeStockTask(ind) {
-		if (this.accum.energy < 100) {
+		if (this.accum.energy < 50 && isProduction) {
 			Telegram.send(this.chat_id, `Не хватает 🔋 для публикации заказа, дождитесь зарядки аккумуляторов`);
 			return false;
 		}
-		this.accum.energy -= 100;
-		this.stock.remove(ind);
-		return true;
+		if (isProduction) this.accum.energy -= 50;
+		return this.stock.remove(ind);
 	}
 }

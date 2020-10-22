@@ -1,18 +1,29 @@
 include("resources.qs")
 
 class StockItem {
-	constructor(id, chat, res, count, price) {
+	constructor(id, chat, res, count, price, is_sell) {
 		this.id = id;
 		this.owner = chat;
 		this.client = 0;
 		this.res = res;
 		this.count = count;
 		this.price = price;
+		this.is_sell = is_sell;
 	}
 	load(o) {
 		for (const [key, value] of Object.entries(o)) {
 			this[key] = value;
 		}
+	}
+	infoFooter() {
+		return this.client == 0 ? "🔘" : "🔒"
+	}
+	info() {
+		let msg = "";
+		if(this.is_sell) msg = `<b>Продаю:</b> `;
+		else msg = `<b>Куплю:</b> `;
+		msg += `${getResourceInfo(this.res, this.count)} за ${money2text(this.price*this.count)} - ${this.infoFooter()}\n`;
+		return msg;
 	}
 }
 
@@ -23,15 +34,34 @@ class Marketplace {
 	}
 	load(o) {
 		for (const [key, value] of Object.entries(o)) {
-			if (key == 'gid') this.gid = value;
 			if (key == 'items') {
-				for (const [k, v] of value) {
+				for (const [k, v] of Object.entries(value)) {
 					let si = new StockItem();
 					si.load(v);
-					this.items.set(k, si);
+					this.items.set(si.id, si);
 				}
+			} else {
+				this[key] = value;
 			}
 		}
+	}
+	addItem(chat, res, count, price, is_sell) {
+		this.gid += 1;
+		const si = new StockItem(this.gid, chat, res, count, price, is_sell);
+		this.items.set(si.id, si);
+		return si;
+	}
+	removeItem(id) {
+		if (this.items.has(id)) {
+			const si = this.items.get(id);
+			if (si.client != 0) {
+				Telegram.send(si.chat, "Нельзя удалить, сделка уже идёт");
+				return false;
+			} else {
+				this.items.remove(id);
+				return true;
+			}
+		} else return true;
 	}
 }
 
@@ -43,26 +73,29 @@ class Stock {
 	}
 	load(o) {
 		for (const [key, value] of Object.entries(o)) {
-			this[key] = value;
+			if (key == 'sell' || key == 'buy') {
+				for (const v of value) {
+					let si = new StockItem();
+					si.load(v);
+					this[key].push(si);
+				}
+			} else {
+				this[key] = value;
+			}
 		}
 	}
-	info(my) {
+	info() {
+		let is = this.fillInfo(this.sell);
+		let ib = this.fillInfo(this.buy);
+		return {msg: is.msg + ib.msg, buttons: is.buttons.concat(ib.buttons)};
+	}
+	fillInfo(arr) {
 		let msg = "";
-		let cnt = 0;
 		let buttons = [];
-		for (const v of this.sell) {
-			cnt++;
-			if (my) msg += `<b>Продам ${cnt}:</b>` 
-			else msg += `<b>Продаёт:</b>`; 
-			msg += getResourceInfo(v.res, v.count) + ` за ${money2text(v.price*v.count)} - ${this.infoFooter(v.client)}\n`;
-			if (my) buttons.push(`Удалить ${cnt}`);
-		}
-		for (const v of this.buy) {
-			cnt++;
-			if (my) msg += `<b>Куплю ${cnt}:</b>`;
-			else msg += `<b>Покупает:</b>`; 
-			msg += getResourceInfo(v.res, v.count) + ` за ${money2text(v.price*v.count)} - ${this.infoFooter(v.client)}\n`;
-			if (my) buttons.push(`Удалить ${cnt}`);
+		for (const v of arr) {
+			msg += `<b>№${v.id}:</b> ` 
+			msg += v.info();
+			buttons.push(`Удалить ${v.id}`);
 		}
 		return {msg, buttons};
 	}
@@ -73,34 +106,39 @@ class Stock {
 		if (arr.length >= 5) {
 			Telegram.send(this.chat_id, "Достигнуто максимальное число заявок");
 		} else {
-			arr.push({res, count, price, client: 0});
+			arr.push(GlobalMarket.addItem(this.chat_id, res, count, price, sell));
 		}
 	}
-	infoFooter(client) {
-		return client == 0 ? "🔘" : "🔒"
-	}
-	remove(index) {
-		if (index >=0) {
-			if (index < this.sell.length) {
-				if (this.sell[index].client == 0) {
-					this.sell.splice(index, 1);
-				} else {
-					Telegram.send(this.chat_id, "Нельзя удалить, сделка уже идёт");
-				}
-			} else {
-				const bind = index - this.sell.length;
-				if (this.buy[bind].client == 0) {
-					this.buy.splice(bind, 1);
-				} else {
-					Telegram.send(this.chat_id, "Нельзя удалить, сделка уже идёт");
-				}
+	remove(bt) {
+		print(bt);
+		print(bt.match(/.*(\d+)/i));
+		let id = parseInt(bt.match(/.*(\d+)/i)[1]);
+		print(id);
+		if (GlobalMarket.removeItem(id)) {
+			const is = this.sell.findIndex(r => r.id == id);
+			if (is >= 0) {
+				this.sell.splice(is, 1);
+				return true
+			}
+			const ib = this.buy.findIndex(r => r.id == id);
+			if (ib >= 0) {
+				this.buy.splice(ib, 1);
+				return true;
 			}
 		}
+		return false;
 	}
 	reserved(res) {
 		let cnt = 0;
 		for (const v of this.sell) {
 			if (v.res == res) cnt += v.count;
+		}
+		return cnt;
+	}
+	reservedStorage() {
+		let cnt = 0;
+		for (const v of this.buy) {
+			cnt += v.count;
 		}
 		return cnt;
 	}
