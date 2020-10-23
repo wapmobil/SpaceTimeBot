@@ -1,7 +1,7 @@
 include("planet.qs")
 include("mininig.qs")
 
-const isProduction = false;
+const isProduction = true;
 
 buttonLoad["clicked()"].connect(on_buttonLoad_clicked);
 buttonSave["clicked()"].connect(on_buttonSave_clicked);
@@ -57,6 +57,7 @@ Telegram["disconnected"].connect(telegramDisconnect);
 if (isProduction) {
 	Telegram.start(SHS.load(77));
 	label.hide();
+	//buttonReset.enabled = true;
 } else {
 	buttonReset.enabled = true;
 	Telegram.start("733272349:AAH9YTSyy3RmGV4A6OWKz1b3CeKnPI2ROd8");
@@ -243,11 +244,11 @@ function research_map(chat_id) {
 
 function on_buttonSave_clicked() {
 	let a = [];
-	for (var value of Planets.values()) {
+	for (const value of Planets.values()) {
 		a.push(value);
 	}
 	SHS.save(isProduction ? 1 : 101, JSON.stringify(a));
-	let g = GlobalMarket;
+	let g = GlobalMarket.save();
 	SHS.save(isProduction ? 2 : 102, JSON.stringify(g));
 	//print(SHS.load(isProduction ? 1 : 101));
 }
@@ -271,7 +272,6 @@ function loadPlanets() {
 function loadMarket() {
 	let m = new Marketplace();
 	let data = SHS.load(isProduction ? 2 : 102);
-	print(data);
 	if (typeof data == 'string') {
 		m.load(JSON.parse(data));
 	}

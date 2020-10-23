@@ -25,6 +25,7 @@ class StockItem {
 		msg += `${getResourceInfo(this.res, this.count)} за ${money2text(this.price*this.count)} - ${this.infoFooter()}\n`;
 		return msg;
 	}
+
 }
 
 class Marketplace {
@@ -35,15 +36,24 @@ class Marketplace {
 	load(o) {
 		for (const [key, value] of Object.entries(o)) {
 			if (key == 'items') {
-				for (const [k, v] of Object.entries(value)) {
-					let si = new StockItem();
-					si.load(v);
-					this.items.set(si.id, si);
+				if (Array.isArray(value)) {
+					for (const v of value) {
+						let si = new StockItem();
+						si.load(v);
+						this.items.set(si.id, si);
+					}
 				}
 			} else {
 				this[key] = value;
 			}
 		}
+	}
+	save() {
+		let arr = []
+		for (const i of this.items.values()) {
+			arr.push(i);
+		}
+		return {gid: this.gid, items : arr};
 	}
 	addItem(chat, res, count, price, is_sell) {
 		this.gid += 1;
