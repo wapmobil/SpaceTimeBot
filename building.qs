@@ -67,7 +67,7 @@ class Building {
 	}
 	infoFooter() {
 		let z = this.consumption() > 0 ? `${this.consumption()}⚡️` : "";
-		let msg = ` Требуется: ${food2text(this.cost())} ${time2text(this.buildTime())} ${z}\n`;
+		let msg = `\n    └Требуется: ${food2text(this.cost())} ${time2text(this.buildTime())} ${z}\n`;
 		if (this.build_progress > 0) msg += `    Идёт 🛠строительство, осталось ${time2text(this.build_progress)}\n`;
 		return msg;
 	}

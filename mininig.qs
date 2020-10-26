@@ -88,7 +88,7 @@ class MiningLabyrinth {
 	}
 	
 	inBounds(x, y) {
-		return ((x < this.mapsize) && (y < this.mapsize) && (x >= 0) && (y >= 0));
+		return ((x < this.mapsize-1) && (y < this.mapsize-1) && (x >= 1) && (y >= 1)) || (x == this.mapsize-2 && y == this.mapsize-1);
 	}
 	
 	isWall(x, y) {

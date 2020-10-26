@@ -297,4 +297,10 @@ class Planet {
 		if (isProduction) this.accum.energy -= 50;
 		return this.stock.remove(ind);
 	}
+	sellResources(r, cnt) {
+		if (!this.trading) {Telegram.send(this.chat_id, "Недоступно, требуется исследование"); return;}
+		if (this.resourceCount(r) < cnt) {Telegram.send(this.chat_id, `Недостаточно ${Resources[r].desc}`); return;}
+		this[Resources[r].name] -= cnt;
+		this.money += cnt;
+	}
 }

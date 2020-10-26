@@ -73,6 +73,13 @@ class Marketplace {
 			}
 		} else return true;
 	}
+	info() {
+		let msg = "";
+		for (const v of this.items.values()) {
+			msg += `<b>№${v.id}:</b> ${v.info()}`;
+		}
+		return msg;
+	}
 }
 
 class Stock {
@@ -103,8 +110,7 @@ class Stock {
 		let msg = "";
 		let buttons = [];
 		for (const v of arr) {
-			msg += `<b>№${v.id}:</b> ` 
-			msg += v.info();
+			msg += `<b>№${v.id}:</b> ${v.info()}` 
 			buttons.push(`Удалить ${v.id}`);
 		}
 		return {msg, buttons};
