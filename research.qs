@@ -12,22 +12,6 @@ class Research {
 	moneyCost() {
 		return this.money > 0 ? money2text(this.money) : "";
 	}
-	
-	//start() {
-	//	this.active = true;
-	//}
-	//
-	//step(st) {
-	//	if (this.active) {
-	//		this.time -= st;
-	//		if (this.time <= 0) {
-	//			this.time = 0;
-	//			this.active = false;
-	//			return this.func;
-	//		}
-	//	}
-	//	return undefined;
-	//}
 
 	add (...children) {
 		for (let child of children) {

@@ -34,6 +34,6 @@ class TradeShip extends Ship {
 	energy() {return 100;}
 	health() {return 100;}
 	armor() {return 5;}
-	capacity() {return 20;}
+	capacity() {return 10;}
 	price() {return 100;}
 }

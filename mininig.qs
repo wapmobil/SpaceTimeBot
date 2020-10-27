@@ -37,13 +37,13 @@ const spawnMiningCells = [
 		new MiningCell ("wall", "⬛️", 0,0),
 		new MiningCell ("home", "🚪", 0,0),
 		new MiningCell ("MiningPlayer", "🤠", 0,0),
-		new MiningCell ("heart", "❤️", 25,1),
+		new MiningCell ("heart", "❤️", 20,1),
 		new MiningCell ("bomb",  "🧨",40,1),
-		new MiningCell ("money", "💰",10,5),
-		new MiningCell ("bigmoney", "💵",500,50),
-		new MiningCell ("rat",   "🐀",50,1),
+		new MiningCell ("money", "💰",5,5),
+		new MiningCell ("bigmoney", "💵",400,100),
+		new MiningCell ("rat",   "🐀",10,1),
 		new MiningCell ("spider",   "🦇",15,2),
-		new MiningCell ("alien", "👽",100,5)
+		new MiningCell ("alien", "👽",50,3)
 		];
 		
 class MiningLabyrinth {
@@ -201,7 +201,7 @@ class MiningLabyrinth {
 
 class MiningGame {
 	constructor() {
-		let mapSize = 15;
+		let mapSize = 13;
 		this.pl = new MiningPlayer(1,1);
 		this.plMap = new MiningLabyrinth(mapSize);
 		this.plMap.dig(this.pl.x,this.pl.y,3);

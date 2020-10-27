@@ -20,9 +20,9 @@ class StockItem {
 	}
 	info() {
 		let msg = "";
-		if(this.is_sell) msg = `<b>Продаю:</b> `;
-		else msg = `<b>Куплю:</b> `;
-		msg += `${getResourceInfo(this.res, this.count)} за ${money2text(this.price*this.count)} - ${this.infoFooter()}\n`;
+		if(this.is_sell) msg = `<b>Продаю:</b>\n`;
+		else msg = `<b>Куплю:</b>\n`;
+		msg += `    ${getResourceInfo(this.res, this.count)} за ${money2text(this.price*this.count)} - ${this.infoFooter()}\n`;
 		return msg;
 	}
 
@@ -68,7 +68,7 @@ class Marketplace {
 				Telegram.send(si.chat, "Нельзя удалить, сделка уже идёт");
 				return false;
 			} else {
-				this.items.remove(id);
+				this.items.delete(id);
 				return true;
 			}
 		} else return true;
@@ -76,9 +76,20 @@ class Marketplace {
 	info() {
 		let msg = "";
 		for (const v of this.items.values()) {
-			msg += `<b>№${v.id}:</b> ${v.info()}`;
+			msg += `<b>№${v.id}:</b> ${v.info()}    Отправить -> /go_${v.id}\n`;
 		}
 		return msg;
+	}
+	get(id) {
+		return this.items.get(id);
+	}
+	start(id, client) {
+		if (this.items.has(id)) {
+			if (si.client != 0) return false;
+			this.items.get(id).client = client;
+			return true;
+		}
+		return false;
 	}
 }
 
@@ -126,15 +137,12 @@ class Stock {
 		}
 	}
 	remove(bt) {
-		print(bt);
-		print(bt.match(/.*(\d+)/i));
-		let id = parseInt(bt.match(/.*(\d+)/i)[1]);
-		print(id);
+		const id = parseInt(bt.match(/.*(\d+)/i)[1]);
 		if (GlobalMarket.removeItem(id)) {
 			const is = this.sell.findIndex(r => r.id == id);
 			if (is >= 0) {
 				this.sell.splice(is, 1);
-				return true
+				return true;
 			}
 			const ib = this.buy.findIndex(r => r.id == id);
 			if (ib >= 0) {
@@ -162,6 +170,21 @@ class Stock {
 		let m = 0;
 		for (const v of this.buy) m += v.price * v.count;
 		return m;
+	}
+	start(id, client) {
+		const is = this.sell.findIndex(r => r.id == id);
+		if (is >= 0) {
+			if (this.sell[is].client != 0) return false;
+			this.sell[is].client = client;
+			return true;
+		}
+		const ib = this.buy.findIndex(r => r.id == id);
+		if (ib >= 0) {
+			if (this.buy[is].client != 0) return false;
+			this.buy[is].client = client;
+			return true;
+		}
+		return false;
 	}
 }
 
