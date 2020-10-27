@@ -40,6 +40,7 @@ class Planet {
 		this.storage.mult = 1;
 		this.ships = new Navy(id);
 		this.expeditions = new Array();
+		this.ship_speed = 1;
 		this.stock = new Stock(id);
 		if (!isProduction) {
 			this.money = 9999999;
@@ -62,7 +63,16 @@ class Planet {
 	load(o) {
 		for (const [key, value] of Object.entries(o)) {
 			if (typeof value == 'object' && this[key] && key != 'sience') {
-				if (this[key].load) this[key].load(value);
+				if (key == 'expeditions') {
+					print(value);
+					if (Array.isArray(value)) {
+						for (const v of value) {
+							let si = new Navy(this.chat_id);
+							si.load(v);
+							this.expeditions.push(si);
+						}
+					}
+				} else if (this[key].load) this[key].load(value);
 			} else {
 				this[key] = value;
 			}
@@ -152,18 +162,14 @@ class Planet {
 				const csid = this.sience[cs].id;
 				this[SieceTree.find(r => r.id == csid).func]();
 				Telegram.send(this.chat_id, "Исследование завершено");
-				//return this.func;
 			}
 		}
-		//let rs_done = this.sience.reduce((a,r) => {
-		//	let x = r.step(this.sience_speed);
-		//	if (x) a = x;
-		//	return a;
-		//});
-		//if (rs_done) {
-		//	this[rs_done]();
-		//	Telegram.send(this.chat_id, "Исследование завершено");
-		//}
+		for(let i=0; i<this.expeditions.length; i++) {
+			this.expeditions[i].arrived -= this.ship_speed;
+			if (this.expeditions[i].arrived <= 0) {
+				this.returnExpedition(i);
+			}
+		}
 	}
 	isBuilding() {
 		let bds = this.getBuildings();
@@ -222,7 +228,7 @@ class Planet {
 		Telegram.send(this.chat_id, "Исследование началось");
 	}
 	fixSience() {
-		if (this.trading && this.ships.count(0) == 0) {
+		if (this.trading && this.ships.count(0) == 0 && this.expeditions.length == 0) {
 			this.ships.m[0].count = 1;
 		}
 		//this.energy_eco = 1;
@@ -277,7 +283,7 @@ class Planet {
 			}
 		} else {
 			if (!this.hasMoney(count*price)) {
-				Telegram.send(this.chat_id, `Не хватает 💰`);
+				Telegram.send(this.chat_id, "Не хватает 💰");
 				return false;
 			}
 			if (this.freeStorage() < count) {
@@ -286,7 +292,7 @@ class Planet {
 			}
 		}
 		if (this.accum.energy < 50 && isProduction) {
-			Telegram.send(this.chat_id, `Не хватает 🔋 для публикации заказа, дождитесь зарядки аккумуляторов`);
+			Telegram.send(this.chat_id, "Не хватает 🔋 для публикации заказа, дождитесь зарядки аккумуляторов");
 			return false;
 		}
 		if (isProduction) this.accum.energy -= 50;
@@ -295,7 +301,7 @@ class Planet {
 	}
 	removeStockTask(ind) {
 		if (this.accum.energy < 50 && isProduction) {
-			Telegram.send(this.chat_id, `Не хватает 🔋 для публикации заказа, дождитесь зарядки аккумуляторов`);
+			Telegram.send(this.chat_id, "Не хватает 🔋 для публикации заказа, дождитесь зарядки аккумуляторов");
 			return false;
 		}
 		if (isProduction) this.accum.energy -= 50;
@@ -310,23 +316,24 @@ class Planet {
 	navyInfo() {
 		if (this.spaceyard.level > 0) {
 			let msg = this.ships.info("Флот на базе");
-			msg += this.expeditions.reduce((m,s) => {
-				if (s.dst == this.chat_id)
-					m += s.info(`Флот возвращается на базу, осталось ${time2text(s.arrived)}`); 
+			for (const value of this.expeditions) {
+				if (value.dst == this.chat_id)
+					msg += value.info(`Флот возвращается на базу, осталось ${time2text(value.arrived)}`); 
 				else
-					m += s.info(`Флот летит на планету ${s.dst}, осталось ${time2text(s.arrived)}`);
-				return m;
-			});
+					msg += value.info(`Флот летит на планету ${value.dst}, осталось ${time2text(value.arrived)}`);
+			}
 			Telegram.send(this.chat_id, msg);
 		} else {
 			Telegram.send(this.chat_id, "Необходимо построить 🏗Верфь");
 		}
 	}
 	expeditionInfo() {
+		const nv = tmpNavy.get(this.chat_id);
 		let msg = "Начать экспедицию\n";
+		msg += GlobalMarket.get(nv.aim).info() + "\n";
 		msg += this.ships.info("Флот на базе");
 		msg += "\n";
-		msg += tmpNavy.get(this.chat_id).info("Флот для отправки");
+		msg += nv.info("Флот для отправки");
 		return msg;
 	}
 	initExpedition(item) {
@@ -377,39 +384,103 @@ class Planet {
 		Telegram.edit(this.chat_id, msg_id, this.expeditionInfo(), btns.concat(["Отправить"]), 2);
 	}
 	startExpedition() {
-		const nv = tmpNavy.get(this.chat_id);
+		let nv = tmpNavy.get(this.chat_id);
+		if (!nv) return;
 		const si = GlobalMarket.get(nv.aim);
 		if (!si) {
 			Telegram.send(this.chat_id, "Ошибка, заявка уже не существует");
 			return;
 		}
+		const r = si.res;
 		if (si.count > nv.freeStorage()) {
 			Telegram.send(this.chat_id, "Ошибка, ресурсы не влезают - нужно больше кораблей или освободить трюм");
 			return;
 		}
 		if (this.accum.energy < nv.energy()) {
-			Telegram.send(this.chat_id, `Не хватает 🔋 для отправки, дождитесь зарядки аккумуляторов`);
+			Telegram.send(this.chat_id, "Не хватает 🔋 для отправки, дождитесь зарядки аккумуляторов");
 			return;
 		}
-		let msg = "В разработке";
-		Telegram.send(this.chat_id, msg);
-		return;
-		if (GlobalMarket.start(nv.aim,this.chat_id)) {
-			if (si.owner < 100) {
-				//NPCstock[si.owner]
+		if (si.is_sell) {
+			if (this.money < si.price * si.count) {
+				Telegram.send(this.chat_id, "Не хватает 💰");
+				return;
 			}
-		//print(si.info());
-		//this.ships.split(nv);
-		//this.expeditions.push(nv);
-		//tmpNavy.delete(this.chat_id);
-		//Telegram.send(this.chat_id, "Экспедиция успешно отправлена!");
+		} else {
+			if (this.resourceCount(r) < si.count) {
+				Telegram.send(this.chat_id, `Не хватает ${Resources_icons[r]}`);
+				return;
+			}
+		}
+		if (GlobalMarket.start(nv.aim, this.chat_id)) {
+			if (si.owner < 100) {
+				if (!NPCstock[si.owner-1].start(nv.aim, this.chat_id)) {
+					Telegram.send(this.chat_id, "Внутренняя ошибка при сделке с NPC, свяжитесь с разработчиком");
+					GlobalMarket.items.get(id).client = 0;
+					return;
+				}
+			} else {
+				if (!Planets.get(si.owner).stock.start(nv.aim, this.chat_id)) {
+					Telegram.send(this.chat_id, "Внутренняя ошибка при сделке с Игроком, свяжитесь с разработчиком");
+					GlobalMarket.items.get(id).client = 0;
+					return;
+				}
+			}
+			if (si.is_sell) {
+				this.money -= si.price * si.count;
+				nv.money += si.price * si.count;
+			} else {
+				this[Resources[r].name] -= si.count;
+				nv[Resources[r].name] += si.count;
+			}
+			this.accum.energy -= nv.energy();
+			this.ships.split(nv);
+			this.expeditions.push(nv);
+			tmpNavy.delete(this.chat_id);
+			Telegram.send(this.chat_id, "Экспедиция успешно отправлена!");
 		} else {
 			Telegram.send(this.chat_id, "Ошибка, заявка уже не существует");
 		}
 	}
+	returnExpedition(i) {
+		let e = this.expeditions[i];
+		if (e.dst == this.chat_id) {
+			this.ships.join(e);
+			this.expeditions.splice(i, 1);
+			Telegram.send(this.chat_id, "Экспедиция вернулась на базу!");
+		} else {
+			const si = GlobalMarket.get(e.aim);
+			if (si.owner < 100) {
+				NPCstock[si.owner-1].delete(si.id);
+				if (si.is_sell) {
+					e.money -= si.price * si.count;
+					e[Resources[si.res].name] += si.count;
+				} else {
+					e[Resources[si.res].name] -= si.count;
+					e.money += si.price * si.count;
+				}
+			} else {
+				Planets.get(si.owner).stock.delete(si.id);
+				if (si.is_sell) {
+					e.money -= si.price * si.count;
+					Planets.get(si.owner).money += si.price * si.count;
+					Planets.get(si.owner)[Resources[si.res].name] -= si.count;
+					e[Resources[si.res].name] += si.count;
+				} else {
+					e[Resources[si.res].name] -= si.count;
+					Planets.get(si.owner)[Resources[si.res].name] += si.count;
+					Planets.get(si.owner).money -= si.price * si.count;
+					e.money += si.price * si.count;
+				}
+			}
+			e.dst = this.chat_id;
+			e.arrived = 500;
+			this.expeditions[i] = e;
+			Telegram.send(this.chat_id, "Экспедиция достигла заданной планеты, обмен ресурсов выполнен.");
+		}
+	}
 	navyUnload() {
 		if (this.spaceyard.level > 0) {
-			let msg = "В разработке";
+			const msg = "В разработке";
 			Telegram.send(this.chat_id, msg);
 		} else {
 			Telegram.send(this.chat_id, "Необходимо построить 🏗Верфь");

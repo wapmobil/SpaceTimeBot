@@ -76,7 +76,8 @@ class Marketplace {
 	info() {
 		let msg = "";
 		for (const v of this.items.values()) {
-			msg += `<b>№${v.id}:</b> ${v.info()}    Отправить -> /go_${v.id}\n`;
+			msg += `<b>№${v.id}:</b> ${v.info()}`
+			if (v.client == 0) msg += `    Отправить -> /go_${v.id}\n`;
 		}
 		return msg;
 	}
@@ -85,7 +86,7 @@ class Marketplace {
 	}
 	start(id, client) {
 		if (this.items.has(id)) {
-			if (si.client != 0) return false;
+			if (this.items.get(id).client != 0) return false;
 			this.items.get(id).client = client;
 			return true;
 		}
@@ -152,6 +153,13 @@ class Stock {
 		}
 		return false;
 	}
+	delete(id) {
+		GlobalMarket.items.delete(id);
+		const is = this.sell.findIndex(r => r.id == id);
+		if (is >= 0) this.sell.splice(is, 1);
+		const ib = this.buy.findIndex(r => r.id == id);
+		if (ib >= 0) this.buy.splice(ib, 1);
+	}
 	reserved(res) {
 		let cnt = 0;
 		for (const v of this.sell) {
@@ -180,8 +188,8 @@ class Stock {
 		}
 		const ib = this.buy.findIndex(r => r.id == id);
 		if (ib >= 0) {
-			if (this.buy[is].client != 0) return false;
-			this.buy[is].client = client;
+			if (this.buy[ib].client != 0) return false;
+			this.buy[ib].client = client;
 			return true;
 		}
 		return false;

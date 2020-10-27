@@ -1,8 +1,8 @@
 include("planet.qs")
 include("mininig.qs")
 
-const isProduction = true;
-const NPC_count = 1;
+const isProduction = false;
+const NPC_count = 3;
 
 buttonLoad["clicked()"].connect(on_buttonLoad_clicked);
 buttonSave["clicked()"].connect(on_buttonSave_clicked);
@@ -83,7 +83,7 @@ let timer = new QTimer();
 timer["timeout"].connect(timerDone);
 timer.start(1000);
 save_timer.start(timer.interval*10);
-tradeNPCtimer.start(timer.interval*60*15);
+tradeNPCtimer.start(timer.interval*100);
 
 
 function telegramConnect() {
@@ -243,8 +243,8 @@ function map_info(chat_id) {
 		for (var [key, value] of Planets) {
 			if (key == chat_id) msg += "Ты: ";
 			msg += `<b>Планета №${key}:</b> ${value.facility.level}🏢\n`
-			msg += `    ${food2text(value.food)}`;
 			if (p.facility.level >= 3) {
+				msg += `    ${food2text(value.food)}`;
 				for(let i=0; i<Resources.length; i++)
 					msg += `|${getResourceCount(i, value[Resources[i].name])}`;
 			}
@@ -540,7 +540,7 @@ function show_stock(chat_id) {
 function help_stock(chat_id) {
 	let msg = "Справка о бирже:\n";
 	msg += "На бирже можно размешать заказы на покупку или продажу ресурсов.\n";
-	msg += "При создании заказа автоматически резирвируются средства и ресурсы для его выполнения.\n";
+	msg += "При создании заказа автоматически резервируются средства и ресурсы для его выполнения.\n";
 	msg += "Заказ можно отменить если ещё никто не принял его и не отправил свои корабли.\n";
 	msg += "За создание или удаление заказа расходуется энергия из аккумуляторов в количестве 50🔋.\n";
 	Telegram.send(chat_id, msg);
@@ -561,10 +561,10 @@ function processTradeNPC() {
 		}
 		NPCstock[j].buy = b;
 		while (NPCstock[j].sell.length < 4) {
-			NPCstock[j].add(true, getRandom(Resources.length), 10*(getRandom(3)+1), 80+getRandom(40));
+			NPCstock[j].add(true, getRandom(Resources.length), (getRandom(10)+1), 50+getRandom(100));
 		}
 		while (NPCstock[j].buy.length < 4) {
-			NPCstock[j].add(false, getRandom(Resources.length), 10*(getRandom(3)+1), 80+getRandom(40));
+			NPCstock[j].add(false, getRandom(Resources.length), (getRandom(10)+1), 50+getRandom(100));
 		}
 	}
 }

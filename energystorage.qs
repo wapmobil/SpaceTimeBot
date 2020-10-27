@@ -5,7 +5,7 @@ class EnergyStorage extends Building {
 	icon() {return "🔋";}
 	description() {return "Обеспечивает хранение излишков ⚡энергии, необходимой для заправки кораблей. Требует ⚡ для работы";}
 	capacity(lvl) {
-		return (lvl*this.upgrade*100);
+		return Math.floor(lvl*this.upgrade*100);
 	}
 	cost() {
 		return (Math.floor(Math.sqrt((this.level+1)*100)))*1000;

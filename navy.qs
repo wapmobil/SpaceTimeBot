@@ -18,7 +18,7 @@ class Navy {
 		msg += `  Энергия пуска: ${this.energy()}🔋\n`;
 		msg += `  Груз: ${this.totalResources()}/${this.capacity()}📦\n`;
 		for(let i=0; i<Resources.length; i++) {
-			msg += getResourceInfo(i, this.resourceCount(i)) + "\n";
+			msg += "  " + getResourceInfo(i, this.resourceCount(i)) + "\n";
 		}
 		msg += `  Деньги: ${money2text(this.money)}\n`
 		for (const value of this.m) {
@@ -78,6 +78,10 @@ class Navy {
 		for(let j=0; j<this.m.length; j++) {
 			this.m[j].count += nv.m[j].count;
 		}
+		for(let i=0; i<Resources.length; i++) {
+			this[Resources[i].name] += nv[Resources[i].name];
+		}
+		this.money += nv.money;
 	}
 	capacity() {
 		let cap = 0;
