@@ -10,8 +10,7 @@ class Navy {
 		for(let i=0; i<Resources.length; i++)
 			this[Resources[i].name] = 0;
 		this.money = 0;
-		this.m = new Array();
-		this.m.push(new TradeShip());
+		this.m = ShipModels();
 	}
 	info(desc) {
 		let msg = `<b>*** ${desc} ***</b>\n`;
@@ -68,6 +67,11 @@ class Navy {
 	}
 	count(index) {
 		return this.m[index].count;
+	}
+	countAll() {
+		let cnt = 0;
+		for(let j=0; j<this.m.length; j++) cnt += this.m[j].count;
+		return cnt;
 	}
 	split(nv) {
 		for(let j=0; j<this.m.length; j++) {

@@ -4,7 +4,7 @@ class MiningPlayer {
 	constructor(x,y){
 		this.x=x;
 		this.y=y;
-		this.hp=3;
+		this.hp=4;
 		this.bombs=1;
 		this.money = 0;
 		
@@ -41,8 +41,8 @@ const spawnMiningCells = [
 		new MiningCell ("bomb",  "🧨",40,1),
 		new MiningCell ("money", "💰",5,5),
 		new MiningCell ("bigmoney", "💵",400,100),
-		new MiningCell ("rat",   "🐀",10,1),
-		new MiningCell ("spider",   "🦇",15,2),
+		new MiningCell ("rat",   "🐀",15,1),
+		new MiningCell ("spider",   "🦇",25,2),
 		new MiningCell ("alien", "👽",50,3)
 		];
 		

@@ -13,8 +13,7 @@ class Spaceyard extends Building {
 		return msg + this.infoFooter();
 		return msg;
 	}
-	consumption() {
-		return 16;
-	}
+	consumption() {return 16;}
 	buildTimeAdd() {return 3000;}
+	shipsBuildSpeed(l) {return l;}
 }

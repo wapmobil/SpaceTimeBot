@@ -89,8 +89,7 @@ class Marketplace {
 			if (this.items.get(id).client != 0) return false;
 			this.items.get(id).client = client;
 			return true;
-		}
-		return false;
+		} else return false;
 	}
 }
 
@@ -123,7 +122,7 @@ class Stock {
 		let buttons = [];
 		for (const v of arr) {
 			msg += `<b>№${v.id}:</b> ${v.info()}` 
-			buttons.push(`Удалить ${v.id}`);
+			if (v.client == 0) buttons.push(`Удалить ${v.id}`);
 		}
 		return {msg, buttons};
 	}
@@ -182,7 +181,7 @@ class Stock {
 	start(id, client) {
 		const is = this.sell.findIndex(r => r.id == id);
 		if (is >= 0) {
-			print(this.sell[is].info(), this.sell[is].client, client);
+			//print(this.sell[is].info(), this.sell[is].client, client);
 			if (this.sell[is].client == client) return true;
 			if (this.sell[is].client != 0) return false;
 			this.sell[is].client = client;
@@ -190,7 +189,7 @@ class Stock {
 		}
 		const ib = this.buy.findIndex(r => r.id == id);
 		if (ib >= 0) {
-			print(this.buy[ib].info(), this.buy[ib].client, client);
+			//print(this.buy[ib].info(), this.buy[ib].client, client);
 			if (this.buy[ib].client == client) return true;
 			if (this.buy[ib].client != 0) return false;
 			this.buy[ib].client = client;

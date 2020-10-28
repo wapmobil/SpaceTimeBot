@@ -1,6 +1,6 @@
 // Базовый класс корабля
 class Ship {
-	constructor(id){
+	constructor(){
 		this.count = 0;
 	}
 	load(o) {
@@ -37,3 +37,18 @@ class TradeShip extends Ship {
 	capacity() {return 10;}
 	price() {return 100;}
 }
+
+function ShipModels() {return [new TradeShip()]};
+const ShipsDescription = function() {
+	let msg = "\n<b> ✈️ Модели кораблей ✈️ </b>\n";
+	for (const s of ShipModels()) {
+		msg += `<b>${s.name()}:</b> ${s.description()}\n`;
+		msg += `  вместимость: ${s.capacity()}📦\n`;
+		msg += `  энергия пуска: ${s.energy()}🔋\n`;
+		msg += `  cтоимость: `;
+		for(let i=0; i<Resources.length; i++) msg += getResourceCount(i, s.price());
+		msg += "\n";
+		msg += `  время строительства: ${time2text(s.price()*Resources.length)}\n`;
+	}
+	return msg;
+}();
