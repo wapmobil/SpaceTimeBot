@@ -182,16 +182,22 @@ class Stock {
 	start(id, client) {
 		const is = this.sell.findIndex(r => r.id == id);
 		if (is >= 0) {
+			print(this.sell[is].info(), this.sell[is].client, client);
+			if (this.sell[is].client == client) return true;
 			if (this.sell[is].client != 0) return false;
 			this.sell[is].client = client;
 			return true;
 		}
 		const ib = this.buy.findIndex(r => r.id == id);
 		if (ib >= 0) {
+			print(this.buy[ib].info(), this.buy[ib].client, client);
+			if (this.buy[ib].client == client) return true;
 			if (this.buy[ib].client != 0) return false;
 			this.buy[ib].client = client;
 			return true;
 		}
+		print("fail", is, ib, id, client);
+		print(this.info().msg);
 		return false;
 	}
 }

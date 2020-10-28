@@ -1,8 +1,8 @@
 include("planet.qs")
 include("mininig.qs")
 
-const isProduction = false;
-const NPC_count = 3;
+const isProduction = true;
+const NPC_count = 1;
 
 buttonLoad["clicked()"].connect(on_buttonLoad_clicked);
 buttonSave["clicked()"].connect(on_buttonSave_clicked);
@@ -83,7 +83,7 @@ let timer = new QTimer();
 timer["timeout"].connect(timerDone);
 timer.start(1000);
 save_timer.start(timer.interval*10);
-tradeNPCtimer.start(timer.interval*100);
+tradeNPCtimer.start(timer.interval*1000);
 
 
 function telegramConnect() {
@@ -313,6 +313,8 @@ function loadNPC() {
 			if (arr.length > j) p.load(arr[j]);
 			npc.push(p);
 		}
+	} else {
+		for(let j=0; j<NPC_count; j++) npc.push(new Stock(j+1));
 	}
 	return npc;
 }
@@ -547,6 +549,7 @@ function help_stock(chat_id) {
 }
 
 function processTradeNPC() {
+	print("NPC update", NPCstock.length);
 	for(let j=0; j<NPCstock.length; j++) {
 		let a = new Array();
 		for (const v of NPCstock[j].sell) {
@@ -561,11 +564,12 @@ function processTradeNPC() {
 		}
 		NPCstock[j].buy = b;
 		while (NPCstock[j].sell.length < 4) {
-			NPCstock[j].add(true, getRandom(Resources.length), (getRandom(10)+1), 50+getRandom(100));
+			NPCstock[j].add(true, getRandom(Resources.length), (j+1)*(getRandom(10)+1), 50+getRandom(100));
 		}
 		while (NPCstock[j].buy.length < 4) {
-			NPCstock[j].add(false, getRandom(Resources.length), (getRandom(10)+1), 50+getRandom(100));
+			NPCstock[j].add(false, getRandom(Resources.length), (j+1)*(getRandom(10)+1), 50+getRandom(100));
 		}
+		//print(NPCstock[j].info().msg);
 	}
 }
 
