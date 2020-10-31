@@ -9,11 +9,20 @@ class Spaceyard extends Building {
 	}
 	info() {
 		let msg = this.infoHeader()+"\n";
-		msg += `    🛠${this.level+1} `;
+		msg += `    производительность ${this.shipsBuildSpeed(this.level)}x\n`;
+		msg += `    🛠${this.level+1}: производительность ${this.shipsBuildSpeed(this.level+1)}x`;
 		return msg + this.infoFooter();
-		return msg;
 	}
 	consumption() {return 16;}
 	buildTimeAdd() {return 3000;}
 	shipsBuildSpeed(l) {return l;}
+	buildShip() {
+		if (this.ship_id >=0 && this.ship_bt > 0) {
+			this.ship_bt -= this.shipsBuildSpeed(this.level);
+			if (this.ship_bt <= 0) {
+				return this.ship_id;
+			}
+		}
+		return -1;
+	}
 }

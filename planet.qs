@@ -15,7 +15,7 @@ class Planet {
 		this.money = 0;
 		this.food = 200;
 		for(let i=0; i<Resources.length; i++)
-			this[Resources[i].name] = 0;
+			this[Resources[i].name] = isProduction ? 0 : 999;
 		this.farm = new Farm(id);
 		this.storage = new Storage(id);
 		this.facility = new Facility(id);
@@ -41,13 +41,15 @@ class Planet {
 		this.ships = new Navy(id);
 		this.expeditions = new Array();
 		this.ship_speed = 1;
+		this.spaceyard.ship_id = -1;
+		this.spaceyard.ship_bt = 0;
 		this.stock = new Stock(id);
 		if (!isProduction) {
 			this.money = 9999999;
 			this.food = 9999999;
 			this.farm.level = 30;
 			this.solar.level = 30;
-			this.storage.level = 30;
+			this.storage.level = 60;
 			this.facility.level = 3;
 			this.build_speed = 100;
 			this.sience_speed = 200;
@@ -85,9 +87,9 @@ class Planet {
 		else msg += "\n";
 		msg += `Еда: ${food2text(this.food)} (+${food2text(this.farm.level - this.facility.eat_food(this.facility.level))})\n`;
 		msg += `Энергия: ${this.energy(2)}/${this.energy(1)}⚡\n`;
-		if (this.accum.level > 0 && all)
-			msg += `Аккум.: ${Math.floor(this.accum.energy)}/${this.accum.capacity(this.accum.level)}🔋 (+${Math.round(this.energy())}🔋 за 100⏳)\n`
 		if (all) {
+			if (this.accum.level > 0)
+				msg += `Аккум.: ${Math.floor(this.accum.energy)}/${this.accum.capacity(this.accum.level)}🔋 (+${Math.round(this.energy())}🔋 за 100⏳)\n`
 			for(let i=0; i<Resources.length; i++) {
 				msg += getResourceInfo(i, this.resourceCount(i));
 				const b = this.stock.reserved(i);
@@ -114,6 +116,12 @@ class Planet {
 	}
 	maxShips() {
 		return this.facility.level + this.spaceyard.level;
+	}
+	totalShips() {
+		let cnt = this.ships.countAll();
+		for (const value of this.expeditions) cnt += value.countAll();
+		if (this.spaceyard.ship_id >= 0) cnt += 1;
+		return cnt;
 	}
 	hasMoney(m) {
 		return ((this.money - this.stock.money()) >= m);
@@ -172,6 +180,12 @@ class Planet {
 			if (this.expeditions[i].arrived <= 0) {
 				this.returnExpedition(i);
 			}
+		}
+		let new_ship = this.spaceyard.buildShip();
+		if (new_ship >= 0) {
+			this.ships.m[new_ship].count += 1;
+			this.spaceyard.ship_id = -1;
+			Telegram.send(this.chat_id, `Корабль ${this.ships.m[new_ship].name()} собран`);
 		}
 	}
 	isBuilding() {
@@ -304,12 +318,14 @@ class Planet {
 		return true;
 	}
 	removeStockTask(ind) {
-		if (this.accum.energy < 50 && isProduction) {
+		if (this.accum.energy < 50) {
 			Telegram.send(this.chat_id, "Не хватает 🔋 для публикации заказа, дождитесь зарядки аккумуляторов");
 			return false;
 		}
-		if (isProduction) this.accum.energy -= 50;
-		return this.stock.remove(ind);
+		if (this.stock.remove(ind)) {
+			this.accum.energy -= 50;
+			return true;
+		} else return false;
 	}
 	sellResources(r, cnt) {
 		if (!this.trading) {Telegram.send(this.chat_id, "Недоступно, требуется исследование"); return;}
@@ -318,13 +334,15 @@ class Planet {
 		this.money += cnt;
 	}
 	shipsCountInfo() {
-		let cnt = this.ships.countAll();
-		for (const value of this.expeditions) cnt += value.countAll();
-		return `Всего кораблей: ${cnt}/${this.maxShips()}\n`;
+		return `Всего кораблей: ${this.totalShips()}/${this.maxShips()}\n`;
 	}
 	navyInfo() {
 		if (this.spaceyard.level > 0) {
-			let msg = this.shipsCountInfo();
+			let msg = this.shipsCountInfo() + "\n";
+			//msg += this.shipsCountInfo();
+			if (this.spaceyard.ship_id >= 0) {
+				msg += `Идёт сборка ${this.ships.m[this.spaceyard.ship_id].name()}, осталось ${time2text(this.spaceyard.ship_bt)}\n`;
+			}
 			msg += this.ships.info("✈️Флот на базе");
 			for (const value of this.expeditions) {
 				if (value.dst == this.chat_id)
@@ -539,13 +557,25 @@ class Planet {
 	}
 	createShip(si) {
 		if (this.spaceyard.level > 0) {
+			const ns = ShipModels()[si];
 			for(let i=0; i<Resources.length; i++) {
-				if (this.resourceCount(i) < ShipModels()[si].price()) {
+				if (this.resourceCount(i) < ns.price()) {
 					Telegram.send(this.chat_id, `Не достаточно ${Resources_desc[i]} для постройки`);
 					return;
 				}
 			}
-			Telegram.send(this.chat_id, "В разработке");
+			if (this.spaceyard.ship_id >= 0) {
+				Telegram.send(this.chat_id, `🏗Верфь уже занята сборкой ${this.ships.m[this.spaceyard.ship_id].name()}`);
+				return;
+			}
+			if (this.totalShips() < this.maxShips()) {
+				this.spaceyard.ship_id = si;
+				this.spaceyard.ship_bt = ns.price()*Resources.length;
+				for(let i=0; i<Resources.length; i++) this[Resources[i].name] -= ns.price();
+				Telegram.send(this.chat_id, `Сборка ${this.ships.m[si].name()} началась`);
+			} else {
+				Telegram.send(this.chat_id, "Достигнуто максимальное количество кораблей");
+			}
 		} else {
 			Telegram.send(this.chat_id, "Требуется построить 🏗Верфь");
 		}

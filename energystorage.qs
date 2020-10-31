@@ -8,7 +8,7 @@ class EnergyStorage extends Building {
 		return Math.floor(lvl*this.upgrade*100);
 	}
 	cost() {
-		return (Math.floor(Math.sqrt((this.level+1)*100)))*1000;
+		return (Math.floor(Math.sqrt(this.level+2)*20+this.level*this.level))*1000;
 	}
 	info() {
 		let msg = this.infoHeader()+"\n";

@@ -73,11 +73,10 @@ class Marketplace {
 			}
 		} else return true;
 	}
-	info() {
+	info(cid) {
 		let msg = "";
 		for (const v of this.items.values()) {
-			msg += `<b>№${v.id}:</b> ${v.info()}`
-			if (v.client == 0) msg += `    Отправить -> /go_${v.id}\n`;
+			if (v.client == 0 && v.owner != cid) msg += `<b>№${v.id} /go_${v.id} -> </b>${v.info()}`
 		}
 		return msg;
 	}
@@ -137,7 +136,7 @@ class Stock {
 		}
 	}
 	remove(bt) {
-		const id = parseInt(bt.match(/.*(\d+)/i)[1]);
+		const id = parseInt(bt.match(/.*\s(\d+)/i)[1]);
 		if (GlobalMarket.removeItem(id)) {
 			const is = this.sell.findIndex(r => r.id == id);
 			if (is >= 0) {
@@ -149,8 +148,7 @@ class Stock {
 				this.buy.splice(ib, 1);
 				return true;
 			}
-		}
-		return false;
+		} else return false;
 	}
 	delete(id) {
 		GlobalMarket.items.delete(id);
