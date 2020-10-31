@@ -243,7 +243,7 @@ function find_money(chat_id) {
 function research(chat_id) {
 	const p = Planets.get(chat_id);
 	if (p.facility.level > 1) {
-		Telegram.sendButtons(chat_id, "Доступные исследования:\n" + p.sienceListExt(), p.sienceList());
+		Telegram.sendButtons(chat_id, "Доступные исследования:\n" + p.sienceListExt(), p.isSienceActive() ? [] : p.sienceList());
 	} else {
 		Telegram.send(chat_id, "Требуется 🏢База 2 уровня");
 	}

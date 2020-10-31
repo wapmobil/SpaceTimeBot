@@ -221,8 +221,11 @@ class Planet {
 	sienceListExt() {
 		return SieceTree.reduce(printSienceDetail, "", Research.Traversal.Actual, this.sience);
 	}
+	isSienceActive() {
+		return this.sience.some(r => r.time > 0);
+	}
 	sienceStart(s) {
-		if (this.sience.some(r => r.time > 0)) {
+		if (this.isSienceActive()) {
 			Telegram.send(this.chat_id, "Сейчас нельзя, исследование уже идёт");
 			return;
 		}
