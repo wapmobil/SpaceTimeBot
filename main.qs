@@ -67,7 +67,8 @@ Telegram["disconnected"].connect(telegramDisconnect);
 if (isProduction) {
 	Telegram.start(SHS.load(77));
 	label.hide();
-	//buttonReset.enabled = true;
+	buttonReset.enabled = false;
+	buttonLoad.enabled = false;
 } else {
 	buttonReset.enabled = true;
 	Telegram.start("733272349:AAH9YTSyy3RmGV4A6OWKz1b3CeKnPI2ROd8");
@@ -253,7 +254,8 @@ function research(chat_id) {
 function map_info(chat_id) {
 	const p = Planets.get(chat_id);
 	if (p.facility.level >= 1) {
-		let msg = "Список планет:\n";
+		let msg = `Всего планет ${Planets.size}\n`;
+		msg += "Список планет:\n";
 		for (var [key, value] of Planets) {
 			if (key == chat_id) msg += "Ты: ";
 			msg += `<b>Планета №${key}:</b> ${value.facility.level}🏢\n`
@@ -341,6 +343,7 @@ function on_buttonLoad_clicked() {
 
 // очистить всё, полный сброс
 function on_buttonReset_clicked() {
+	if (isProduction) return;
 	Planets = new Map();
 	GlobalMarket = new Marketplace();
 	NPCstock = new Array();
