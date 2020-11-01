@@ -318,6 +318,7 @@ class Planet {
 		}
 		if (isProduction) this.accum.energy -= 50;
 		this.stock.add(sell, res, count, price);
+		Statistica.stock_items += 1;
 		return true;
 	}
 	removeStockTask(ind) {
@@ -489,6 +490,7 @@ class Planet {
 			this.ships.split(nv);
 			this.expeditions.push(nv);
 			tmpNavy.delete(this.chat_id);
+			Statistica.expeditions++;
 			Telegram.edit(this.chat_id, msg_id, "Экспедиция успешно отправлена!");
 		} else {
 			Telegram.edit(this.chat_id, msg_id, "Ошибка, заявка уже не существует");

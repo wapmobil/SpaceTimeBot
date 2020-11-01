@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>515</width>
-    <height>528</height>
+    <width>795</width>
+    <height>606</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -88,34 +88,32 @@
     </layout>
    </item>
    <item>
-    <widget class="QLabel" name="label">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
+    <widget class="QSpinBox" name="spinPlayers">
+     <property name="readOnly">
+      <bool>true</bool>
      </property>
-     <property name="font">
-      <font>
-       <family>DejaVu Sans Mono</family>
-       <pointsize>10</pointsize>
-      </font>
+     <property name="keyboardTracking">
+      <bool>false</bool>
      </property>
-     <property name="text">
-      <string>TextLabel</string>
+     <property name="prefix">
+      <string>Players: </string>
+     </property>
+     <property name="maximum">
+      <number>9999999</number>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QLCDNumber" name="lcdNumber">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="segmentStyle">
-      <enum>QLCDNumber::Flat</enum>
+    <widget class="SHSGraphic" name="graphic">
+     <property name="variables">
+      <stringlist>
+       <string>players=players</string>
+       <string>active_players=active</string>
+       <string>messages=messages</string>
+       <string>mining=mining</string>
+       <string>expeditions=expeditions</string>
+       <string>stock_items=stocks</string>
+      </stringlist>
      </property>
     </widget>
    </item>
@@ -123,9 +121,19 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>Graphic</class>
+   <extends>QFrame</extends>
+   <header>graphic.h</header>
+  </customwidget>
+  <customwidget>
    <class>CLineEdit</class>
    <extends>QLineEdit</extends>
    <header>clineedit.h</header>
+  </customwidget>
+  <customwidget>
+   <class>SHSGraphic</class>
+   <extends>Graphic</extends>
+   <header>graphic.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

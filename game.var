@@ -1,0 +1,7 @@
+
+players = {inf} #s 
+active_players = {inf} #s 
+messages = {inf} #s 
+mining = {inf} #s 
+expeditions = {inf} #s 
+stock_items = {inf} #s 

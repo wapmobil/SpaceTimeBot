@@ -1,5 +1,7 @@
+include("statistic.qs")
 include("planet.qs")
 include("mininig.qs")
+
 
 const isProduction = true;
 const NPC_count = isProduction ? 2 : 3;
@@ -88,7 +90,7 @@ let NPCstock = loadNPC();
 let timer = new QTimer();
 timer["timeout"].connect(timerDone);
 timer.start(1000);
-save_timer.start(timer.interval*10);
+save_timer.start(timer.interval*100);
 tradeNPCtimer.start(timer.interval*1000);
 processTradeNPC();
 
@@ -110,6 +112,11 @@ function timerDone() {
 
 function received(chat_id, msg) {
 	//print(msg);
+	Statistica.messages++;
+	if(!PlanetStats.has(chat_id)) {
+		PlanetStats.set(chat_id, 0);
+		Statistica.active_players++;
+	} //else PlanetStats.get(chat_id) += 1;
 	if (msg == "📈Биржа ресурсов") check_trading(chat_id);
 	if (msg == "✈️Флот") check_ships(chat_id);
 	if (!Planets.has(chat_id)) {
@@ -228,6 +235,7 @@ function ship_create(chat_id, ship_index) {
 function ship_create0(chat_id) {ship_create(chat_id, 0);}
 
 function find_money(chat_id) {
+	Statistica.mining++;
 	MiningGames.set(chat_id, new MiningGame(chat_id));
 	Telegram.sendButtons(chat_id, "Подземелье.\n" + MiningGames.get(chat_id).show(), miningButtons, 3);
 	//let pr = getRandom(3);
@@ -290,7 +298,7 @@ function on_buttonSave_clicked() {
 	for (const value of Planets.values()) {
 		a.push(value);
 	}
-	lcdNumber.intValue = a.length;
+	spinPlayers.setValue(a.length);
 	SHS.save(isProduction ? 1 : 101, JSON.stringify(a));
 	SHS.save(isProduction ? 2 : 102, JSON.stringify(GlobalMarket.save()));
 	SHS.save(isProduction ? 3 : 103, JSON.stringify(NPCstock));
@@ -310,7 +318,7 @@ function loadPlanets() {
 	  		m.set(item.chat_id, p);
 		});
 	}
-	lcdNumber.intValue = m.size;
+	spinPlayers.setValue(m.size);
 	return m;
 }
 
@@ -445,6 +453,7 @@ const buyFoodFooter = `\nСтоимость покупки: 100🍍 -> 1💰`;
 const sellResFooter = `\nСтоимость продажи: 1 ресурс -> 1💰`;
 
 function processMiningButton(chat_id, msg_id, button) {
+	if (!MiningGames.has(chat_id)) return;
 	const ind = miningButtonsRole[miningButtons.indexOf(button)];
 	if (ind >= 0 && ind < 4) {
 		switch (MiningGames.get(chat_id).move(ind+1)) {
@@ -455,6 +464,7 @@ function processMiningButton(chat_id, msg_id, button) {
 				finishMsg +=`${MiningGames.get(chat_id).pl.money}`;
 				finishMsg += "💰";
 			Telegram.edit(chat_id, msg_id, finishMsg);
+			MiningGames.delete(chat_id);
 			break;
 			case 2:
 				let deathMsg ="Ты пал в бою\n";
@@ -462,6 +472,7 @@ function processMiningButton(chat_id, msg_id, button) {
 				deathMsg += `${MiningGames.get(chat_id).pl.money}`;
 				deathMsg += "💰";
 				Telegram.edit(chat_id, msg_id, deathMsg);
+			MiningGames.delete(chat_id);
 			break;
 			case 0:
 			Telegram.edit(chat_id, msg_id, "Подземелье.\n" + MiningGames.get(chat_id).show(), miningButtons, 3);
