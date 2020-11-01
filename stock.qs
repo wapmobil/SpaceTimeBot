@@ -15,15 +15,13 @@ class StockItem {
 			this[key] = value;
 		}
 	}
-	infoFooter() {
-		return this.client == 0 ? "🔘" : "🔒"
-	}
-	info() {
+	info(ext) {
 		let msg = "";
 		if(this.is_sell) msg = `<b>Продаю:</b>\n`;
 		else msg = `<b>Куплю:</b>\n`;
-		msg += `    ${getResourceInfo(this.res, this.count)} за ${money2text(this.price*this.count)} - ${this.infoFooter()}\n`;
-		return msg;
+		msg += `    ${getResourceInfo(this.res, this.count)} за ${money2text(this.price*this.count)} (${money2text(this.price)} за ${getResourceCount(this.res, 1)})`;
+		if(ext && this.client != 0) msg += " 🔒";
+		return msg+"\n";
 	}
 
 }
@@ -120,7 +118,7 @@ class Stock {
 		let msg = "";
 		let buttons = [];
 		for (const v of arr) {
-			msg += `<b>№${v.id}:</b> ${v.info()}` 
+			msg += `<b>№${v.id}:</b> ${v.info(true)}` 
 			if (v.client == 0) buttons.push(`Удалить ${v.id}`);
 		}
 		return {msg, buttons};

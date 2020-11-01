@@ -16,7 +16,8 @@ tradeNPCtimer["timeout"].connect(processTradeNPC);
 
 Telegram.clearCommands();
 Telegram.disablePassword();
-Telegram.addCommand("Поискать 💰", "find_money");
+Telegram.addCommand("Подземелье/🤠Отправиться", "find_money");
+Telegram.addCommand("Подземелье/ℹ️Справка", "mining_info");
 Telegram.addCommand("🔍Исследования", "research");
 Telegram.addCommand("💸Торговля/Купить 🍍", "buy_food");
 Telegram.addCommand("💸Торговля/Продать ресурсы", "sell_resources");
@@ -71,7 +72,7 @@ if (isProduction) {
 	buttonLoad.enabled = false;
 } else {
 	buttonReset.enabled = true;
-	Telegram.start("733272349:AAH9YTSyy3RmGV4A6OWKz1b3CeKnPI2ROd8");
+	Telegram.start("733272349:AAG1nSh_O8B1wszI46tymwnbXtGqg3LGSXA");
 }
 
 
@@ -257,6 +258,7 @@ function map_info(chat_id) {
 		let msg = `Всего планет ${Planets.size}\n`;
 		msg += "Список планет:\n";
 		for (var [key, value] of Planets) {
+			if (value.facility.level == 0) continue;
 			if (key == chat_id) msg += "Ты: ";
 			msg += `<b>Планета №${key}:</b> ${value.facility.level}🏢\n`
 			if (p.facility.level >= 3) {
@@ -288,6 +290,7 @@ function on_buttonSave_clicked() {
 	for (const value of Planets.values()) {
 		a.push(value);
 	}
+	lcdNumber.intValue = a.length;
 	SHS.save(isProduction ? 1 : 101, JSON.stringify(a));
 	SHS.save(isProduction ? 2 : 102, JSON.stringify(GlobalMarket.save()));
 	SHS.save(isProduction ? 3 : 103, JSON.stringify(NPCstock));
@@ -307,6 +310,7 @@ function loadPlanets() {
 	  		m.set(item.chat_id, p);
 		});
 	}
+	lcdNumber.intValue = m.size;
 	return m;
 }
 
@@ -609,3 +613,12 @@ function navy_unload(chat_id) {
 function ship_price(chat_id) {
 	Telegram.send(chat_id, Planets.get(chat_id).infoResources() + ShipsDescription);
 }
+
+function mining_info(chat_id){
+		Telegram.send(chat_id,"Справка по добыче в подземелье.\n
+		 Основная цель - добыча денег, но засчитывается только если дойти до финиша..\n
+		  Перемещение при помощи кнопок (вверх вправо вниз влево). \n
+		  При нажатии кнопки бомбы следующий переход взорвет стену (или ничего если вы решили потратить бомбу на пустую клетку). \n
+			Убийство монстров тоже приносит деньги. \n
+			Не спешите жать кнопки, telegram это не одобряет ");
+	}

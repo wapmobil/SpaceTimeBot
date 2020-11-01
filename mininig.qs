@@ -22,28 +22,29 @@ class MiningPlayer {
 }
 
 class MiningCell {
-	constructor(name,icon,spawnrate,value){// icons , spawn rate 1/spawnrate 
+	constructor(name,icon,spawnrate,value,health){// icons , spawn rate 1/spawnrate 
 		// value of mob(hp) or resources(qauntity)
 		this.name= name;
 		this.icon= icon;
 		this.spawnrate = spawnrate;
 		this.number = getRandom(spawnrate); //random number in spawnrate range
 		this.value = value+ Math.floor(getRandom(value)/2)- Math.floor(getRandom(value)/2);
+		this.health = health;
 	}
 }
 
 const spawnMiningCells = [
-		new MiningCell ("empty", "▫️", 0,0),
-		new MiningCell ("wall", "⬛️", 0,0),
-		new MiningCell ("home", "🚪", 0,0),
-		new MiningCell ("MiningPlayer", "🤠", 0,0),
-		new MiningCell ("heart", "❤️", 20,1),
-		new MiningCell ("bomb",  "🧨",40,1),
-		new MiningCell ("money", "💰",5,5),
-		new MiningCell ("bigmoney", "💵",400,100),
-		new MiningCell ("rat",   "🐀",15,1),
-		new MiningCell ("spider",   "🦇",25,2),
-		new MiningCell ("alien", "👽",50,3)
+		new MiningCell ("empty", "▫️", 0,0,0),
+		new MiningCell ("wall", "⬛️", 0,0,0),
+		new MiningCell ("home", "🚪", 0,0,0),
+		new MiningCell ("MiningPlayer", "🤠", 0,0,0),
+		new MiningCell ("heart", "❤️", 20,1,0),
+		new MiningCell ("bomb",  "🧨",40,1,0),
+		new MiningCell ("money", "💰",5,5,0),
+		new MiningCell ("bigmoney", "💵",400,100,0),
+		new MiningCell ("rat",   "🐀",15,3,1),
+		new MiningCell ("spider",   "🦇",25,5,2),
+		new MiningCell ("alien", "👽",50,10,3)
 		];
 		
 class MiningLabyrinth {
@@ -261,7 +262,8 @@ class MiningGame {
 			this.pl.money += spawnMiningCells[this.plMap.map[x][y]].value;
 			break;
 			case 8:case 9: case 10:
-			this.pl.hp -= spawnMiningCells[this.plMap.map[x][y]].value;
+			this.pl.hp -= spawnMiningCells[this.plMap.map[x][y]].health;
+			this.pl.money += spawnMiningCells[this.plMap.map[x][y]].value;
 			break;
 		}
 		if (x == this.plMap.mapsize-2 && y == this.plMap.mapsize-1) {
