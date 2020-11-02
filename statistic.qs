@@ -12,7 +12,6 @@ var Statistica = {
 
 var PlanetStats = new Map();
 
-
 function statisticStep() {
 	players = Planets.size;
 	for (const key in Statistica) {

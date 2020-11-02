@@ -1,7 +1,7 @@
 
-players = {inf} #s 
-active_players = {inf} #s 
-messages = {inf} #s 
-mining = {inf} #s 
-expeditions = {inf} #s 
-stock_items = {inf} #s 
+players = {1 y} #s 
+active_players = {1 y} #s 
+messages = {1 y} #s 
+mining = {1 y} #s 
+expeditions = {1 y} #s 
+stock_items = {1 y} #s 
