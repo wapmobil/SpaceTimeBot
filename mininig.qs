@@ -1,16 +1,16 @@
 
 class MiningPlayer {
 	
-	constructor(x,y){
-		this.x=x;
-		this.y=y;
-		this.hp=4;
-		this.bombs=1;
+	constructor(x, y) {
+		this.x = x;
+		this.y = y;
+		this.hp = 4;
+		this.bombs = 1;
 		this.money = 0;
 		
 	}
 	
-	MiningPlayerinfo(){
+	MiningPlayerinfo() {
 		let info = "Здоровье: ";
 		info+=`${this.pl.hp}`;
 		info+="Бомбы: ";
@@ -22,7 +22,7 @@ class MiningPlayer {
 }
 
 class MiningCell {
-	constructor(name,icon,spawnrate,value,health){// icons , spawn rate 1/spawnrate 
+	constructor(name,icon,spawnrate,value,health) {// icons , spawn rate 1/spawnrate 
 		// value of mob(hp) or resources(qauntity)
 		this.name = name;
 		this.icon = icon;
@@ -34,17 +34,17 @@ class MiningCell {
 }
 
 const spawnMiningCells = [
-		new MiningCell ("empty"       , "▫️" , 0, 0, 0),
-		new MiningCell ("wall"        , "⬛️", 0, 0, 0),
-		new MiningCell ("home"        , "🚪", 0, 0, 0),
-		new MiningCell ("MiningPlayer", "🤠", 0, 0, 0),
-		new MiningCell ("heart"       , "❤️" , 20, 1, 0),
-		new MiningCell ("bomb"        , "🧨", 40, 1, 0),
-		new MiningCell ("money"       , "💰", 5, 5, 0),
-		new MiningCell ("bigmoney"    , "💵", 400, 100, 0),
-		new MiningCell ("rat"         , "🐀", 15, 3, 1),
-		new MiningCell ("spider"      , "🦇", 25, 5, 2),
-		new MiningCell ("alien"       , "👽", 50, 10, 3)
+		new MiningCell("empty"       , "▫️" , 0, 0, 0),
+		new MiningCell("wall"        , "⬛️", 0, 0, 0),
+		new MiningCell("home"        , "🚪", 0, 0, 0),
+		new MiningCell("MiningPlayer", "🤠", 0, 0, 0),
+		new MiningCell("heart"       , "❤️" , 20, 1, 0),
+		new MiningCell("bomb"        , "🧨", 40, 1, 0),
+		new MiningCell("money"       , "💰", 5, 5, 0),
+		new MiningCell("bigmoney"    , "💵", 400, 100, 0),
+		new MiningCell("rat"         , "🐀", 15, 3, 1),
+		new MiningCell("spider"      , "🦇", 25, 5, 2),
+		new MiningCell("alien"       , "👽", 50, 10, 3)
 		];
 		
 class MiningLabyrinth {
@@ -129,13 +129,13 @@ class MiningLabyrinth {
 	}
 	
 	isEmpty(x, y) {
-		if(this.inBounds(x, y) && (this.map[x][y] == 0)) {
+		if (this.inBounds(x, y) && (this.map[x][y] == 0)) {
 			return true;
 		} else return false;
 	}
 	
 	isrdytoMove(x, y) {
-		if((this.isEmpty(x + 2, y)) || (this.isEmpty(x - 2, y)) || (this.isEmpty(x, y + 2)) || (this.isEmpty(x, y - 2))) {
+		if ((this.isEmpty(x + 2, y)) || (this.isEmpty(x - 2, y)) || (this.isEmpty(x, y + 2)) || (this.isEmpty(x, y - 2))) {
 			return true;
 		} else {
 			return false;
@@ -143,52 +143,52 @@ class MiningLabyrinth {
 	}
 	
 	tractor() {
-		for(let x = 1; x < this.mapsize - 1; x += 2) {
-			for(let y = 1; y < this.mapsize - 1; y += 2) {
+		for (let x = 1; x < this.mapsize - 1; x += 2) {
+			for (let y = 1; y < this.mapsize - 1; y += 2) {
 				let way = true;
 				let i = x;
 				let j = y;
 				this.map[i][j] = 3;
-				while(this.map[i][j] == 3) { //  2-где были 3 - где находимся
-					while(way) {
+				while (this.map[i][j] == 3) { //  2-где были 3 - где находимся
+					while (way) {
 						let delwall = getRandom(4);
-						switch(delwall) {
-							case 0:
-								if(this.isEmpty(i + 2, j)) {
-									this.map[i + 1][j] = 2;
-									this.map[i][j] = 2;
-									this.map[i + 2][j] = 3;
-									way = false;
-									i += 2;
-								} else this.map[i][j] = 2;
-								break;
-							case 1:
-								if(this.isEmpty(i - 2, j)) {
-									this.map[i - 1][j] = 2;
-									this.map[i][j] = 2;
-									this.map[i - 2][j] = 3;
-									way = false;
-									i -= 2;
-								} else this.map[i][j] = 2;
-								break;
-							case 2:
-								if(this.isEmpty(i, j + 2)) {
-									this.map[i][j + 1] = 2;
-									this.map[i][j] = 2;
-									this.map[i][j + 2] = 3;
-									way = false;
-									j += 2;
-								} else this.map[i][j] = 2;
-								break;
-							case 3:
-								if(this.isEmpty(i, j - 2)) {
-									this.map[i][j - 1] = 2;
-									this.map[i][j] = 2;
-									this.map[i][j - 2] = 3;
-									way = false;
-									j -= 2;
-								} else this.map[i][j] = 2;
-								break;
+						switch (delwall) {
+						case 0:
+							if (this.isEmpty(i + 2, j)) {
+								this.map[i + 1][j] = 2;
+								this.map[i][j] = 2;
+								this.map[i + 2][j] = 3;
+								way = false;
+								i += 2;
+							} else this.map[i][j] = 2;
+							break;
+						case 1:
+							if (this.isEmpty(i - 2, j)) {
+								this.map[i - 1][j] = 2;
+								this.map[i][j] = 2;
+								this.map[i - 2][j] = 3;
+								way = false;
+								i -= 2;
+							} else this.map[i][j] = 2;
+							break;
+						case 2:
+							if (this.isEmpty(i, j + 2)) {
+								this.map[i][j + 1] = 2;
+								this.map[i][j] = 2;
+								this.map[i][j + 2] = 3;
+								way = false;
+								j += 2;
+							} else this.map[i][j] = 2;
+							break;
+						case 3:
+							if (this.isEmpty(i, j - 2)) {
+								this.map[i][j - 1] = 2;
+								this.map[i][j] = 2;
+								this.map[i][j - 2] = 3;
+								way = false;
+								j -= 2;
+							} else this.map[i][j] = 2;
+							break;
 						}
 						way = this.isrdytoMove(i, j);
 					}
@@ -204,15 +204,15 @@ class MiningLabyrinth {
 class MiningGame {
 	constructor() {
 		let mapSize = 13;
-		this.pl = new MiningPlayer(1,1);
+		this.pl = new MiningPlayer(1, 1);
 		this.plMap = new MiningLabyrinth(mapSize);
-		this.plMap.dig(this.pl.x,this.pl.y,3);
+		this.plMap.dig(this.pl.x, this.pl.y, 3);
 		this.active_bomb = false;
 		
 	}
 
 
-	blow(){
+	blow() {
 		this.active_bomb = this.pl.bombs > 0;
 		//if (plMap.isWall(Pos)&&(this.pl.bombs!=0)){
 		//	this.plMap.dig(Pos.x,Pos.y,"⬜️");
@@ -220,7 +220,7 @@ class MiningGame {
 		//} else return false;
 	}
 
-	MiningPlayerinfo(){
+	MiningPlayerinfo() {
 		let info = "Здоровье: ";
 		for (let i = 0; i < this.pl.hp; i++) info += "❤️";
 		info += "\nБомбы: ";
@@ -230,69 +230,111 @@ class MiningGame {
 		return info + "\n";
 
 	}
+	
+	isSafeCell(x, y) {
+		return (this.plMap.inBounds(x, y) && !this.plMap.isWall(x, y) && (this.plMap.indofMiningCell(x, y) < 8));
+	}
 
-	move(way) {// 0-stay 1-up 2-down 3-left 4 - right
+	move(way, continiously) { // 0-stay 1-up 2-down 3-left 4 - right
 		let x = this.pl.x;
 		let y = this.pl.y;
-		switch (way) {
-		case 1:
-//			let nx = 0;
-//			for (nx = x - 1; nx > 0; nx--) {
-//				if (this.plMap.inBounds(nx, y) || this.plMap.isWall(nx, y) || (this.plMap.indofMiningCell(nx, y) >= 8)) {
-//					nx++;
-//					break;
-//				}
-//			}
-//			print(x, nx);
-//			x = nx;
-			x -= 1;
-			break;
-		case 2:
-			y -= 1;
-			break;
-		case 3:
-			x += 1;
-			break;
-		case 4:
-			y += 1;
-			break;
+		let steps = 1;
+		if (continiously) {
+			let nx = x, ny = y;
+			switch (way) {
+			case 1:
+				for (nx = x - 1; nx >= 0; nx--) {
+					if (!this.isSafeCell(nx, y)) {
+						nx++;
+						break;
+					}
+				}
+				steps = x - nx;
+				break;
+			case 2:
+				for (ny = y - 1; ny >= 0; ny--) {
+					if (!this.isSafeCell(x, ny)) {
+						ny++;
+						break;
+					}
+				}
+				steps = y - ny;
+				break;
+			case 3:
+				for (nx = x + 1; nx < this.plMap.mapsize; nx++) {
+					if (!this.isSafeCell(nx, y)) {
+						nx--;
+						break;
+					}
+				}
+				steps = nx - x;
+				break;
+			case 4:
+				for (ny = y + 1; ny < this.plMap.mapsize; ny++) {
+					if (!this.isSafeCell(x, ny)) {
+						ny--;
+						break;
+					}
+				}
+				steps = ny - y;
+				break;
+			}
+			//print("steps =", steps)
 		}
-		
-		switch(this.plMap.indofMiningCell(x,y)) {
-		case 4:
-			this.pl.hp++;
-			break;
-		case 5:
-			this.pl.bombs++;
-			break;
-		case 6:
-			this.pl.money += spawnMiningCells[this.plMap.map[x][y]].value;
-			break;
-		case 7:
-			this.pl.money += spawnMiningCells[this.plMap.map[x][y]].value;
-			break;
-		case 8:
-		case 9:
-		case 10:
-			this.pl.hp    -= spawnMiningCells[this.plMap.map[x][y]].health;
-			this.pl.money += spawnMiningCells[this.plMap.map[x][y]].value;
-			break;
-		}
-		if (x == this.plMap.mapsize - 2 && y == this.plMap.mapsize - 1) {
-			return 1; // - end of journey
-		}
-		if (this.pl.hp <= 0) {
-			return 2;
-		}
-		if (this.plMap.inBounds(x, y) && (!this.plMap.isWall(x, y) || this.active_bomb)) { // делать все действия до перехода
-			this.plMap.dig(this.pl.x, this.pl.y, 0);
-			this.pl.x = x;
-			this.pl.y = y;
-			this.plMap.dig(this.pl.x, this.pl.y, 3);
-		}
-		if (this.active_bomb) {
-			this.active_bomb = false;
-			this.pl.bombs -= 1;
+		for (let s = 0; s < steps; s++) {
+			x = this.pl.x;
+			y = this.pl.y;
+			switch (way) {
+			case 1:
+				x -= 1;
+				break;
+			case 2:
+				y -= 1;
+				break;
+			case 3:
+				x += 1;
+				break;
+			case 4:
+				y += 1;
+				break;
+			}
+			
+			switch(this.plMap.indofMiningCell(x,y)) {
+			case 4:
+				this.pl.hp++;
+				break;
+			case 5:
+				this.pl.bombs++;
+				break;
+			case 6:
+				this.pl.money += spawnMiningCells[this.plMap.map[x][y]].value;
+				break;
+			case 7:
+				this.pl.money += spawnMiningCells[this.plMap.map[x][y]].value;
+				break;
+			case 8:
+			case 9:
+			case 10:
+				this.pl.hp    -= spawnMiningCells[this.plMap.map[x][y]].health;
+				this.pl.money += spawnMiningCells[this.plMap.map[x][y]].value;
+				break;
+			}
+			if (x == this.plMap.mapsize - 2 && y == this.plMap.mapsize - 1) {
+				return 1; // - end of journey
+			}
+			if (this.pl.hp <= 0) {
+				return 2;
+			}
+			if (this.plMap.inBounds(x, y) && (!this.plMap.isWall(x, y) || this.active_bomb)) { // делать все действия до перехода
+				this.plMap.dig(this.pl.x, this.pl.y, 0);
+				this.pl.x = x;
+				this.pl.y = y;
+				this.plMap.dig(this.pl.x, this.pl.y, 3);
+			}
+			if (this.active_bomb) {
+				this.active_bomb = false;
+				this.pl.bombs -= 1;
+			}
 		}
 		return 0;
 	}
@@ -301,9 +343,13 @@ class MiningGame {
 	}
 }
 
-var miningButtons	  = [" ", "↑" , " ",
-						 "←", "🧨", "→",
-						 " ", "↓" , " "];
-var miningButtonsRole = [-1,  0, -1,
-						  1,  4,  3,
-						 -1,  2, -1];
+var miningButtons	  = [" ", " ", "⇑" , " ", " ",
+						 " ", " ", "↑" , " ", " ",
+						 "⇐", "←", "🧨", "→", "⇒",
+						 " ", " ", "↓" , " ", " ",
+						 " ", " ", "⇓" , " ", " "];
+var miningButtonsRole = [-1, -1, 10, -1, -1,
+						 -1, -1,  0, -1, -1,
+						 11,  1,  4,  3, 13,
+						 -1, -1,  2, -1, -1,
+						 -1, -1, 12, -1, -1];
