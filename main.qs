@@ -3,7 +3,7 @@ include("planet.qs")
 include("mininig.qs")
 
 
-const isProduction = false;
+const isProduction = true;
 const NPC_count = isProduction ? 2 : 3;
 
 buttonLoad["clicked()"].connect(on_buttonLoad_clicked);
@@ -59,7 +59,9 @@ Telegram.addCommand("🛠Строительство/🏭Завод/🛠Cтрои
 Telegram.addCommand("🛠Строительство/🏗Верфь", "info_spaceyard");
 Telegram.addCommand("🛠Строительство/🏗Верфь/📖Инфо", "info_spaceyard");
 Telegram.addCommand("🛠Строительство/🏗Верфь/🛠Cтроить 🏗Верфь", "build_spaceyard");
-
+Telegram.addCommand("🛠Строительство/🏗Верфь/🏗Строительство ✈Кораблей", "ship_price");
+Telegram.addCommand("🛠Строительство/🏗Верфь/🏗Строительство ✈Кораблей/🏗Cтроить Грузовик", "ship_create0");
+Telegram.addCommand("🛠Строительство/🏗Верфь/🏗Строительство ✈Кораблей/🏗Cтроить Малютку", "ship_create1");
 Telegram["receiveCommand"].connect(function(id, cmd, script) {this[script](id);});
 Telegram["receiveMessage"].connect(received);
 Telegram["receiveSpecialMessage"].connect(receivedSpecial);
@@ -455,12 +457,15 @@ function processMiningButton(chat_id, msg_id, button) {
 		switch (MiningGames.get(chat_id).move(ind+1)) {
 			case 1:
 				Planets.get(chat_id).money += MiningGames.get(chat_id).pl.money;
+				mining_ok++;
+				mining_money_all += MiningGames.get(chat_id).pl.money;
+				mining_money_max = Math.max(mining_money_max, MiningGames.get(chat_id).pl.money);
 				let finishMsg = "Вы выбрались из подземелья!\n";
 				finishMsg +="Денег собрано:";
 				finishMsg +=`${MiningGames.get(chat_id).pl.money}`;
 				finishMsg += "💰";
-			Telegram.edit(chat_id, msg_id, finishMsg);
-			MiningGames.delete(chat_id);
+				Telegram.edit(chat_id, msg_id, finishMsg);
+				MiningGames.delete(chat_id);
 			break;
 			case 2:
 				let deathMsg ="Ты пал в бою\n";
@@ -468,7 +473,8 @@ function processMiningButton(chat_id, msg_id, button) {
 				deathMsg += `${MiningGames.get(chat_id).pl.money}`;
 				deathMsg += "💰";
 				Telegram.edit(chat_id, msg_id, deathMsg);
-			MiningGames.delete(chat_id);
+				MiningGames.delete(chat_id);
+				mining_fail++;
 			break;
 			case 0:
 			Telegram.edit(chat_id, msg_id, "Подземелье.\n" + MiningGames.get(chat_id).show(), miningButtons, 3);
@@ -629,6 +635,6 @@ function mining_info(chat_id){
 			"При нажатии кнопки 🧨 следующий переход взорвет стену⬛️ "+
 			"(или ничего если вы решили потратить 🧨 на пустую клетку).\n"+
 			"При переходе на монстра вы теряете здоровье❤️, но получаете деньги💰.\n"+
-			"Типы монстров:\n  🐀 - 1❤, ~3💰\n  🦇 - 2❤, ~5💰\n  👽 - 3❤, ~10💰\n"+
-			"Не спешите жать кнопки, telegram это не одобряет ");
+			"Типы монстров:\n  🐀Крыса - 1❤, ~3💰\n  🦇Летучая мышь - 2❤, ~5💰\n  👽Чужой - 3❤, ~10💰\n"+
+			"Не спешите жать кнопки, telegram это не одобряет...");
 	}

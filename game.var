@@ -5,3 +5,7 @@ messages = {1 y} #s
 mining = {1 y} #s 
 expeditions = {1 y} #s 
 stock_items = {1 y} #s 
+mining_fail = {1 y} #s 
+mining_ok = {1 y} #s 
+mining_money_all = {1 y} #s 
+mining_money_max = {1 y} #s 
