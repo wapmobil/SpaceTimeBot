@@ -246,7 +246,7 @@ function ship_create1(chat_id) {ship_create(chat_id, 1);}
 function find_money(chat_id) {
 	Statistica.mining++;
 	MiningGames.set(chat_id, new MiningGame(chat_id));
-	Telegram.sendButtons(chat_id, "Подземелье.\n" + MiningGames.get(chat_id).show(), miningButtons, 3);
+	Telegram.sendButtons(chat_id, "Подземелье.\n" + MiningGames.get(chat_id).show(), miningButtons, 5);
 	//let pr = getRandom(3);
 	//pr *= p.facility.level*p.facility.level+1;
 	//pr += getRandom(3);
@@ -452,9 +452,14 @@ const sellResFooter = `\nСтоимость продажи: 1 ресурс -> 1�
 
 function processMiningButton(chat_id, msg_id, button) {
 	if (!MiningGames.has(chat_id)) return;
-	const ind = miningButtonsRole[miningButtons.indexOf(button)];
+	let ind = miningButtonsRole[miningButtons.indexOf(button)];
+	let cont = false;
+	if (ind >= 10) {
+		ind -= 10;
+		cont = true;
+	}
 	if (ind >= 0 && ind < 4) {
-		switch (MiningGames.get(chat_id).move(ind+1)) {
+		switch (MiningGames.get(chat_id).move(ind + 1, cont)) {
 			case 1:
 				Planets.get(chat_id).money += MiningGames.get(chat_id).pl.money;
 				Statistica.mining_ok++;
@@ -477,7 +482,7 @@ function processMiningButton(chat_id, msg_id, button) {
 				Statistica.mining_fail++;
 			break;
 			case 0:
-			Telegram.edit(chat_id, msg_id, "Подземелье.\n" + MiningGames.get(chat_id).show(), miningButtons, 3);
+			Telegram.edit(chat_id, msg_id, "Подземелье.\n" + MiningGames.get(chat_id).show(), miningButtons, 5);
 			break;
 		}
 	}
@@ -627,11 +632,13 @@ function ship_price(chat_id) {
 	Telegram.send(chat_id, Planets.get(chat_id).infoResources() + ShipsDescription);
 }
 
+
 function mining_info(chat_id){
 		Telegram.send(chat_id,
 			"Справка по добыче в подземелье.\n"+
 			"Основная цель - добыча денег💰, но засчитывается только если дойти до финиша🚪.\n"+
-			"Перемещение при помощи кнопок (↑ ↓ ← →).\n"+
+			"Перемещение:\n  ↑ ↓ ← → - на одну клетку\n"+
+			"  ⇑ ⇓ ⇐ ⇒ - до упора (стены или монстра)\n"+
 			"При нажатии кнопки 🧨 следующий переход взорвет стену⬛️ "+
 			"(или ничего если вы решили потратить 🧨 на пустую клетку).\n"+
 			"При переходе на монстра вы теряете здоровье❤️, но получаете деньги💰.\n"+
