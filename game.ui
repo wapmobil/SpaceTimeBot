@@ -113,6 +113,10 @@
        <string>mining=mining</string>
        <string>expeditions=expeditions</string>
        <string>stock_items=stocks</string>
+       <string>mining_fail=mining fail</string>
+       <string>mining_ok=mining ok</string>
+       <string>mining_money_all=mining money all</string>
+       <string>mining_money_max=mining money max</string>
       </stringlist>
      </property>
     </widget>

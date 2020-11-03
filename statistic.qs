@@ -3,11 +3,15 @@ timer_statistic["timeout()"].connect(statisticStep);
 timer_statistic.start(5 * 60 * 1000);
 
 var Statistica = {
-	messages      : 0,
-	mining        : 0,
-	expeditions   : 1,
-	stock_items   : 2,
-	active_players: 3
+	messages         : 0,
+	mining           : 0,
+	expeditions      : 0,
+	stock_items      : 0,
+	active_players   : 0,
+	mining_fail      : 0,
+	mining_ok        : 0,
+	mining_money_all : 0,
+	mining_money_max : 0
 	};
 
 var PlanetStats = new Map();

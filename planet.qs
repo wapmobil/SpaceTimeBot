@@ -47,10 +47,10 @@ class Planet {
 		if (!isProduction) {
 			this.money = 9999999;
 			this.food = 9999999;
-			this.farm.level = 30;
+			this.farm.level = 0;
 			this.solar.level = 30;
 			this.storage.level = 60;
-			this.facility.level = 3;
+			this.facility.level = 0;
 			this.build_speed = 100;
 			this.sience_speed = 200;
 			this.ship_speed = 20;
@@ -250,6 +250,10 @@ class Planet {
 	fixSience() {
 		if (this.trading && this.ships.count(0) == 0 && this.expeditions.length == 0) {
 			this.ships.m[0].count = 1;
+		}
+		if (this.facility.level >= this.farm.level && this.facility.level > 0) {
+			this.food = Math.max(this.food, 100000, this.storage.capacity(this.storage.level));
+			this.farm.level = this.facility.level+1;
 		}
 		//this.energy_eco = 1;
 		//this.build_speed = 1;
