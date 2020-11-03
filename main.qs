@@ -3,7 +3,7 @@ include("planet.qs")
 include("mininig.qs")
 
 
-const isProduction = true;
+const isProduction = false;
 const NPC_count = isProduction ? 2 : 3;
 
 buttonLoad["clicked()"].connect(on_buttonLoad_clicked);
@@ -217,7 +217,14 @@ function buildSomething(chat_id, bl) {
 }
 function build_farm(chat_id)      {buildSomething(chat_id, "farm");}
 function build_storage(chat_id)   {buildSomething(chat_id, "storage");}
-function build_facility(chat_id)  {buildSomething(chat_id, "facility");}
+function build_facility(chat_id)  {
+	const p = Planets.get(chat_id);
+	if (p.facility.level >= p.farm.level) {
+		Telegram.send(chat_id, `Для строительства базы требуется 🍍Ферма ${p.facility.level+1} уровня`);
+	} else {
+		buildSomething(chat_id, "facility");
+	}
+}
 function build_factory(chat_id)   {buildSomething(chat_id, "factory");}
 function build_accum(chat_id)     {buildSomething(chat_id, "accum");}
 function build_solar(chat_id)     {buildSomething(chat_id, "solar");}
