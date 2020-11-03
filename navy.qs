@@ -28,7 +28,7 @@ class Navy {
 	load(o) {
 		for (const [key, value] of Object.entries(o)) {
 			if (key == "m") {
-				for (var i=0; i<this.m.length; i++) this.m[i].load(value[i]);
+				for (var i=0; i<Math.min(this.m.length, value.length); i++) this.m[i].load(value[i]);
 			} else {
 				this[key] = value;
 			}

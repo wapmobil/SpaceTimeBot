@@ -38,7 +38,18 @@ class TradeShip extends Ship {
 	price() {return 100;}
 }
 
-function ShipModels() {return [new TradeShip()]};
+class SmallShip extends Ship {
+	name() {return "Малютка";}
+	description() {return "Корабль общего назначения";}
+	energy() {return 10;}
+	health() {return 10;}
+	armor() {return 1;}
+	capacity() {return 1;}
+	price() {return 10;}
+}
+
+function ShipModels() {return [new TradeShip(), new SmallShip()]};
+
 const ShipsDescription = function() {
 	let msg = "\n<b> ✈️ Модели кораблей ✈️ </b>\n";
 	for (const s of ShipModels()) {

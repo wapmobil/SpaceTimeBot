@@ -30,11 +30,12 @@ Telegram.addCommand("💸Торговля/📈Биржа ресурсов/ℹ️
 Telegram.addCommand("💸Торговля/📈Биржа ресурсов/🖥Смотреть заявки", "show_stock");
 Telegram.addCommand("📖Инфоцентр/🌍Планета", "planet_info");
 Telegram.addCommand("📖Инфоцентр/💻Дерево исследований", "research_map");
-Telegram.addCommand("📖Инфоцентр/🌌Сканер планет", "map_info");
+//Telegram.addCommand("📖Инфоцентр/🌌Сканер планет", "map_info");
 Telegram.addCommand("✈️Флот/📖Инфо", "navy_info");
 Telegram.addCommand("✈️Флот/📤Разгрузить", "navy_unload");
 Telegram.addCommand("✈️Флот/🏗Строительство ✈Кораблей", "ship_price");
 Telegram.addCommand("✈️Флот/🏗Строительство ✈Кораблей/🏗Cтроить Грузовик", "ship_create0");
+Telegram.addCommand("✈️Флот/🏗Строительство ✈Кораблей/🏗Cтроить Малютку", "ship_create1");
 Telegram.addCommand("✈️Флот/ℹ️Cправка", "help_ships");
 Telegram.addCommand("🛠Строительство/📖Инфо", "planet_info");
 Telegram.addCommand("🛠Строительство/🍍Ферма", "info_farm");
@@ -69,7 +70,6 @@ Telegram["disconnected"].connect(telegramDisconnect);
 
 if (isProduction) {
 	Telegram.start(SHS.load(77));
-	label.hide();
 	buttonReset.enabled = false;
 	buttonLoad.enabled = false;
 } else {
@@ -118,7 +118,6 @@ function received(chat_id, msg) {
 		Statistica.active_players++;
 	} //else PlanetStats.get(chat_id) += 1;
 	if (msg == "📈Биржа ресурсов") check_trading(chat_id);
-	if (msg == "✈️Флот") check_ships(chat_id);
 	if (!Planets.has(chat_id)) {
 		Planets.set(chat_id, new Planet(chat_id));
 		Telegram.send(chat_id,
@@ -233,6 +232,7 @@ function ship_create(chat_id, ship_index) {
 }
 
 function ship_create0(chat_id) {ship_create(chat_id, 0);}
+function ship_create1(chat_id) {ship_create(chat_id, 1);}
 
 function find_money(chat_id) {
 	Statistica.mining++;
@@ -406,14 +406,7 @@ function time2text(t) {
 
 function check_trading(chat_id) {
 	if (!Planets.get(chat_id).trading) {
-		Telegram.send(chat_id, "Требуется исследование");
-		Telegram.cancelCommand();
-	}
-}
-
-function check_ships(chat_id) {
-	if (!Planets.get(chat_id).spaceyard.level > 0) {
-		Telegram.send(chat_id, "Требуется построить 🏗Верфь");
+		Telegram.send(chat_id, "Требуется исследование - 💸Торговля");
 		Telegram.cancelCommand();
 	}
 }
@@ -424,11 +417,7 @@ function buy_food(chat_id) {
 
 function sell_resources(chat_id) {
 	const p = Planets.get(chat_id);
-	if (p.trading) {
-		Telegram.sendButtons(chat_id, "Продажа ресурсов:\n" + p.infoResources(true) + sellResFooter, TradeButtons, Resources.length);
-	} else {
-		Telegram.send(chat_id, "Требуется исследование");
-	}
+	Telegram.sendButtons(chat_id, "Продажа ресурсов:\n" + p.infoResources(true) + sellResFooter, TradeButtons, Resources.length);
 }
 
 const TradeFoodButtons = function() {
@@ -626,10 +615,12 @@ function ship_price(chat_id) {
 }
 
 function mining_info(chat_id){
-		Telegram.send(chat_id,"Справка по добыче в подземелье.\n
-		 Основная цель - добыча денег, но засчитывается только если дойти до финиша..\n
-		  Перемещение при помощи кнопок (вверх вправо вниз влево). \n
-		  При нажатии кнопки бомбы следующий переход взорвет стену (или ничего если вы решили потратить бомбу на пустую клетку). \n
-			Убийство монстров тоже приносит деньги. \n
-			Не спешите жать кнопки, telegram это не одобряет ");
+		Telegram.send(chat_id,
+			"Справка по добыче в подземелье.\n"+
+			"Основная цель - добыча денег, но засчитывается только если дойти до финиша.\n"+
+			"Перемещение при помощи кнопок (вверх вправо вниз влево).\n"+
+			"При нажатии кнопки бомбы следующий переход взорвет стену "+
+			"(или ничего если вы решили потратить бомбу на пустую клетку).\n"+
+			"Убийство монстров тоже приносит деньги.\n"+
+			"Не спешите жать кнопки, telegram это не одобряет ");
 	}

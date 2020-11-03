@@ -115,7 +115,7 @@ class Planet {
 		return free;
 	}
 	maxShips() {
-		return this.facility.level + this.spaceyard.level;
+		return 10*this.facility.level + this.spaceyard.level;
 	}
 	totalShips() {
 		let cnt = this.ships.countAll();
@@ -265,34 +265,41 @@ class Planet {
 		//});
 	}
 	enable_factory() {
-		Telegram.send(this.chat_id, "Поздравляем теперь ты можешь построить завод по производству ресурса - "
+		Telegram.send(this.chat_id, "Поздравляем, теперь ты можешь построить 🏭Завод по производству ресурса - "
 			 + Resources[this.factory.type].icon + Resources[this.factory.type].desc);
 		this.factory.locked = false;
 	}
 	enable_accum() {
+		Telegram.send(this.chat_id, "Поздравляем, теперь ты можешь построить 🔋Аккумуляторы");
 		this.accum.locked = false;
 	}
 	eco_power() {
+		Telegram.send(this.chat_id, "Потребление ⚡энергиии снизилось на 10%");
 		this.energy_eco *= 0.9;
 	}
 	fastbuild() {
 		this.build_speed += 1;
+		Telegram.send(this.chat_id, `Скорость 🛠строительства увеличилась и составляет ${this.build_speed}x`);
 	}
 	enable_ships() {
+		Telegram.send(this.chat_id, "Поздравляем, теперь ты можешь построить 🏗Верфь, которая нужна для сборки новых кораблей");
 		this.spaceyard.locked = false;
 	}
 	upgrade_accum() {
+		Telegram.send(this.chat_id, "Ёмкость 🔋Аккумуляторов увеличилась");
 		this.accum.upgrade *= 1.2;
 	}
 	enable_trading() {
 		this.trading = true;
 		this.ships.add(0, 1);
-		Telegram.send(this.chat_id, "Учёные смогли починить твой корабль, теперь у тебя есть 1 Грузовик");
+		Telegram.send(this.chat_id, "Поздравляем, теперь тебе доступна 💸Торговля на 📈Бирже.\n" +
+		"А ещё учёные смогли починить твой корабль, и теперь у тебя есть 1 Грузовик");
 	}
 	more_taxes() {
 		this.facility.taxes *= 2;
 	}
 	upgrade_capacity() {
+		Telegram.send(this.chat_id, "Поздравляем, макстимальное количество хранимой 🍍еды - удвоилось");
 		this.storage.mult *= 2;
 	}
 	
@@ -341,7 +348,7 @@ class Planet {
 		return `Всего кораблей: ${this.totalShips()}/${this.maxShips()}\n`;
 	}
 	navyInfo() {
-		if (this.spaceyard.level > 0) {
+		if (this.trading) {
 			let msg = this.shipsCountInfo() + "\n";
 			//msg += this.shipsCountInfo();
 			if (this.spaceyard.ship_id >= 0) {
@@ -369,8 +376,8 @@ class Planet {
 		return msg;
 	}
 	initExpedition(item) {
-		if (this.spaceyard.level == 0) {
-			Telegram.send(this.chat_id, "Необходимо построить 🏗Верфь");
+		if (!this.trading) {
+			Telegram.send(this.chat_id, "Необходимо исследовать торговлю");
 			return false;
 		}
 		if (this.ships.totalResources() > 0) {
@@ -536,7 +543,7 @@ class Planet {
 		}
 	}
 	navyUnload() {
-		if (this.spaceyard.level > 0) {
+		if (this.trading) {
 			if (this.ships.money == 0 && this.ships.totalResources() == 0) {
 				Telegram.send(this.chat_id, "В трюме пусто");
 				return;
@@ -557,7 +564,7 @@ class Planet {
 			}
 			Telegram.send(this.chat_id, "📤Разгрузка успешно выполнена: " + msg);
 		} else {
-			Telegram.send(this.chat_id, "Необходимо построить 🏗Верфь");
+			Telegram.send(this.chat_id, "Необходимо исследовать торговлю");
 		}
 	}
 	createShip(si) {
