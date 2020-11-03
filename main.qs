@@ -457,9 +457,9 @@ function processMiningButton(chat_id, msg_id, button) {
 		switch (MiningGames.get(chat_id).move(ind+1)) {
 			case 1:
 				Planets.get(chat_id).money += MiningGames.get(chat_id).pl.money;
-				mining_ok++;
-				mining_money_all += MiningGames.get(chat_id).pl.money;
-				mining_money_max = Math.max(mining_money_max, MiningGames.get(chat_id).pl.money);
+				Statistica.mining_ok++;
+				Statistica.mining_money_all += MiningGames.get(chat_id).pl.money;
+				Statistica.mining_money_max = Math.max(Statistica.mining_money_max, MiningGames.get(chat_id).pl.money);
 				let finishMsg = "Вы выбрались из подземелья!\n";
 				finishMsg +="Денег собрано:";
 				finishMsg +=`${MiningGames.get(chat_id).pl.money}`;
@@ -474,7 +474,7 @@ function processMiningButton(chat_id, msg_id, button) {
 				deathMsg += "💰";
 				Telegram.edit(chat_id, msg_id, deathMsg);
 				MiningGames.delete(chat_id);
-				mining_fail++;
+				Statistica.mining_fail++;
 			break;
 			case 0:
 			Telegram.edit(chat_id, msg_id, "Подземелье.\n" + MiningGames.get(chat_id).show(), miningButtons, 3);
