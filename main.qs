@@ -2,9 +2,15 @@ include("statistic.qs")
 include("planet.qs")
 include("mininig.qs")
 
+console.clear();
 	for (const s of ShipModels()) {
 		print(s.name(), s.hp);
 	}
+	let sh = new CruiserShip(), sh2 = new InterceptorShip();
+	sh.count = 1;
+	sh2.count = 4;
+	for (let z = 0; z < 10; ++z)
+		sh.hitTo(sh2);
 
 const isProduction = false;
 const NPC_count = isProduction ? 2 : 3;
