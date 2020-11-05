@@ -18,9 +18,45 @@ class Ship {
 	
 	health  () {return 1;}
 	attack  () {return 0;}
-	defence () {return 0;}
-	damage  () {return {b:1, d:8}}
+	defence () {return 10;}
+	damage  () {return {x: 1, d: 8}}
 	armor   () {return 0;} // damage reduction
+	
+	criticalMissD() {return 1;}
+	criticalHitD () {return 20;}
+	criticalHitX () {return 2;} // x2
+	
+	roll      (d) {return getRandom(d) + 1;}
+	baseRoll   () {return this.roll(20);}
+	damageRoll () {return getRandom((this.damage().d - 1) * this.damage().x + 1) + this.damage().x;}
+	
+	hitTo(ship) {
+		let thisAR = this.baseRoll();
+		let dam = this.damageRoll();
+		let hit = false;
+		let msg = `${this.name()} attack ${ship.name()} (roll ${thisAR}): `;
+		if (thisAR >= this.criticalHitD()) {
+			hit = true;
+			dam *= this.criticalHitX();
+			msg += `critical hit x${this.criticalHitX()}`;
+		} else if (thisAR <= this.criticalMissD()) {
+			msg += `critical miss`;
+		} else if ((thisAR + this.attack()) >= ship.defence()) {
+			hit = true;
+			msg += `hit`;
+		} else {
+			msg += `miss`;
+		}
+		if (hit) {
+			dam = Math.max(0, dam * ship.armor());
+			ship.hp -= dam;
+			msg += `: ${dam}`;
+			if (ship.hp <= 0) {
+				msg += `\n  ${ship.name()} destroyed`
+			}
+		}
+		print(msg);
+	}
 	
 	info(detail) {
 		let msg = `<b>${this.name()}:</b> ${this.count} шт.\n`
