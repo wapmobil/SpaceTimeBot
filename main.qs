@@ -2,8 +2,11 @@ include("statistic.qs")
 include("planet.qs")
 include("mininig.qs")
 
+	for (const s of ShipModels()) {
+		print(s.name(), s.hp);
+	}
 
-const isProduction = true;
+const isProduction = false;
 const NPC_count = isProduction ? 2 : 3;
 
 buttonLoad["clicked()"].connect(on_buttonLoad_clicked);
@@ -71,13 +74,14 @@ Telegram["disconnected"].connect(telegramDisconnect);
 //Telegram["messageSent"].connect(telegramSent);
 
 if (isProduction) {
-	Telegram.start(SHS.load(77));
+//	Telegram.start(SHS.load(77));
 	buttonReset.enabled = false;
 	buttonLoad.enabled = false;
 } else {
 	buttonReset.enabled = true;
-	Telegram.start("733272349:AAG1nSh_O8B1wszI46tymwnbXtGqg3LGSXA");
+//	Telegram.start("733272349:AAG1nSh_O8B1wszI46tymwnbXtGqg3LGSXA");
 }
+
 
 
  // Здесь вся БД
