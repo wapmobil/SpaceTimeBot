@@ -18,6 +18,7 @@ var PlanetStats = new Map();
 
 function statisticStep() {
 	players = Planets.size;
+	stock_items_all = GlobalMarket.items.size;
 	for (const key in Statistica) {
 		this[key] = Statistica[key];
 		Statistica[key] = 0;

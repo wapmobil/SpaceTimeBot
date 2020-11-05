@@ -117,6 +117,7 @@
        <string>mining_ok=mining ok</string>
        <string>mining_money_all=mining money all</string>
        <string>mining_money_max=mining money max</string>
+       <string>stock_items_all=stocks_active</string>
       </stringlist>
      </property>
     </widget>

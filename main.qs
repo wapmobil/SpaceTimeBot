@@ -605,10 +605,10 @@ function processTradeNPC() {
 			else GlobalMarket.removeItem(v.id);
 		}
 		NPCstock[j].buy = b;
-		while (NPCstock[j].sell.length < 4) {
+		while (NPCstock[j].sell.length < 3) {
 			NPCstock[j].add(true, getRandom(Resources.length), (2*j*j+1)*(getRandom(10)+1), 50+getRandom(100));
 		}
-		while (NPCstock[j].buy.length < 4) {
+		while (NPCstock[j].buy.length < 3) {
 			NPCstock[j].add(false, getRandom(Resources.length), (2*j*j+1)*(getRandom(10)+1), 50+getRandom(100));
 		}
 		//print(NPCstock[j].info().msg);

@@ -96,9 +96,11 @@ class Planet {
 				if(b > 0) msg += `(📈 ${getResourceCount(i, b)})`;
 				msg += '\n';
 			}
-			msg += `Склад: ${this.totalResources()}/${this.storage.capacityProd(this.storage.level)}📦\n`
+			const bs = this.stock.reservedStorage();
+			msg += `Склад: ${this.totalResources()+bs}/${this.storage.capacityProd(this.storage.level)}📦`;
+			if (bs > 0) msg += ` (📈 ${bs})`;
 		}
-		return msg;
+		return msg + "\n";
 	}
 	resourceCount(res) {
 		return this[Resources[res].name] - this.stock.reserved(res);
