@@ -30,7 +30,7 @@ Telegram.addCommand("💸Торговля/📈Биржа ресурсов/ℹ️
 Telegram.addCommand("💸Торговля/📈Биржа ресурсов/🖥Смотреть заявки", "show_stock");
 Telegram.addCommand("📖Инфоцентр/🌍Планета", "planet_info");
 Telegram.addCommand("📖Инфоцентр/💻Дерево исследований", "research_map");
-//Telegram.addCommand("📖Инфоцентр/🌌Сканер планет", "map_info");
+Telegram.addCommand("📖Инфоцентр/Статистика", "stat_info");
 Telegram.addCommand("✈️Флот/📖Инфо", "navy_info");
 Telegram.addCommand("✈️Флот/📤Разгрузить", "navy_unload");
 Telegram.addCommand("✈️Флот/🏗Строительство ✈Кораблей", "ship_price");
@@ -272,8 +272,7 @@ function research(chat_id) {
 function map_info(chat_id) {
 	const p = Planets.get(chat_id);
 	if (p.facility.level >= 1) {
-		let msg = `Всего планет ${Planets.size}\n`;
-		msg += "Список планет:\n";
+		let msg = "Список планет:\n";
 		for (var [key, value] of Planets) {
 			if (value.facility.level == 0) continue;
 			if (key == chat_id) msg += "Ты: ";
@@ -296,6 +295,12 @@ function map_info(chat_id) {
 	} else {
 		Telegram.send(chat_id, "Требуется 🏢База 1 уровня");
 	}
+}
+
+function stat_info(chat_id) {
+	let msg = `Всего планет ${Planets.size}\n`;
+	msg += `Заявок в маркете ${GlobalMarket.items.size}\n`
+	Telegram.send(chat_id, msg);
 }
 
 function research_map(chat_id) {
