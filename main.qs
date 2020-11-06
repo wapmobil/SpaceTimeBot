@@ -3,6 +3,8 @@ include("planet.qs")
 include("mininig.qs")
 
 console.clear();
+
+function testCombat() {
 	for (const s of ShipModels()) {
 		print(s.name(), s.hp);
 	}
@@ -11,8 +13,9 @@ console.clear();
 	sh2.count = 4;
 	for (let z = 0; z < 10; ++z)
 		sh.hitTo(sh2);
+}
 
-const isProduction = false;
+const isProduction = true;
 const NPC_count = isProduction ? 2 : 3;
 
 buttonLoad["clicked()"].connect(on_buttonLoad_clicked);
@@ -80,12 +83,12 @@ Telegram["disconnected"].connect(telegramDisconnect);
 //Telegram["messageSent"].connect(telegramSent);
 
 if (isProduction) {
-//	Telegram.start(SHS.load(77));
+	Telegram.start(SHS.load(77));
 	buttonReset.enabled = false;
 	buttonLoad.enabled = false;
 } else {
 	buttonReset.enabled = true;
-//	Telegram.start("733272349:AAG1nSh_O8B1wszI46tymwnbXtGqg3LGSXA");
+	Telegram.start("733272349:AAG1nSh_O8B1wszI46tymwnbXtGqg3LGSXA");
 }
 
 
@@ -652,7 +655,7 @@ function navy_unload(chat_id) {
 }
 
 function ship_price(chat_id) {
-	Telegram.send(chat_id, Planets.get(chat_id).infoResources() + ShipsDescription);
+	Telegram.send(chat_id, Planets.get(chat_id).infoResources() + Planets.get(chat_id).shipsCountInfo() + ShipsDescription);
 }
 
 

@@ -73,6 +73,11 @@ class Navy {
 		for(let j=0; j<this.m.length; j++) cnt += this.m[j].count;
 		return cnt;
 	}
+	size() {
+		let cnt = 0;
+		for(let j=0; j<this.m.length; j++) cnt += this.m[j].count * this.m[j].size();
+		return cnt;
+	}
 	split(nv) {
 		for(let j=0; j<this.m.length; j++) {
 			this.m[j].count -= nv.m[j].count;

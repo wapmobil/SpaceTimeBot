@@ -116,12 +116,12 @@ class Planet {
 		free -= this.stock.reservedStorage();
 		return free;
 	}
-	maxShips() {
+	maxShipsSize() {
 		return 10*this.facility.level + this.spaceyard.level;
 	}
-	totalShips() {
-		let cnt = this.ships.countAll();
-		for (const value of this.expeditions) cnt += value.countAll();
+	totalShipsSize() {
+		let cnt = this.ships.size();
+		for (const value of this.expeditions) cnt += value.size();
 		if (this.spaceyard.ship_id >= 0) cnt += 1;
 		return cnt;
 	}
@@ -351,7 +351,7 @@ class Planet {
 		this.money += cnt;
 	}
 	shipsCountInfo() {
-		return `Всего кораблей: ${this.totalShips()}/${this.maxShips()}\n`;
+		return `Слоты кораблей: ${this.totalShipsSize()}/${this.maxShipsSize()}\n`;
 	}
 	navyInfo() {
 		if (this.trading) {
@@ -586,7 +586,7 @@ class Planet {
 				Telegram.send(this.chat_id, `🏗Верфь уже занята сборкой ${this.ships.m[this.spaceyard.ship_id].name()}`);
 				return;
 			}
-			if (this.totalShips() < this.maxShips()) {
+			if (this.totalShipsSize() < this.maxShipsSize()) {
 				this.spaceyard.ship_id = si;
 				this.spaceyard.ship_bt = ns.price()*Resources.length;
 				for(let i=0; i<Resources.length; i++) this[Resources[i].name] -= ns.price();
