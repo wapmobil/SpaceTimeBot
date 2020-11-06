@@ -279,6 +279,7 @@ class MiningGame {
 				steps = ny - y;
 				break;
 			}
+			steps = Math.max(steps, 1);
 			//print("steps =", steps)
 		}
 		for (let s = 0; s < steps; s++) {
