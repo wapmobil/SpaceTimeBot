@@ -3,7 +3,7 @@ include("planet.qs")
 include("mininig.qs")
 
 
-const isProduction = true;
+const isProduction = false;
 const NPC_count = isProduction ? 2 : 3;
 
 buttonLoad["clicked()"].connect(on_buttonLoad_clicked);
@@ -152,9 +152,9 @@ function telegramButton(chat_id, msg_id, button, msg) {
 		let research_list = Planets.get(chat_id).sienceList();
 		//print(research_list);
 		if (research_list.indexOf(button) >= 0) {
-			Planets.get(chat_id).sienceStart(button);
+			Planets.get(chat_id).sienceStart(button, msg_id);
 		} else {
-			Telegram.send(chat_id, "Исследование недоступно");
+			Telegram.edit(chat_id, msg_id, "Исследование недоступно");
 		}
 	}
 	const tbi = TradeFoodButtons.indexOf(button);
@@ -181,6 +181,8 @@ function telegramButton(chat_id, msg_id, button, msg) {
 	if (msg.substring(0,s.length) == s) processStockAdd(chat_id, msg_id, button, msg);
 	s = "Начать экспедицию\n";
 	if (msg.substring(0,s.length) == s) processExpedition(chat_id, msg_id, button, msg);
+	s = "Биржа:\n";
+	if (msg.substring(0,s.length) == s) processStockFilter(chat_id, msg_id, button);
 }
 
 function telegramSent(chat_id, msg_id, msg) {
@@ -579,8 +581,14 @@ function processStockAdd(chat_id, msg_id, button) {
 
 function show_stock(chat_id) {
 	let msg = "Биржа:\n";
-	msg += GlobalMarket.info(chat_id);
-	Telegram.send(chat_id, msg);
+	msg += "Выберите тип заявки"; //GlobalMarket.info(chat_id);
+	Telegram.sendButtons(chat_id, msg, stockFilterButtons, 2);
+}
+
+function processStockFilter(chat_id, msg_id, button) {
+	let msg = "Биржа:\n";
+	msg += GlobalMarket.info(chat_id, button);
+	Telegram.edit(chat_id, msg_id, msg, stockFilterButtons, 2);
 }
 
 function help_stock(chat_id) {

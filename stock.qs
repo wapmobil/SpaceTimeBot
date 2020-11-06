@@ -19,7 +19,7 @@ class StockItem {
 		let msg = "";
 		if(this.is_sell) msg = `<b>Продаю:</b>\n`;
 		else msg = `<b>Куплю:</b>\n`;
-		msg += `    ${getResourceInfo(this.res, this.count)} за ${money2text(this.price*this.count)} (${money2text(this.price)} за ${getResourceCount(this.res, 1)})`;
+		msg += `    ${getResourceInfo(this.res, this.count)} за ${money2text(this.price*this.count)} (${money2text(this.price)}/${Resources_icons[this.res]})`;
 		if(ext && this.client != 0) msg += " 🔒";
 		return msg+"\n";
 	}
@@ -71,9 +71,16 @@ class Marketplace {
 			}
 		} else return true;
 	}
-	info(cid) {
+	info(cid, butt) {
 		let msg = "";
+		let r = -1;
+		if (butt) r = stockFilterButtons.indexOf(butt);
 		for (const v of this.items.values()) {
+			if (r >= 0 && r < Resources.length*2) {
+				if (!v.is_sell && r%2 == 0) continue;
+				if (v.is_sell && r%2 != 0) continue;
+				if (v.res != Math.floor(r/2)) continue;
+			}
 			if (v.client == 0 && v.owner != cid) msg += `<b>№${v.id} /go_${v.id} -> </b>${v.info()}`
 		}
 		return msg;
@@ -206,3 +213,14 @@ function createStockCountButtons() {
 	return arr;
 }
 const stockCountButtons = createStockCountButtons();
+
+function createStockFilterButtons() {
+	let arr = [];
+	for(let i=0; i<Resources.length; i++) {
+		arr.push(`Купить ${Resources_icons[i]}`);
+		arr.push(`Продать ${Resources_icons[i]}`);
+	}
+	arr.push("Все");
+	return arr;
+}
+const stockFilterButtons = createStockFilterButtons();

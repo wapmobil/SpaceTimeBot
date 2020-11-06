@@ -226,18 +226,18 @@ class Planet {
 	isSienceActive() {
 		return this.sience.some(r => r.time > 0);
 	}
-	sienceStart(s) {
+	sienceStart(s, msg_id) {
 		if (this.isSienceActive()) {
-			Telegram.send(this.chat_id, "Сейчас нельзя, исследование уже идёт");
+			Telegram.edit(this.chat_id, msg_id, "Сейчас нельзя, исследование уже идёт");
 			return;
 		}
 		const bs = SieceTree.find(r => r.name == s);
 		if (this.food <= bs.cost) {
-			Telegram.send(this.chat_id, "Недостаточно 🍍еды");
+			Telegram.edit(this.chat_id, msg_id, "Недостаточно 🍍еды");
 			return;
 		}
 		if (!this.hasMoney(bs.money)) {
-			Telegram.send(this.chat_id, "Недостаточно 💰денег");
+			Telegram.edit(this.chat_id, msg_id, "Недостаточно 💰денег");
 			return;
 		}
 		let ns = new Object();
@@ -247,7 +247,7 @@ class Planet {
 		this.food -= bs.cost;
 		this.money -= bs.money;
 		this.sience.push(ns);
-		Telegram.send(this.chat_id, "Исследование началось");
+		Telegram.edit(this.chat_id, msg_id, "Исследование началось");
 	}
 	fixSience() {
 		if (this.trading && this.ships.count(0) == 0 && this.expeditions.length == 0) {
