@@ -83,6 +83,7 @@ class Marketplace {
 			}
 			if (v.client == 0 && v.owner != cid) msg += `<b>№${v.id} /go_${v.id} -> </b>${v.info()}`
 		}
+		if (msg.length == 0) return "Заявок нет";
 		return msg;
 	}
 	get(id) {
