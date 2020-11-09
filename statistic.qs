@@ -15,12 +15,13 @@ var Statistica = {
 	};
 
 var PlanetStats = new Map();
+var globalThis = this;
 
 function statisticStep() {
 	players = Planets.size;
 	stock_items_all = GlobalMarket.items.size;
-	for (const key in Statistica) {
-		this[key] = Statistica[key];
+	for (const [key, value] of Object.entries(Statistica)) {
+		globalThis[key] = Statistica[key];
 		Statistica[key] = 0;
 	}
 	PlanetStats = new Map();

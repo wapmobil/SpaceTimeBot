@@ -1,4 +1,5 @@
 include("statistic.qs")
+
 include("planet.qs")
 include("mininig.qs")
 
@@ -636,10 +637,10 @@ function processTradeNPC() {
 			else GlobalMarket.removeItem(v.id);
 		}
 		NPCstock[j].buy = b;
-		while (NPCstock[j].sell.length < 3) {
+		while (NPCstock[j].sell.length < 2) {
 			NPCstock[j].add(true, getRandom(Resources.length), (2*j*j+1)*(getRandom(10)+1), 50+getRandom(100));
 		}
-		while (NPCstock[j].buy.length < 3) {
+		while (NPCstock[j].buy.length < 2) {
 			NPCstock[j].add(false, getRandom(Resources.length), (2*j*j+1)*(getRandom(10)+1), 50+getRandom(100));
 		}
 		//print(NPCstock[j].info().msg);
@@ -659,7 +660,7 @@ function ship_price(chat_id) {
 }
 
 
-function mining_info(chat_id){
+function mining_info(chat_id) {
 		Telegram.send(chat_id,
 			"Справка по добыче в подземелье.\n"+
 			"Основная цель - добыча денег💰, но засчитывается только если дойти до финиша🚪.\n"+
