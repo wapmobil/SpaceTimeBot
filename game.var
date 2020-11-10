@@ -10,3 +10,4 @@ mining_ok = {1 y} #s
 mining_money_all = {1 y} #s 
 mining_money_max = {1 y} #s 
 stock_items_all = {1 y} #s 
+dayly_players = {1 y} #s 

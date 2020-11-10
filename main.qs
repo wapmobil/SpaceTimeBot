@@ -1,5 +1,4 @@
 include("statistic.qs")
-
 include("planet.qs")
 include("mininig.qs")
 
@@ -262,7 +261,7 @@ function ship_create1(chat_id) {ship_create(chat_id, 1);}
 function find_money(chat_id) {
 	Statistica.mining++;
 	MiningGames.set(chat_id, new MiningGame(chat_id));
-	Telegram.sendButtons(chat_id, "Подземелье.\n" + MiningGames.get(chat_id).show(), miningButtons, 5);
+	Telegram.sendButtons(chat_id, "Подземелье.\n" + MiningGames.get(chat_id).show(), miningButtons, 3);
 	//let pr = getRandom(3);
 	//pr *= p.facility.level*p.facility.level+1;
 	//pr += getRandom(3);
@@ -503,7 +502,7 @@ function processMiningButton(chat_id, msg_id, button) {
 				Statistica.mining_fail++;
 			break;
 			case 0:
-			Telegram.edit(chat_id, msg_id, "Подземелье.\n" + MiningGames.get(chat_id).show(), miningButtons, 5);
+			Telegram.edit(chat_id, msg_id, "Подземелье.\n" + MiningGames.get(chat_id).show(), miningButtons, 3);
 			break;
 		}
 	}
@@ -638,10 +637,10 @@ function processTradeNPC() {
 		}
 		NPCstock[j].buy = b;
 		while (NPCstock[j].sell.length < 2) {
-			NPCstock[j].add(true, getRandom(Resources.length), (2*j*j+1)*(getRandom(10)+1), 50+getRandom(100));
+			NPCstock[j].add(true, getRandom(Resources.length), (2*j*j+1)*(getRandom(25)+1), 100+getRandom(100));
 		}
 		while (NPCstock[j].buy.length < 2) {
-			NPCstock[j].add(false, getRandom(Resources.length), (2*j*j+1)*(getRandom(10)+1), 50+getRandom(100));
+			NPCstock[j].add(false, getRandom(Resources.length), (2*j*j+1)*(getRandom(25)+1), 100+getRandom(100));
 		}
 		//print(NPCstock[j].info().msg);
 	}

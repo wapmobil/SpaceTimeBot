@@ -33,10 +33,10 @@ class Ship {
 	
 	hitTo(ship) {
 		if (ship.count <= 0) return;
-		let thisAR = this.baseRoll();
+		const thisAR = this.baseRoll();
 		let dam = this.damageRoll();
 		let hit = false;
-		let msg = `${this.name()} attack ${ship.name()} (roll ${thisAR}): `;
+		let msg = `${this.name()} ⚔️ ${ship.name()} (roll ${thisAR}): `;
 		if (thisAR >= this.crit().hit) {
 			hit = true;
 			dam *= this.crit().x;
@@ -110,7 +110,7 @@ class SmallShip extends Ship {
 	health  () {return 10;}
 	attack  () {return 1;}
 	defence () {return 10;}
-	damage  () {return {x: 1, d: 2}}
+	damage  () {return {x: 1, d: 4}}
 	armor   () {return 2;}
 }
 
@@ -186,7 +186,8 @@ const ShipsDescription = function() {
 		msg += `  вместимость: ${s.capacity()}📦\n`;
 		msg += `  энергия пуска: ${s.energy()}🔋\n`;
 		msg += `  ${s.health()}❤️ ${s.attack()}⚔️ ${s.defence()}🛡\n`;
-		msg += `  ${s.damage().x}d${s.damage().d}🗡 ${s.armor()}🚅`;
+		msg += `  ${s.damage().x}d${s.damage().d}🗡 ${s.armor()}👕\n`;
+		msg += "  стоимость: ";
 		for (let i = 0; i < Resources.length; i++) msg += getResourceCount(i, s.price());
 		msg += "\n";
 		msg += `  время строительства: ${time2text(s.price()*Resources.length)}\n`;

@@ -9,7 +9,7 @@ class Storage extends Building {
 		else return Math.floor((Math.sqrt(lvl)*lvl-10))*20000*this.mult;
 	}
 	capacityProd(lvl) {
-		return Math.floor(lvl*lvl/40+lvl)*10;
+		return Math.floor(lvl*lvl/40+lvl)*10*this.mult;
 	}
 	cost() {
 		return (this.level*this.level+1)*100;

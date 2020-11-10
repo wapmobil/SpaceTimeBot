@@ -250,13 +250,14 @@ class Planet {
 		Telegram.edit(this.chat_id, msg_id, "Исследование началось");
 	}
 	fixSience() {
-		if (this.trading && this.ships.count(0) == 0 && this.expeditions.length == 0) {
-			this.ships.m[0].count = 1;
-		}
-		if (this.facility.level >= this.farm.level && this.facility.level > 0) {
-			this.food = Math.max(this.food, 100000, this.storage.capacity(this.storage.level));
-			this.farm.level = this.facility.level+1;
-		}
+		//if (this.trading && this.ships.count(0) == 0 && this.expeditions.length == 0) {
+		//	this.ships.m[0].count = 1;
+		//}
+		//if (this.facility.level >= this.farm.level && this.facility.level > 0) {
+		//	this.food = Math.max(this.food, 100000, this.storage.capacity(this.storage.level));
+		//	this.farm.level = this.facility.level+1;
+		//}
+		if (!this.hasMoney(0)) this.money += 2000;
 		//this.energy_eco = 1;
 		//this.build_speed = 1;
 		//this.food = this.money;
@@ -464,7 +465,7 @@ class Planet {
 			return;
 		}
 		if (si.is_sell) {
-			if (this.money < si.price * si.count) {
+			if (!this.hasMoney(si.price * si.count)) {
 				Telegram.edit(this.chat_id, msg_id, "Не хватает 💰");
 				return;
 			}
