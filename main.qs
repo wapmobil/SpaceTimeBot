@@ -15,7 +15,7 @@ function testCombat() {
 		sh.hitTo(sh2);
 }
 
-const isProduction = true;
+const isProduction = false;
 const NPC_count = isProduction ? 2 : 3;
 
 buttonLoad["clicked()"].connect(on_buttonLoad_clicked);
@@ -43,12 +43,14 @@ Telegram.addCommand("💸Торговля/📈Биржа ресурсов/🖥С
 Telegram.addCommand("📖Инфоцентр/🌍Планета", "planet_info");
 Telegram.addCommand("📖Инфоцентр/💻Дерево исследований", "research_map");
 Telegram.addCommand("📖Инфоцентр/Статистика", "stat_info");
+Telegram.addCommand("✈️Флот", "navy_info");
 Telegram.addCommand("✈️Флот/📖Инфо", "navy_info");
 Telegram.addCommand("✈️Флот/📤Разгрузить", "navy_unload");
 Telegram.addCommand("✈️Флот/🏗Строительство ✈Кораблей", "ship_price");
 Telegram.addCommand("✈️Флот/🏗Строительство ✈Кораблей/🏗Cтроить Грузовик", "ship_create0");
 Telegram.addCommand("✈️Флот/🏗Строительство ✈Кораблей/🏗Cтроить Малютку", "ship_create1");
 Telegram.addCommand("✈️Флот/ℹ️Cправка", "help_ships");
+//Telegram.addCommand("✈️Флот/☄️Экспедиция", "start_expedition");
 Telegram.addCommand("🛠Строительство/📖Инфо", "planet_info");
 Telegram.addCommand("🛠Строительство/🍍Ферма", "info_farm");
 Telegram.addCommand("🛠Строительство/🍍Ферма/📖Инфо", "info_farm");
@@ -108,6 +110,7 @@ timer.start(1000);
 save_timer.start(timer.interval*100);
 tradeNPCtimer.start(timer.interval*1000);
 processTradeNPC();
+//statisticStep();
 
 function telegramConnect() {
 	Telegram.sendAll("Server <b>started</b>");
@@ -314,7 +317,17 @@ function map_info(chat_id) {
 
 function stat_info(chat_id) {
 	let msg = `Всего планет ${Planets.size}\n`;
-	msg += `Заявок в маркете ${GlobalMarket.items.size}\n`
+	msg += `Заявок в маркете ${GlobalMarket.items.size}\n`;
+	let arr = new Array();
+	let money = 0;
+	for(let i=0; i<Resources.length; i++) arr.push(0);
+	for (var [key, value] of Planets) {
+		for(let i=0; i<Resources.length; i++) arr[i] += value[Resources[i].name];
+		money += value.money;
+	}
+	msg += "Всего ресурсов:\n";
+	for(let i=0; i<Resources.length; i++) msg += getResourceInfo(i, arr[i]) + "\n";
+	msg += `Деньги: ${money2text(money)}\n`;
 	Telegram.send(chat_id, msg);
 }
 
@@ -617,7 +630,7 @@ function help_ships(chat_id) {
 	let msg = "Справка о кораблях:\n";
 	msg += "Каждый тип корабля имеет свои характеристики: объём 📦трюма, расход 🔋энергии и т.п.\n";
 	msg += "Постройка корабля осуществляется исключительно за ресурсы " + Resources_desc + "\n";
-	msg += "Максимальное количество кораблей ограничено и зависит от уровня Ангара, а также 🏢Базы и 🏗Верфи .\n";
+	msg += "Максимальное количество слотов кораблей ограничено и зависит от уровня 🏢Базы и 🏗Верфи .\n";
 	Telegram.send(chat_id, msg);
 }
 
@@ -636,11 +649,11 @@ function processTradeNPC() {
 			else GlobalMarket.removeItem(v.id);
 		}
 		NPCstock[j].buy = b;
-		while (NPCstock[j].sell.length < 2) {
-			NPCstock[j].add(true, getRandom(Resources.length), (2*j*j+1)*(getRandom(25)+1), 100+getRandom(100));
+		while (NPCstock[j].sell.length < 4) {
+			NPCstock[j].add(true, getRandom(Resources.length), (2*j*j+1)*(getRandom(20)+1), 100+getRandom(100));
 		}
-		while (NPCstock[j].buy.length < 2) {
-			NPCstock[j].add(false, getRandom(Resources.length), (2*j*j+1)*(getRandom(25)+1), 100+getRandom(100));
+		while (NPCstock[j].buy.length < 4) {
+			NPCstock[j].add(false, getRandom(Resources.length), (2*j*j+1)*(getRandom(20)+1), 50+getRandom(100));
 		}
 		//print(NPCstock[j].info().msg);
 	}
@@ -671,3 +684,7 @@ function mining_info(chat_id) {
 			"Типы монстров:\n  🐀Крыса - 1❤, ~3💰\n  🦇Летучая мышь - 2❤, ~5💰\n  👽Чужой - 3❤, ~10💰\n"+
 			"Не спешите жать кнопки, telegram это не одобряет...");
 	}
+
+function start_expedition(chat_id) {
+	Telegram.send(chat_id, "В разработке...");
+}

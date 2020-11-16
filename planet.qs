@@ -429,8 +429,12 @@ class Planet {
 		const btns = this.ships.buttons();
 		const bid = btns.indexOf(button);
 		if (bid == -1)  {
-			print(btns, button, bid);
-			Telegram.send(this.chat_id, "Ошибка");
+			print(btns,  button, bid);
+			Telegram.edit(this.chat_id, msg_id, "Ошибка");
+			return;
+		}
+		if (!GlobalMarket.get(tmpNavy.get(this.chat_id).aim)) {
+			Telegram.edit(this.chat_id, msg_id, "Ошибка, заявка уже не существует");
 			return;
 		}
 		const id = sinds[bid];
@@ -504,7 +508,7 @@ class Planet {
 			this.ships.split(nv);
 			this.expeditions.push(nv);
 			tmpNavy.delete(this.chat_id);
-			Statistica.expeditions++;
+			Statistica.expeditions_total++;
 			Telegram.edit(this.chat_id, msg_id, "Экспедиция успешно отправлена!");
 		} else {
 			Telegram.edit(this.chat_id, msg_id, "Ошибка, заявка уже не существует");

@@ -89,7 +89,7 @@ class TradeShip extends Ship {
 	name() {return "Грузовик";}
 	description() {return "Торговый корабль";}
 	size    () {return 2;}
-	capacity() {return 25;}
+	capacity() {return 30;}
 	price   () {return 100;}
 	energy  () {return 100;}
 	
@@ -125,7 +125,7 @@ class InterceptorShip extends Ship {
 	health  () {return 40;}
 	attack  () {return 6;}
 	defence () {return 18;}
-	damage  () {return {x: 4, d: 10}}
+	damage  () {return {x: 1, d: 10}}
 	armor   () {return 3;}
 }
 
@@ -140,7 +140,7 @@ class CorvetteShip extends Ship {
 	health  () {return 150;}
 	attack  () {return 3;}
 	defence () {return 15;}
-	damage  () {return {x: 2, d: 20}}
+	damage  () {return {x: 2, d: 14}}
 	armor   () {return 4;}
 }
 
@@ -155,7 +155,7 @@ class FrigateShip extends Ship {
 	health  () {return 250;}
 	attack  () {return 4;}
 	defence () {return 14;}
-	damage  () {return {x: 3, d: 20}}
+	damage  () {return {x: 1, d: 20}}
 	armor   () {return 6;}
 }
 
@@ -176,7 +176,7 @@ class CruiserShip extends Ship {
 
 
 function ShipModels() {return [new TradeShip(), new SmallShip(), new InterceptorShip(),
-							   new CorvetteShip(), new FrigateShip(), new CruiserShip()]};
+							   new CorvetteShip(), new FrigateShip(), new CruiserShip()]}
 
 const ShipsDescription = function() {
 	let msg = "\n<b> ✈️ Модели кораблей ✈️ </b>\n";
@@ -194,3 +194,50 @@ const ShipsDescription = function() {
 	}
 	return msg;
 }();
+
+class EnemyJunior extends Ship {
+	name() {return "EnemyJunior";}
+	description() {return "";}
+	size    () {return 1;}
+	capacity() {return 0;}
+	price   () {return 0;}
+	energy  () {return 0;}
+	
+	health  () {return 10;}
+	attack  () {return 1;}
+	defence () {return 10;}
+	damage  () {return {x: 1, d: 8}}
+	armor   () {return 2;}
+}
+
+class EnemyMiddle extends Ship {
+	name() {return "EnemyMiddle";}
+	description() {return "";}
+	size    () {return 1;}
+	capacity() {return 0;}
+	price   () {return 0;}
+	energy  () {return 0;}
+	
+	health  () {return 100;}
+	attack  () {return 4;}
+	defence () {return 12;}
+	damage  () {return {x: 1, d: 20}}
+	armor   () {return 5;}
+}
+
+class EnemySenior extends Ship {
+	name() {return "EnemySenior";}
+	description() {return "";}
+	size    () {return 1;}
+	capacity() {return 0;}
+	price   () {return 0;}
+	energy  () {return 0;}
+	
+	health  () {return 1000;}
+	attack  () {return 10;}
+	defence () {return 20;}
+	damage  () {return {x: 5, d: 20}}
+	armor   () {return 10;}
+}
+
+function enemyShips() {return [new EnemyJunior(), new EnemyMiddle(), new EnemySenior()]}

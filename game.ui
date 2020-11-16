@@ -111,13 +111,15 @@
        <string>active_players=active</string>
        <string>messages=messages</string>
        <string>mining=mining</string>
-       <string>expeditions=expeditions</string>
+       <string>expeditions_total=expeditions</string>
        <string>stock_items=stocks</string>
        <string>mining_fail=mining fail</string>
        <string>mining_ok=mining ok</string>
        <string>mining_money_all=mining money all</string>
        <string>mining_money_max=mining money max</string>
        <string>stock_items_all=stocks_active</string>
+       <string>dayly_players=players_day</string>
+       <string>money_total=total money</string>
       </stringlist>
      </property>
     </widget>
