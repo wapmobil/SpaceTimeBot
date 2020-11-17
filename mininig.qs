@@ -344,9 +344,6 @@ class MiningGame {
 	}
 }
 
-var miningButtons	  = ["⇐", "↑" , "⇑",
-						 "←", "🧨", "→",
-						 "⇓", "↓" , "⇒"];
-var miningButtonsRole = [11,  0, 10,
-						  1,  4,  3,
-						 12,  2, 13];
+var miningButtons	  = [[{button: "⇐", data: 11, script: "processMiningButton"}, {button: "↑", data: 0, script: "processMiningButton"}, {button: "⇑", data: 10, script: "processMiningButton"}],
+						 [{button: "←", data:  1, script: "processMiningButton"}, {button: "🧨", data: 4, script: "processMiningButton"}, {button: "→", data:  3, script: "processMiningButton"}],
+						 [{button: "⇓", data: 12, script: "processMiningButton"}, {button: "↓", data: 2, script: "processMiningButton"}, {button: "⇒", data: 13, script: "processMiningButton"}]];

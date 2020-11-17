@@ -418,18 +418,16 @@ class Planet {
 			nv[Resources[item.res].name] = item.count;
 		}
 		tmpNavy.set(this.chat_id, nv);
-		Telegram.sendButtons(this.chat_id, this.expeditionInfo(), this.ships.buttons().concat(["Отправить"]), 2);
+		Telegram.send(this.chat_id, this.expeditionInfo(), this.ships.buttons().concat([{button: "Отправить", script: "processExpedition"}]));
 	}
-	prepareExpedition(msg_id, button) {
-		if (button == "Отправить") {
+	prepareExpedition(msg_id, data) {
+		if (data == "Отправить") {
 			this.startExpedition(msg_id);
 			return;
 		}
-		const sinds = this.ships.indexes();
-		const btns = this.ships.buttons();
-		const bid = btns.indexOf(button);
-		if (bid == -1)  {
-			print(btns,  button, bid);
+		const sid = data.split(" ");
+		if (sid.length != 2)  {
+			print(sid,  data);
 			Telegram.edit(this.chat_id, msg_id, "Ошибка");
 			return;
 		}
@@ -437,7 +435,8 @@ class Planet {
 			Telegram.edit(this.chat_id, msg_id, "Ошибка, заявка уже не существует");
 			return;
 		}
-		const id = sinds[bid];
+		const id = [parseInt(sid[0]), parseInt(sid[1])];
+		//print(data, id, sid);
 		if (id[1] > 0) {
 			if (tmpNavy.get(this.chat_id).count(id[0]) < this.ships.count(id[0])) {
 				tmpNavy.get(this.chat_id).add(id[0], id[1]);
@@ -447,11 +446,15 @@ class Planet {
 				tmpNavy.get(this.chat_id).remove(id[0], -id[1]);
 			} else return;
 		}
-		Telegram.edit(this.chat_id, msg_id, this.expeditionInfo(), btns.concat(["Отправить"]), 2);
+		Telegram.edit(this.chat_id, msg_id, this.expeditionInfo(), this.ships.buttons().concat([{button: "Отправить", script: "processExpedition"}]));
 	}
 	startExpedition(msg_id) {
 		let nv = tmpNavy.get(this.chat_id);
-		if (!nv) return;
+		if (!nv) {
+			Telegram.edit(this.chat_id, msg_id, "Ошибка");
+			print("error");
+			return;
+		}
 		nv.money = 0;
 		for(let i=0; i<Resources.length; i++) nv[Resources[i].name] = 0;
 		const si = GlobalMarket.get(nv.aim);

@@ -25,8 +25,9 @@ pushButton["clicked()"].connect(on_pushButton_clicked);
 let save_timer = new QTimer();
 save_timer["timeout"].connect(on_buttonSave_clicked);
 
-let tradeNPCtimer = new QTimer();
-tradeNPCtimer["timeout"].connect(processTradeNPC);
+Cron.removeAll();
+Cron.addSchedule("*/10 * * * * *", "processTradeNPC")
+Cron.addSchedule("*/5 * * * * *", "statisticStep")
 
 Telegram.clearCommands();
 Telegram.disablePassword();
@@ -76,7 +77,7 @@ Telegram.addCommand("🛠Строительство/🏗Верфь/🛠Cтрои
 Telegram.addCommand("🛠Строительство/🏗Верфь/🏗Строительство ✈Кораблей", "ship_price");
 Telegram.addCommand("🛠Строительство/🏗Верфь/🏗Строительство ✈Кораблей/🏗Cтроить Грузовик", "ship_create0");
 Telegram.addCommand("🛠Строительство/🏗Верфь/🏗Строительство ✈Кораблей/🏗Cтроить Малютку", "ship_create1");
-Telegram["receiveCommand"].connect(function(id, cmd, script) {this[script](id);});
+
 Telegram["receiveMessage"].connect(received);
 Telegram["receiveSpecialMessage"].connect(receivedSpecial);
 Telegram["buttonPressed"].connect(telegramButton);
@@ -90,7 +91,7 @@ if (isProduction) {
 	buttonLoad.enabled = false;
 } else {
 	buttonReset.enabled = true;
-	Telegram.start("733272349:AAG1nSh_O8B1wszI46tymwnbXtGqg3LGSXA");
+	Telegram.start("733272349:AAEHpMUGv0sV1JRcVS1aR8fWXIH5HpPapAQ");
 }
 
 
@@ -108,8 +109,7 @@ let timer = new QTimer();
 timer["timeout"].connect(timerDone);
 timer.start(1000);
 save_timer.start(timer.interval*100);
-tradeNPCtimer.start(timer.interval*1000);
-processTradeNPC();
+processTradeNPC(true);
 //statisticStep();
 
 function telegramConnect() {
@@ -173,32 +173,6 @@ function telegramButton(chat_id, msg_id, button, msg) {
 			Telegram.edit(chat_id, msg_id, "Исследование недоступно");
 		}
 	}
-	const tbi = TradeFoodButtons.indexOf(button);
-	if (tbi >= 0) {
-		s = "Покупка 🍍еды:\n";
-		if (msg.substring(0,s.length) == s) {
-			Planets.get(chat_id).buyFood(Math.pow(10,Math.floor(tbi)+2));
-			Telegram.edit(chat_id, msg_id, s + Planets.get(chat_id).infoResources(false) + buyFoodFooter, TradeFoodButtons, 2);
-		}
-	}
-	const rbi = TradeButtons.indexOf(button);
-	if (rbi >= 0) {
-		s = "Продажа ресурсов:\n";
-		if (msg.substring(0,s.length) == s) {
-			Planets.get(chat_id).sellResources(rbi%3, Math.pow(10,Math.floor(rbi/3)));
-			Telegram.edit(chat_id, msg_id, s + Planets.get(chat_id).infoResources(true) + sellResFooter, TradeButtons, Resources.length);
-		}
-	}
-	s = "Подземелье.\n";
-	if (msg.substring(0,s.length) == s) processMiningButton(chat_id, msg_id, button);
-	s = "Мои заявки:\n";
-	if (msg.substring(0,s.length) == s) processStockRemove(chat_id, msg_id, button);
-	s = "Создание заявки:";
-	if (msg.substring(0,s.length) == s) processStockAdd(chat_id, msg_id, button, msg);
-	s = "Начать экспедицию\n";
-	if (msg.substring(0,s.length) == s) processExpedition(chat_id, msg_id, button, msg);
-	s = "Биржа:\n";
-	if (msg.substring(0,s.length) == s) processStockFilter(chat_id, msg_id, button);
 }
 
 function telegramSent(chat_id, msg_id, msg) {
@@ -264,7 +238,7 @@ function ship_create1(chat_id) {ship_create(chat_id, 1);}
 function find_money(chat_id) {
 	Statistica.mining++;
 	MiningGames.set(chat_id, new MiningGame(chat_id));
-	Telegram.sendButtons(chat_id, "Подземелье.\n" + MiningGames.get(chat_id).show(), miningButtons, 3);
+	Telegram.send(chat_id, "Подземелье.\n" + MiningGames.get(chat_id).show(), miningButtons);
 	//let pr = getRandom(3);
 	//pr *= p.facility.level*p.facility.level+1;
 	//pr += getRandom(3);
@@ -280,7 +254,7 @@ function find_money(chat_id) {
 function research(chat_id) {
 	const p = Planets.get(chat_id);
 	if (p.facility.level > 1) {
-		Telegram.sendButtons(chat_id, "Доступные исследования:\n" + p.sienceListExt(), p.isSienceActive() ? [] : p.sienceList());
+		Telegram.send(chat_id, "Доступные исследования:\n" + p.sienceListExt(), p.isSienceActive() ? [] : p.sienceList());
 	} else {
 		Telegram.send(chat_id, "Требуется 🏢База 2 уровня");
 	}
@@ -454,38 +428,52 @@ function check_trading(chat_id) {
 }
 
 function buy_food(chat_id) {
-	Telegram.sendButtons(chat_id, "Покупка 🍍еды:\n" + Planets.get(chat_id).infoResources(false) + buyFoodFooter, TradeFoodButtons, 2);
+	Telegram.send(chat_id, "Покупка 🍍еды:\n" + Planets.get(chat_id).infoResources(false) + buyFoodFooter, TradeFoodButtons);
 }
 
 function sell_resources(chat_id) {
-	const p = Planets.get(chat_id);
-	Telegram.sendButtons(chat_id, "Продажа ресурсов:\n" + p.infoResources(true) + sellResFooter, TradeButtons, Resources.length);
+	Telegram.send(chat_id, "Продажа ресурсов:\n" + Planets.get(chat_id).infoResources(true) + sellResFooter, TradeButtons);
 }
 
 const TradeFoodButtons = function() {
 	let arr = [];
-	for(let j=2; j<8; j++) {
-		arr.push(`${food2text(Math.pow(10, j))}`);
+	for(let j=2; j<6; j++) {
+		arr.push({button: `${food2text(Math.pow(10, j))} за ${money2text(Math.pow(10, j-2))}`, data:`${Math.pow(10, j)}`, script: "processBuyFood"});
 	}
 	return arr;
 }();
+
+function processBuyFood(chat_id, msg_id, data) {
+	Planets.get(chat_id).buyFood(parseInt(data));
+	Telegram.edit(chat_id, msg_id, "Покупка 🍍еды:\n" + Planets.get(chat_id).infoResources(false) + buyFoodFooter, TradeFoodButtons);
+}
 
 const TradeButtons = function() {
 	let arr = [];
 	for(let j=0; j<3; j++) {
+		let a = [];
 		for(let i=0; i<Resources.length; i++) {
-			arr.push(`${Math.pow(10, j)} ${Resources_icons[i]}`);
+			a.push({button: `${Math.pow(10, j)} ${Resources_icons[i]}`, data: `${i} ${Math.pow(10, j)}`, script: "processSellResources"});
 		}
+		arr.push(a);
 	}
 	return arr;
 }();
 
+function processSellResources(chat_id, msg_id, data) {
+	const rbi = data.split(" ");
+	if (rbi.length == 2) {
+		Planets.get(chat_id).sellResources(parseInt(rbi[0]), parseInt(rbi[1]));
+		Telegram.edit(chat_id, msg_id, "Продажа ресурсов:\n" + Planets.get(chat_id).infoResources(true) + sellResFooter, TradeButtons);
+	}
+}
+
 const buyFoodFooter = `\nСтоимость покупки: 100🍍 -> 1💰`;
 const sellResFooter = `\nСтоимость продажи: 1 ресурс -> 1💰`;
 
-function processMiningButton(chat_id, msg_id, button) {
+function processMiningButton(chat_id, msg_id, data) {
 	if (!MiningGames.has(chat_id)) return;
-	let ind = miningButtonsRole[miningButtons.indexOf(button)];
+	let ind = parseInt(data);
 	let cont = false;
 	if (ind >= 10) {
 		ind -= 10;
@@ -515,7 +503,7 @@ function processMiningButton(chat_id, msg_id, button) {
 				Statistica.mining_fail++;
 			break;
 			case 0:
-			Telegram.edit(chat_id, msg_id, "Подземелье.\n" + MiningGames.get(chat_id).show(), miningButtons, 3);
+			Telegram.edit(chat_id, msg_id, "Подземелье.\n" + MiningGames.get(chat_id).show(), miningButtons);
 			break;
 		}
 	}
@@ -530,33 +518,45 @@ function navy_info(chat_id) {
 
 function my_stock(chat_id) {
 	const m = Planets.get(chat_id).stock.info(true);
-	Telegram.sendButtons(chat_id, "Мои заявки:\n" + m.msg, m.buttons);
+	Telegram.send(chat_id, "Мои заявки:\n" + m.msg, m.buttons);
 }
 
-function new_stock(chat_id) {
-	StockTasks.set(chat_id, {});
-	Telegram.sendButtons(chat_id, "Создание заявки:", ["Купить", "Продать"], 2);
-}
-function processStockRemove(chat_id, msg_id, button) {
-	Planets.get(chat_id).removeStockTask(button);
+function processStockRemove(chat_id, msg_id, data) {
+	Planets.get(chat_id).removeStockTask(parseInt(data));
 	const m = Planets.get(chat_id).stock.info(true);
 	Telegram.edit(chat_id, msg_id, "Мои заявки:\n" + m.msg, m.buttons);
 }
 
-function processStockAdd(chat_id, msg_id, button) {
+function new_stock(chat_id) {
+	StockTasks.set(chat_id, {});
+	Telegram.send(chat_id, "Создание заявки:", [[{button: "Купить", script: "processStockAdd"}, {button: "Продать", script: "processStockAdd"}]]);
+}
+
+
+function processStockAdd(chat_id, msg_id, data) {
 	let t = StockTasks.get(chat_id);
-	let nbuttons = Resources_desc;
+	let nbuttons = [];
 	let msg = "Создание заявки:\n";
-	if (button == "Купить") t.sell = false;
-	if (button == "Продать") t.sell = true;
-	const rind = Resources_desc.indexOf(button);
+	if (data == "Купить")  {t.sell = false; t.step = 0;}
+	if (data == "Продать") {t.sell = true;  t.step = 0;}
+	const rind = Resources_desc.indexOf(data);
 	if (rind >= 0) {
 		t.res = rind;
 		t.cnt = 10;
 		t.price = 100;
 		t.step = 1;
+		const avres = Planets.get(chat_id).resourceCount(t.res);
+		if (avres <= 0 && t.sell) {
+			Telegram.edit(chat_id, msg_id, `Нет в наличии ${Resources_desc[t.res]}`);
+			return;
+		}
 	}
-	if (button == "Дальше") {
+	if (t.step == 0) {
+		for (let i=0; i<Resources_desc.length; i++) {
+			nbuttons.push({button: Resources_desc[i], script: "processStockAdd"});
+		}
+	}
+	if (data == "Дальше") {
 		if (t.sell) {
 			if (t.cnt > Planets.get(chat_id).resourceCount(t.res)) {
 				Telegram.edit(chat_id, msg_id, "Недостаточно ресурсов");
@@ -565,7 +565,7 @@ function processStockAdd(chat_id, msg_id, button) {
 		}
 		t.step = 2;
 	}
-	if (button == "Готово") {
+	if (data == "Готово") {
 		if(Planets.get(chat_id).addStockTask(t.sell, t.res, t.cnt, t.price))
 			Telegram.edit(chat_id, msg_id, "Заявка создана");
 		return;
@@ -573,26 +573,33 @@ function processStockAdd(chat_id, msg_id, button) {
 	const bs = t.sell ? "Продажа" : "Покупка";
 	msg += `${bs}`;
 
-	const cind = stockCountButtons.indexOf(button);
+	const cind = stockCountButtons.indexOf(data);
+	//print(data, cind);
 	if (cind >= 0) {
-		if (t.step == 1) t.cnt += Number.parseInt(button);
-		if (t.step == 2) t.price += Number.parseInt(button);
-		if (t.cnt <= 0) t.cnt = 1;
+		if (t.step == 1) t.cnt += parseInt(data);
+		if (t.step == 2) t.price += parseInt(data);
 		if (t.sell && t.step == 1) {
 			const avres = Planets.get(chat_id).resourceCount(t.res);
 			if (t.cnt > avres) t.cnt = avres;
 		}
+		if (t.cnt <= 0) t.cnt = 1;
 		if (t.price <=0 ) t.price = 1;
 		if (!t.sell && t.step == 2) {
 			const avm = Planets.get(chat_id).money - Planets.get(chat_id).stock.money();
 			if (t.cnt * t.price > avm) t.price = Math.floor(avm/t.cnt);
 		}
 	}
+	if (nbuttons.length == 0) {
+		for (let i=0; i<stockCountButtons.length; i+=2) {
+			nbuttons.push([{button: stockCountButtons[i  ], script: "processStockAdd"},
+						   {button: stockCountButtons[i+1], script: "processStockAdd"}]);
+		}
+	}
 	if (t.step == 1) {
-		nbuttons = stockCountButtons.concat(["Дальше"]);
+		nbuttons.push({button: "Дальше", script: "processStockAdd"});
 	}
 	if (t.step == 2) {
-		nbuttons = stockCountButtons.concat(["Готово"]);
+		nbuttons.push({button: "Готово", script: "processStockAdd"});
 	}
 	StockTasks.set(chat_id, t);
 	if (t.res >= 0) {
@@ -602,19 +609,19 @@ function processStockAdd(chat_id, msg_id, button) {
 			msg += `(cтоимость 1${Resources_icons[t.res]} - ${money2text(t.price)})`
 		}
 	}
-	Telegram.edit(chat_id, msg_id, msg, nbuttons, 2);
+	Telegram.edit(chat_id, msg_id, msg, nbuttons);
 }
 
 function show_stock(chat_id) {
 	let msg = "Биржа:\n";
 	msg += "Выберите тип заявки"; //GlobalMarket.info(chat_id);
-	Telegram.sendButtons(chat_id, msg, stockFilterButtons, 2);
+	Telegram.send(chat_id, msg, stockFilterButtons);
 }
 
 function processStockFilter(chat_id, msg_id, button) {
 	let msg = "Биржа:\n";
 	msg += GlobalMarket.info(chat_id, button);
-	Telegram.edit(chat_id, msg_id, msg, stockFilterButtons, 2);
+	Telegram.edit(chat_id, msg_id, msg, stockFilterButtons);
 }
 
 function help_stock(chat_id) {
@@ -634,33 +641,35 @@ function help_ships(chat_id) {
 	Telegram.send(chat_id, msg);
 }
 
-function processTradeNPC() {
-	//print("NPC update", NPCstock.length);
-	for(let j=0; j<NPCstock.length; j++) {
-		let a = new Array();
-		for (const v of NPCstock[j].sell) {
-			if (v.client != 0) a.push(v);
-			else GlobalMarket.removeItem(v.id)
+function processTradeNPC(on) {
+	if (on) {
+		//print("NPC update", NPCstock.length);
+		for(let j=0; j<NPCstock.length; j++) {
+			let a = new Array();
+			for (const v of NPCstock[j].sell) {
+				if (v.client != 0) a.push(v);
+				else GlobalMarket.removeItem(v.id)
+			}
+			NPCstock[j].sell = a;
+			let b = new Array();
+			for (const v of NPCstock[j].buy) {
+				if (v.client != 0) b.push(v);
+				else GlobalMarket.removeItem(v.id);
+			}
+			NPCstock[j].buy = b;
+			while (NPCstock[j].sell.length < 4) {
+				NPCstock[j].add(true, getRandom(Resources.length), (2*j*j+1)*(getRandom(20)+1), 100+getRandom(100));
+			}
+			while (NPCstock[j].buy.length < 4) {
+				NPCstock[j].add(false, getRandom(Resources.length), (2*j*j+1)*(getRandom(20)+1), 50+getRandom(100));
+			}
+			//print(NPCstock[j].info().msg);
 		}
-		NPCstock[j].sell = a;
-		let b = new Array();
-		for (const v of NPCstock[j].buy) {
-			if (v.client != 0) b.push(v);
-			else GlobalMarket.removeItem(v.id);
-		}
-		NPCstock[j].buy = b;
-		while (NPCstock[j].sell.length < 4) {
-			NPCstock[j].add(true, getRandom(Resources.length), (2*j*j+1)*(getRandom(20)+1), 100+getRandom(100));
-		}
-		while (NPCstock[j].buy.length < 4) {
-			NPCstock[j].add(false, getRandom(Resources.length), (2*j*j+1)*(getRandom(20)+1), 50+getRandom(100));
-		}
-		//print(NPCstock[j].info().msg);
 	}
 }
 
-function processExpedition(chat_id, msg_id, button) {
-	Planets.get(chat_id).prepareExpedition(msg_id, button);
+function processExpedition(chat_id, msg_id, data) {
+	Planets.get(chat_id).prepareExpedition(msg_id, data);
 }
 
 function navy_unload(chat_id) {

@@ -74,7 +74,7 @@ class Marketplace {
 	info(cid, butt) {
 		let msg = "";
 		let r = -1;
-		if (butt) r = stockFilterButtons.indexOf(butt);
+		if (butt) r = parseInt(butt);
 		for (const v of this.items.values()) {
 			if (r >= 0 && r < Resources.length*2) {
 				if (!v.is_sell && r%2 == 0) continue;
@@ -127,7 +127,7 @@ class Stock {
 		let buttons = [];
 		for (const v of arr) {
 			msg += `<b>№${v.id}:</b> ${v.info(true)}` 
-			if (v.client == 0) buttons.push(`Удалить ${v.id}`);
+			if (v.client == 0) buttons.push({button : `Удалить ${v.id}`, data : v.id, script : "processStockRemove"});
 		}
 		return {msg, buttons};
 	}
@@ -141,8 +141,7 @@ class Stock {
 			arr.push(GlobalMarket.addItem(this.chat_id, res, count, price, sell));
 		}
 	}
-	remove(bt) {
-		const id = parseInt(bt.match(/.*\s(\d+)/i)[1]);
+	remove(id) {
 		if (GlobalMarket.removeItem(id)) {
 			const is = this.sell.findIndex(r => r.id == id);
 			if (is >= 0) {
@@ -218,10 +217,9 @@ const stockCountButtons = createStockCountButtons();
 function createStockFilterButtons() {
 	let arr = [];
 	for(let i=0; i<Resources.length; i++) {
-		arr.push(`Купить ${Resources_icons[i]}`);
-		arr.push(`Продать ${Resources_icons[i]}`);
+		arr.push([{button: `Купить ${Resources_icons[i]}`, script: "processStockFilter", data: i*2}, {button: `Продать ${Resources_icons[i]}`, script: "processStockFilter", data: i*2+1}]);
 	}
-	arr.push("Все");
+	arr.push({button: "Все", script: "processStockFilter", data: Resources.length*2});
 	return arr;
 }
 const stockFilterButtons = createStockFilterButtons();

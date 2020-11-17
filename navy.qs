@@ -36,20 +36,10 @@ class Navy {
 	}
 	buttons() {
 		let b = [];
-		for (const v of this.m) {
-			if (v.count > 0) {
-				b.push(`${v.name()} -1`);
-				b.push(`${v.name()} +1`);
-			}
-		}
-		return b;
-	}
-	indexes() {
-		let b = [];
 		for(let j=0; j<this.m.length; j++) {
 			if (this.m[j].count > 0) {
-				b.push([j, -1]);
-				b.push([j, +1]);
+				b.push([{button: `${this.m[j].name()} -1`, data: `${j} -1`, script: "processExpedition"},
+						{button: `${this.m[j].name()} +1`, data: `${j} +1`, script: "processExpedition"}]);
 			}
 		}
 		return b;
