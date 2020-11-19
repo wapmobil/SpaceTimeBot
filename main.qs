@@ -28,6 +28,7 @@ save_timer["timeout"].connect(on_buttonSave_clicked);
 Cron.removeAll();
 Cron.addSchedule("*/10 * * * * *", "processTradeNPC")
 Cron.addSchedule("*/5 * * * * *", "statisticStep")
+Cron.addSchedule("0 6 * * * *", "statisticDayStep")
 
 Telegram.clearCommands();
 Telegram.disablePassword();
@@ -80,7 +81,7 @@ Telegram.addCommand("🛠Строительство/🏗Верфь/🏗Стро�
 
 Telegram["receiveMessage"].connect(received);
 Telegram["receiveSpecialMessage"].connect(receivedSpecial);
-Telegram["buttonPressed"].connect(telegramButton);
+//Telegram["buttonPressed"].connect(telegramButton);
 Telegram["connected"].connect(telegramConnect);
 Telegram["disconnected"].connect(telegramDisconnect);
 //Telegram["messageSent"].connect(telegramSent);
@@ -133,8 +134,10 @@ function received(chat_id, msg) {
 	Statistica.messages++;
 	if(!PlanetStats.has(chat_id)) {
 		PlanetStats.set(chat_id, 0);
-		Statistica.active_players++;
-	} //else PlanetStats.get(chat_id) += 1;
+	}
+	if(!PlanetStatsDay.has(chat_id)) {
+		PlanetStatsDay.set(chat_id, 0);
+	}
 	if (msg == "📈Биржа ресурсов") check_trading(chat_id);
 	if (!Planets.has(chat_id)) {
 		Planets.set(chat_id, new Planet(chat_id));
@@ -162,17 +165,6 @@ function receivedSpecial(chat_id, msg) {
 }
 
 function telegramButton(chat_id, msg_id, button, msg) {
-	//print(msg);
-	let s = "Доступные исследования:";
-	if (msg.substring(0,s.length) == s) {
-		let research_list = Planets.get(chat_id).sienceList();
-		//print(research_list);
-		if (research_list.indexOf(button) >= 0) {
-			Planets.get(chat_id).sienceStart(button, msg_id);
-		} else {
-			Telegram.edit(chat_id, msg_id, "Исследование недоступно");
-		}
-	}
 }
 
 function telegramSent(chat_id, msg_id, msg) {
@@ -260,6 +252,9 @@ function research(chat_id) {
 	}
 }
 
+function processResearch(chat_id, msg_id, data) {
+	Planets.get(chat_id).sienceStart(parseInt(data), msg_id);
+}
 
 function map_info(chat_id) {
 	const p = Planets.get(chat_id);
@@ -680,7 +675,6 @@ function ship_price(chat_id) {
 	Telegram.send(chat_id, Planets.get(chat_id).infoResources() + Planets.get(chat_id).shipsCountInfo() + ShipsDescription);
 }
 
-
 function mining_info(chat_id) {
 		Telegram.send(chat_id,
 			"Справка по добыче в подземелье.\n"+
@@ -692,7 +686,7 @@ function mining_info(chat_id) {
 			"При переходе на монстра вы теряете здоровье❤️, но получаете деньги💰.\n"+
 			"Типы монстров:\n  🐀Крыса - 1❤, ~3💰\n  🦇Летучая мышь - 2❤, ~5💰\n  👽Чужой - 3❤, ~10💰\n"+
 			"Не спешите жать кнопки, telegram это не одобряет...");
-	}
+}
 
 function start_expedition(chat_id) {
 	Telegram.send(chat_id, "В разработке...");

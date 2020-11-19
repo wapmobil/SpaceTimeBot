@@ -118,7 +118,7 @@ const printSienceTree = function(ret, res, cursience, prefix) {
 }
 
 const getSienceButtons = function(a, r) {
-	a.push(r.name);
+	a.push({button: r.name, data: r.id, script: "processResearch"});
 	return a;
 }
 

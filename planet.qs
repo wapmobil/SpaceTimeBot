@@ -226,12 +226,15 @@ class Planet {
 	isSienceActive() {
 		return this.sience.some(r => r.time > 0);
 	}
-	sienceStart(s, msg_id) {
+	sienceStart(id, msg_id) {
 		if (this.isSienceActive()) {
 			Telegram.edit(this.chat_id, msg_id, "Сейчас нельзя, исследование уже идёт");
 			return;
 		}
-		const bs = SieceTree.find(r => r.name == s);
+		const bs = SieceTree.find(r => r.id == id);
+		if (!bs) {
+			Telegram.edit(this.chat_id, msg_id, "Исследование недоступно");
+		}
 		if (this.food <= bs.cost) {
 			Telegram.edit(this.chat_id, msg_id, "Недостаточно 🍍еды");
 			return;

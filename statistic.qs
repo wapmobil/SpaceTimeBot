@@ -3,14 +3,18 @@ var Statistica = {
 	mining           : 0,
 	expeditions_total: 0,
 	stock_items      : 0,
-	active_players   : 0,
 	mining_fail      : 0,
 	mining_ok        : 0,
 	mining_money_all : 0,
 	mining_money_max : 0
 	};
 
+var StatisticaDay = {
+	dayly_players : 0
+};
+
 var PlanetStats = new Map();
+var PlanetStatsDay = new Map();
 var globalThis = this;
 
 function statisticStep(on) {
@@ -28,6 +32,19 @@ function statisticStep(on) {
 			for(let i=0; i<Resources.length; i++) arr[i] += value[Resources[i].name];
 			money += value.money;
 		}
+		money_total = money;
+		active_players = PlanetStats.size;
 		PlanetStats = new Map();
+	}
+}
+
+function statisticDayStep(on) {
+	if (on) {
+		for (const [key, value] of Object.entries(StatisticaDay)) {
+			globalThis[key] = StatisticaDay[key];
+			StatisticaDay[key] = 0;
+		}
+		dayly_players = PlanetStatsDay.size;
+		PlanetStatsDay = new Map();
 	}
 }
