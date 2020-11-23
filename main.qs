@@ -1,19 +1,9 @@
+console.clear();
+
 include("statistic.qs")
 include("planet.qs")
 include("mininig.qs")
 
-console.clear();
-
-function testCombat() {
-	for (const s of ShipModels()) {
-		print(s.name(), s.hp);
-	}
-	let sh = new CruiserShip(), sh2 = new InterceptorShip();
-	sh.count = 1;
-	sh2.count = 4;
-	for (let z = 0; z < 10; ++z)
-		sh.hitTo(sh2);
-}
 
 const isProduction = false;
 const NPC_count = isProduction ? 2 : 3;
@@ -52,7 +42,7 @@ Telegram.addCommand("✈️Флот/🏗Строительство ✈Кораб
 Telegram.addCommand("✈️Флот/🏗Строительство ✈Кораблей/🏗Cтроить Грузовик", "ship_create0");
 Telegram.addCommand("✈️Флот/🏗Строительство ✈Кораблей/🏗Cтроить Малютку", "ship_create1");
 Telegram.addCommand("✈️Флот/ℹ️Cправка", "help_ships");
-//Telegram.addCommand("✈️Флот/☄️Экспедиция", "start_expedition");
+Telegram.addCommand("✈️Флот/☄️Экспедиции/Тест битвы", "battle_test");
 Telegram.addCommand("🛠Строительство/📖Инфо", "planet_info");
 Telegram.addCommand("🛠Строительство/🍍Ферма", "info_farm");
 Telegram.addCommand("🛠Строительство/🍍Ферма/📖Инфо", "info_farm");
@@ -691,3 +681,21 @@ function mining_info(chat_id) {
 function start_expedition(chat_id) {
 	Telegram.send(chat_id, "В разработке...");
 }
+
+function battle_test(chat_id) {
+	let enemy = new Navy(1);
+	enemy.type = 1;
+	enemy.m = enemyShips();
+	enemy.m[0].count = 10;
+	enemy.m[1].count = 3;
+	enemy.m[2].count = 1;
+	let nv = new Navy(chat_id);
+	nv.type = 1;
+	nv.m[1].count = 20;
+	nv.m[2].count = 10;
+	nv.m[3].count = 5;
+	nv.m[4].count = 1;
+	let bt = new Battle(nv, enemy);
+	Telegram.send(chat_id, bt.info(chat_id), nv.infoBattle(true));
+}
+

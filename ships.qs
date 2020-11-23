@@ -36,18 +36,18 @@ class Ship {
 		const thisAR = this.baseRoll();
 		let dam = this.damageRoll();
 		let hit = false;
-		let msg = `${this.name()} ⚔️ ${ship.name()} (roll ${thisAR}): `;
+		let msg = `${this.name()} ⚔️ ${ship.name()} (${thisAR}🎲): `;
 		if (thisAR >= this.crit().hit) {
 			hit = true;
 			dam *= this.crit().x;
-			msg += `critical hit x${this.criticalHitX()}`;
+			msg += `критическое попадание x${this.criticalHitX()}`;
 		} else if (thisAR <= this.crit().miss) {
-			msg += `critical miss`;
+			msg += `промах`;
 		} else if ((thisAR + this.attack()) >= ship.defence()) {
 			hit = true;
-			msg += `hit`;
+			msg += `попадание`;
 		} else {
-			msg += `miss`;
+			msg += `промах`;
 		}
 		if (hit) {
 			msg += `: ${dam}`;
@@ -65,22 +65,31 @@ class Ship {
 				}
 			}
 			if (ship.count <= 0) {
-				msg += `\n  ${ship.name()} terminated`
+				msg += `\n отряд ${ship.name()} уничтожен`
 			} else if (killed > 0) {
-				msg += `\n  ${killed} ${ship.name()} destroyed`
+				msg += `\n уничтожено ${killed} ${ship.name()}`
 			}
 		}
 		print(msg);
 	}
 	
 	info(detail) {
-		let msg = `<b>${this.name()}:</b> ${this.count} шт.\n`
+		let msg = `${this.name()}: ${this.count} шт.\n`
 		if (detail) {
 			msg += `  ${this.description()}\n`;
 			msg += `  вместимость: ${this.capacity()}📦\n`;
 			msg += `  энергия пуска: ${this.energy()}🔋\n`;
 		}
 		return msg;
+	}
+	
+	infoBattle(bt) {
+		let nm = this.name();
+		if (bt) return nm;
+		nm = nm.padEnd(12);
+		let cn = `<b>${this.count}</b> (${this.hp}❤️)`;
+		cn = cn.padEnd(20);
+		return `${nm}: ${cn}`;
 	}
 }
 
@@ -125,7 +134,7 @@ class InterceptorShip extends Ship {
 	health  () {return 40;}
 	attack  () {return 6;}
 	defence () {return 18;}
-	damage  () {return {x: 1, d: 10}}
+	damage  () {return {x: 1, d: 12}}
 	armor   () {return 3;}
 }
 

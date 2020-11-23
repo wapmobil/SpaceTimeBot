@@ -25,6 +25,15 @@ class Navy {
 		}
 		return msg;
 	}
+	infoBattle(bt) {
+		let arr = [];
+		for(let j=0; j<this.m.length; j++) {
+			if (this.m[j].count > 0) {
+				arr.push(this.m[j].infoBattle(bt));
+			}
+		}
+		return arr;
+	}
 	load(o) {
 		for (const [key, value] of Object.entries(o)) {
 			if (key == "m") {

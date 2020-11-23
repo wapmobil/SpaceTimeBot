@@ -1,5 +1,5 @@
 include("stock.qs")
-include("navy.qs")
+include("battle.qs")
 include("spaceyard.qs")
 include("solar.qs")
 include("factory.qs")
@@ -44,6 +44,7 @@ class Planet {
 		this.spaceyard.ship_id = -1;
 		this.spaceyard.ship_bt = 0;
 		this.stock = new Stock(id);
+		this.battle = -1;
 		if (!isProduction) {
 			this.money = 9999999;
 			this.food = 9999999;
