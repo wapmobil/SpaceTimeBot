@@ -5,7 +5,7 @@ include("planet.qs")
 include("mininig.qs")
 
 
-const isProduction = false;
+const isProduction = true;
 const NPC_count = isProduction ? 2 : 3;
 
 buttonLoad["clicked()"].connect(on_buttonLoad_clicked);
@@ -42,7 +42,7 @@ Telegram.addCommand("✈️Флот/🏗Строительство ✈Кораб
 Telegram.addCommand("✈️Флот/🏗Строительство ✈Кораблей/🏗Cтроить Грузовик", "ship_create0");
 Telegram.addCommand("✈️Флот/🏗Строительство ✈Кораблей/🏗Cтроить Малютку", "ship_create1");
 Telegram.addCommand("✈️Флот/ℹ️Cправка", "help_ships");
-Telegram.addCommand("✈️Флот/☄️Экспедиции/Тест битвы", "battle_test");
+//Telegram.addCommand("✈️Флот/☄️Экспедиции/Тест битвы", "battle_test");
 Telegram.addCommand("🛠Строительство/📖Инфо", "planet_info");
 Telegram.addCommand("🛠Строительство/🍍Ферма", "info_farm");
 Telegram.addCommand("🛠Строительство/🍍Ферма/📖Инфо", "info_farm");
@@ -94,6 +94,7 @@ let MiningGames = new Map();
 let StockTasks = new Map();
 let GlobalMarket = loadMarket();
 let NPCstock = loadNPC();
+let Battles = loadBattles();
 
 //Старт
 let timer = new QTimer();
@@ -332,6 +333,11 @@ function loadMarket() {
 	return m;
 }
 
+function loadBattles() {
+	let b = new BattleList();
+	return b;
+}
+
 function loadNPC() {
 	let npc = new Array();
 	let data = SHS.load(isProduction ? 3 : 103);
@@ -352,6 +358,7 @@ function on_buttonLoad_clicked() {
 	Planets = loadPlanets();
 	GlobalMarket = loadMarket();
 	NPCstock = loadNPC();
+	Battles = loadBattles();
 }
 
 // очистить всё, полный сброс
@@ -359,8 +366,8 @@ function on_buttonReset_clicked() {
 	if (isProduction) return;
 	Planets = new Map();
 	GlobalMarket = new Marketplace();
-	NPCstock = new Array();
-	for(let j=0; j<NPC_count; j++) NPCstock.push(new Stock(j+1));
+	//NPCstock = new Array();
+	//for(let j=0; j<NPC_count; j++) NPCstock.push(new Stock(j+1));
 }
 
 function on_pushButton_clicked() {
@@ -422,7 +429,7 @@ function sell_resources(chat_id) {
 
 const TradeFoodButtons = function() {
 	let arr = [];
-	for(let j=2; j<6; j++) {
+	for(let j=2; j<7; j++) {
 		arr.push({button: `${food2text(Math.pow(10, j))} за ${money2text(Math.pow(10, j-2))}`, data:`${Math.pow(10, j)}`, script: "processBuyFood"});
 	}
 	return arr;
@@ -516,7 +523,6 @@ function new_stock(chat_id) {
 	StockTasks.set(chat_id, {});
 	Telegram.send(chat_id, "Создание заявки:", [[{button: "Купить", script: "processStockAdd"}, {button: "Продать", script: "processStockAdd"}]]);
 }
-
 
 function processStockAdd(chat_id, msg_id, data) {
 	let t = StockTasks.get(chat_id);
@@ -682,7 +688,7 @@ function start_expedition(chat_id) {
 	Telegram.send(chat_id, "В разработке...");
 }
 
-function battle_test(chat_id) {
+function createTestBattle(chat_id) {
 	let enemy = new Navy(1);
 	enemy.type = 1;
 	enemy.m = enemyShips();
@@ -695,7 +701,15 @@ function battle_test(chat_id) {
 	nv.m[2].count = 10;
 	nv.m[3].count = 5;
 	nv.m[4].count = 1;
-	let bt = new Battle(nv, enemy);
-	Telegram.send(chat_id, bt.info(chat_id), nv.infoBattle(true));
+	return new Battle(nv, enemy);
+}
+
+function battle_test(chat_id) {
+	let btid = Planets.get(chat_id).battle;
+	if (!Battles.b.has(btid)) {
+		btid = Battles.addBattle(createTestBattle(chat_id));
+	}
+	let b = Battles.b.get(btid);
+	Telegram.send(chat_id, b.info(chat_id), b.buttons(chat_id));
 }
 

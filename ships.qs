@@ -10,6 +10,7 @@ class Ship {
 		}
 	}
 	name() {return "";}
+	shortName() {return "";}
 	description() {return "";}
 	
 	size    () {return 1;} // size in angar
@@ -84,11 +85,10 @@ class Ship {
 	}
 	
 	infoBattle(bt) {
-		let nm = this.name();
-		if (bt) return nm;
-		nm = nm.padEnd(12);
+		let nm = this.shortName();
+		if (bt) return this.name() + " " + this.count + "шт";
 		let cn = `<b>${this.count}</b> (${this.hp}❤️)`;
-		cn = cn.padEnd(20);
+		cn = cn.padEnd(18);
 		return `${nm}: ${cn}`;
 	}
 }
@@ -96,6 +96,7 @@ class Ship {
 
 class TradeShip extends Ship {
 	name() {return "Грузовик";}
+	shortName() {return "Гр";}
 	description() {return "Торговый корабль";}
 	size    () {return 2;}
 	capacity() {return 30;}
@@ -111,6 +112,7 @@ class TradeShip extends Ship {
 
 class SmallShip extends Ship {
 	name() {return "Малютка";}
+	shortName() {return "Мл";}
 	description() {return "Корабль общего назначения";}
 	capacity() {return 2;}
 	price   () {return 10;}
@@ -125,6 +127,7 @@ class SmallShip extends Ship {
 
 class InterceptorShip extends Ship {
 	name() {return "Перехватчик";}
+	shortName() {return "Пх";}
 	description() {return "Маневреный малый боевой корабль";}
 	size    () {return 2;}
 	capacity() {return 0;}
@@ -140,6 +143,7 @@ class InterceptorShip extends Ship {
 
 class CorvetteShip extends Ship {
 	name() {return "Корвет";}
+	shortName() {return "Кв";}
 	description() {return "Средний боевой корабль";}
 	size    () {return 3;}
 	capacity() {return 0;}
@@ -155,6 +159,7 @@ class CorvetteShip extends Ship {
 
 class FrigateShip extends Ship {
 	name() {return "Фрегат";}
+	shortName() {return "Фр";}
 	description() {return "Крупный боевой корабль";}
 	size    () {return 5;}
 	capacity() {return 0;}
@@ -170,6 +175,7 @@ class FrigateShip extends Ship {
 
 class CruiserShip extends Ship {
 	name() {return "Крейсер";}
+	shortName() {return "Кр";}
 	description() {return "Боевой крейсер";}
 	size    () {return 6;}
 	capacity() {return 0;}
@@ -206,6 +212,7 @@ const ShipsDescription = function() {
 
 class EnemyJunior extends Ship {
 	name() {return "EnemyJunior";}
+	shortName() {return "EJ";}
 	description() {return "";}
 	size    () {return 1;}
 	capacity() {return 0;}
@@ -221,6 +228,7 @@ class EnemyJunior extends Ship {
 
 class EnemyMiddle extends Ship {
 	name() {return "EnemyMiddle";}
+	shortName() {return "EM";}
 	description() {return "";}
 	size    () {return 1;}
 	capacity() {return 0;}
@@ -236,6 +244,7 @@ class EnemyMiddle extends Ship {
 
 class EnemySenior extends Ship {
 	name() {return "EnemySenior";}
+	shortName() {return "ES";}
 	description() {return "";}
 	size    () {return 1;}
 	capacity() {return 0;}
