@@ -119,7 +119,7 @@ class SmallShip extends Ship {
 	energy  () {return 10;}
 	
 	health  () {return 10;}
-	attack  () {return 1;}
+	attack  () {return 1+3;}
 	defence () {return 10;}
 	damage  () {return {x: 1, d: 4}}
 	armor   () {return 2;}
@@ -134,10 +134,10 @@ class InterceptorShip extends Ship {
 	price   () {return 100;}
 	energy  () {return 100;}
 	
-	health  () {return 40;}
-	attack  () {return 8;}
+	health  () {return 25;}
+	attack  () {return 6+3;}
 	defence () {return 18;}
-	damage  () {return {x: 1, d: 12}}
+	damage  () {return {x: 4, d: 10}}
 	armor   () {return 3;}
 }
 
@@ -151,9 +151,9 @@ class CorvetteShip extends Ship {
 	energy  () {return 300;}
 	
 	health  () {return 150;}
-	attack  () {return 10;}
+	attack  () {return 3+3;}
 	defence () {return 15;}
-	damage  () {return {x: 2, d: 14}}
+	damage  () {return {x: 2, d: 16}}
 	armor   () {return 4;}
 }
 
@@ -167,9 +167,9 @@ class FrigateShip extends Ship {
 	energy  () {return 400;}
 	
 	health  () {return 250;}
-	attack  () {return 14;}
+	attack  () {return 4+3;}
 	defence () {return 14;}
-	damage  () {return {x: 20, d: 6}}
+	damage  () {return {x: 3, d: 20}}
 	armor   () {return 6;}
 }
 
@@ -183,9 +183,9 @@ class CruiserShip extends Ship {
 	energy  () {return 500;}
 	
 	health  () {return 500;}
-	attack  () {return 18;}
+	attack  () {return 6+3;}
 	defence () {return 12;}
-	damage  () {return {x: 4, d: 20}}
+	damage  () {return {x: 5, d: 20}}
 	armor   () {return 8;}
 }
 
@@ -220,7 +220,7 @@ class EnemyJunior extends Ship {
 	energy  () {return 0;}
 	
 	health  () {return 10;}
-	attack  () {return 5;}
+	attack  () {return 5+3;}
 	defence () {return 10;}
 	damage  () {return {x: 1, d: 8}}
 	armor   () {return 2;}
@@ -236,7 +236,7 @@ class EnemyMiddle extends Ship {
 	energy  () {return 0;}
 	
 	health  () {return 100;}
-	attack  () {return 10;}
+	attack  () {return 8+3;}
 	defence () {return 12;}
 	damage  () {return {x: 1, d: 20}}
 	armor   () {return 5;}
@@ -252,9 +252,9 @@ class EnemySenior extends Ship {
 	energy  () {return 0;}
 	
 	health  () {return 1000;}
-	attack  () {return 15;}
-	defence () {return 20;}
-	damage  () {return {x: 5, d: 20}}
+	attack  () {return 10+3;}
+	defence () {return 16;}
+	damage  () {return {x: 4, d: 20}}
 	armor   () {return 10;}
 }
 
