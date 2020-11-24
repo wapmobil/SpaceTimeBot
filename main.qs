@@ -1,3 +1,6 @@
+buttonCopyText["clicked()"].connect(on_buttonCopyText_clicked);
+pushButton_2["clicked()"].connect(on_pushButton_2_clicked);
+sliderInfo["valueChanged"].connect(on_sliderInfo_valueChanged);
 console.clear();
 
 include("statistic.qs")
@@ -5,8 +8,9 @@ include("planet.qs")
 include("mininig.qs")
 
 
-const isProduction = true;
+const isProduction = false;
 const NPC_count = isProduction ? 2 : 3;
+const npc_delay = 2;
 
 buttonLoad["clicked()"].connect(on_buttonLoad_clicked);
 buttonSave["clicked()"].connect(on_buttonSave_clicked);
@@ -42,7 +46,8 @@ Telegram.addCommand("✈️Флот/🏗Строительство ✈Кораб
 Telegram.addCommand("✈️Флот/🏗Строительство ✈Кораблей/🏗Cтроить Грузовик", "ship_create0");
 Telegram.addCommand("✈️Флот/🏗Строительство ✈Кораблей/🏗Cтроить Малютку", "ship_create1");
 Telegram.addCommand("✈️Флот/ℹ️Cправка", "help_ships");
-//Telegram.addCommand("✈️Флот/☄️Экспедиции/Тест битвы", "battle_test");
+Telegram.addCommand("Тест битвы", "battle_test");
+Telegram.addCommand("✈️Флот/👣️Экспедиции/Тест битвы", "battle_test");
 Telegram.addCommand("🛠Строительство/📖Инфо", "planet_info");
 Telegram.addCommand("🛠Строительство/🍍Ферма", "info_farm");
 Telegram.addCommand("🛠Строительство/🍍Ферма/📖Инфо", "info_farm");
@@ -97,6 +102,7 @@ let NPCstock = loadNPC();
 let Battles = loadBattles();
 
 //Старт
+let npc_delay_cnt = npc_delay;
 let timer = new QTimer();
 timer["timeout"].connect(timerDone);
 timer.start(1000);
@@ -117,7 +123,11 @@ function timerDone() {
 	for (var value of Planets.values()) {
 		value.step();
 	}
-	on_buttonSave_clicked();
+	npc_delay_cnt--;
+	if (npc_delay_cnt == 0) {
+		Battles.stepNPC();
+		npc_delay_cnt = npc_delay;
+	}
 }
 
 function received(chat_id, msg) {
@@ -129,7 +139,18 @@ function received(chat_id, msg) {
 	if(!PlanetStatsDay.has(chat_id)) {
 		PlanetStatsDay.set(chat_id, 0);
 	}
-	if (msg == "📈Биржа ресурсов") check_trading(chat_id);
+	if (msg == "📈Биржа ресурсов") {
+		if (!Planets.get(chat_id).trading) {
+			Telegram.send(chat_id, "Требуется исследование - 💸Торговля");
+			Telegram.cancelCommand();
+		}
+	}
+	if (msg == "👣️Экспедиции") {
+		if (Planets.get(chat_id).enabled_exp == 0) {
+			Telegram.send(chat_id, "Требуется исследование - 👣️Экспедиции");
+			Telegram.cancelCommand();
+		}
+	}
 	if (!Planets.has(chat_id)) {
 		Planets.set(chat_id, new Planet(chat_id));
 		Telegram.send(chat_id,
@@ -411,14 +432,6 @@ function time2text(t) {
 	return ret + "⏳";
 }
 
-
-function check_trading(chat_id) {
-	if (!Planets.get(chat_id).trading) {
-		Telegram.send(chat_id, "Требуется исследование - 💸Торговля");
-		Telegram.cancelCommand();
-	}
-}
-
 function buy_food(chat_id) {
 	Telegram.send(chat_id, "Покупка 🍍еды:\n" + Planets.get(chat_id).infoResources(false) + buyFoodFooter, TradeFoodButtons);
 }
@@ -692,8 +705,8 @@ function createTestBattle(chat_id) {
 	let enemy = new Navy(1);
 	enemy.type = 1;
 	enemy.m = enemyShips();
-	enemy.m[0].count = 10;
-	enemy.m[1].count = 3;
+	enemy.m[0].count = 20;
+	enemy.m[1].count = 5;
 	enemy.m[2].count = 1;
 	let nv = new Navy(chat_id);
 	nv.type = 1;
@@ -706,10 +719,47 @@ function createTestBattle(chat_id) {
 
 function battle_test(chat_id) {
 	let btid = Planets.get(chat_id).battle;
-	if (!Battles.b.has(btid)) {
+	//if (!Battles.b.has(btid)) {
 		btid = Battles.addBattle(createTestBattle(chat_id));
-	}
-	let b = Battles.b.get(btid);
+		Planets.get(chat_id).battle = btid;
+	//}
+	const b = Battles.b.get(btid);
 	Telegram.send(chat_id, b.info(chat_id), b.buttons(chat_id));
 }
 
+function battle_start(chat_id, msg_id, data) {
+	let btid = Planets.get(chat_id).battle;
+	if (Battles.b.has(btid)) {
+		Battles.b.get(btid).start(chat_id, msg_id);
+		const b = Battles.b.get(btid);
+		Telegram.edit(chat_id, msg_id, b.info(chat_id), b.buttons(chat_id));
+	}
+}
+
+function battle_step(chat_id, msg_id, data) {
+	let btid = Planets.get(chat_id).battle;
+	if (Battles.b.has(btid)) {
+		Battles.b.get(btid).step(chat_id, data);
+	}
+}
+
+function on_sliderInfo_valueChanged(val) {
+	let ks = Planets.keys();
+	let index = 0;
+	for (const key of ks) {
+		if (index == val) {
+			labelPlayerInfo.setText(`Планета №${key}\n`+Planets.get(key).shipsCountInfo() + Planets.get(key).info(true));
+			return;
+		}
+		index++;
+	}
+	labelPlayerInfo.setText("Игрока не существует");
+}
+
+function on_pushButton_2_clicked() {
+	Telegram.sendAll(pushButton_2.text);
+}
+
+function on_buttonCopyText_clicked() {
+	lineEdit.setText(textEdit.plainText);
+}

@@ -30,7 +30,16 @@ class Navy {
 		for(let j=0; j<this.m.length; j++) {
 			if (this.m[j].count > 0) {
 				arr.push(this.m[j].infoBattle(bt));
-			}
+			} else arr.push("");
+		}
+		return arr;
+	}
+	battleList() {
+		let arr = [];
+		for(let j=0; j<this.m.length; j++) {
+			if (this.m[j].count > 0) {
+				arr.push(0);
+			} else arr.push(-1);
 		}
 		return arr;
 	}

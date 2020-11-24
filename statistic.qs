@@ -10,7 +10,7 @@ var Statistica = {
 	};
 
 var StatisticaDay = {
-	dayly_players : 0
+	expeditions : 0
 };
 
 var PlanetStats = new Map();
@@ -34,6 +34,7 @@ function statisticStep(on) {
 		}
 		money_total = money;
 		active_players = PlanetStats.size;
+		dayly_players = PlanetStatsDay.size;
 		PlanetStats = new Map();
 	}
 }

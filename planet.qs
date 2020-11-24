@@ -45,6 +45,7 @@ class Planet {
 		this.spaceyard.ship_bt = 0;
 		this.stock = new Stock(id);
 		this.battle = -1;
+		this.enabled_exp = 0;
 		if (!isProduction) {
 			this.money = 9999999;
 			this.food = 9999999;
@@ -92,10 +93,12 @@ class Planet {
 			if (this.accum.level > 0)
 				msg += `Аккум.: ${Math.floor(this.accum.energy)}/${this.accum.capacity(this.accum.level)}🔋 (+${Math.round(this.energy())}🔋 за 100⏳)\n`
 			for(let i=0; i<Resources.length; i++) {
-				msg += getResourceInfo(i, this.resourceCount(i));
-				const b = this.stock.reserved(i);
-				if(b > 0) msg += `(📈 ${getResourceCount(i, b)})`;
-				msg += '\n';
+				if (this.resourceCount(i) > 0 || this.stock.reserved(i) > 0) {
+					msg += getResourceInfo(i, this.resourceCount(i));
+					const b = this.stock.reserved(i);
+					if(b > 0) msg += `(📈 ${getResourceCount(i, b)})`;
+					msg += '\n';
+				}
 			}
 			const bs = this.stock.reservedStorage();
 			msg += `Склад: ${this.totalResources()+bs}/${this.storage.capacityProd(this.storage.level)}📦`;
@@ -135,12 +138,13 @@ class Planet {
 		this.food += cnt;
 		this.money -= cnt/100;
 	}
-	info() { // отобразить текущее состояние планеты
+	info(ret) { // отобразить текущее состояние планеты
 		let msg = this.infoResources();
 		const bds = this.getBuildings();
 		for (var value of bds) {
 			msg += value.info();
 		}
+		if (ret) return msg;
 		Telegram.send(this.chat_id, msg);
 	}
 	step() { // эта функция вызывается каждый timerDone
@@ -312,6 +316,10 @@ class Planet {
 	upgrade_capacity() {
 		Telegram.send(this.chat_id, "Поздравляем, макстимальное количество хранимой 🍍еды - удвоилось");
 		this.storage.mult *= 2;
+	}
+	enable_expeditions() {
+		Telegram.send(this.chat_id, "Поздравляем, теперь тебе доступна отправка экспедиций");
+		this.enabled_exp = 1;
 	}
 	
 	addStockTask(sell, res, count, price) {

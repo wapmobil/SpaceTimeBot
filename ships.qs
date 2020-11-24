@@ -33,25 +33,25 @@ class Ship {
 	}
 	
 	hitTo(ship) {
-		if (ship.count <= 0) return;
+		if (ship.count <= 0) return "";
 		const thisAR = this.baseRoll();
 		let dam = this.damageRoll();
 		let hit = false;
-		let msg = `${this.name()} ⚔️ ${ship.name()} (${thisAR}🎲): `;
+		let msg = `${this.name()} ⚔️ ${ship.name()} (${thisAR}🎲):\n`;
 		if (thisAR >= this.crit().hit) {
 			hit = true;
 			dam *= this.crit().x;
-			msg += `критическое попадание x${this.criticalHitX()}`;
+			msg += `🥊критическое попадание x${this.crit().x}`;
 		} else if (thisAR <= this.crit().miss) {
-			msg += `промах`;
+			msg += `🌪промах`;
 		} else if ((thisAR + this.attack()) >= ship.defence()) {
 			hit = true;
-			msg += `попадание`;
+			msg += `🗡попадание`;
 		} else {
-			msg += `промах`;
+			msg += `☁️промах`;
 		}
 		if (hit) {
-			msg += `: ${dam}`;
+			msg += `:-${dam}💔`;
 			let killed = 0;
 			while (dam > 0) {
 				let cdam = Math.min(dam, ship.hp + ship.armor());
@@ -66,12 +66,12 @@ class Ship {
 				}
 			}
 			if (ship.count <= 0) {
-				msg += `\n отряд ${ship.name()} уничтожен`
+				msg += `\n ☠️ отряд ${ship.name()} уничтожен`
 			} else if (killed > 0) {
-				msg += `\n уничтожено ${killed} ${ship.name()}`
+				msg += `\n 💥 уничтожено ${killed} ${ship.name()}`
 			}
 		}
-		print(msg);
+		return msg;
 	}
 	
 	info(detail) {
@@ -87,9 +87,9 @@ class Ship {
 	infoBattle(bt) {
 		let nm = this.shortName();
 		if (bt) return this.name() + " " + this.count + "шт";
-		let cn = `<b>${this.count}</b> (${this.hp}❤️)`;
+		let cn = `${this.count}✈️${this.hp}❤️`;
 		cn = cn.padEnd(18);
-		return `${nm}: ${cn}`;
+		return `${nm}:${cn}`;
 	}
 }
 
@@ -135,7 +135,7 @@ class InterceptorShip extends Ship {
 	energy  () {return 100;}
 	
 	health  () {return 40;}
-	attack  () {return 6;}
+	attack  () {return 8;}
 	defence () {return 18;}
 	damage  () {return {x: 1, d: 12}}
 	armor   () {return 3;}
@@ -151,7 +151,7 @@ class CorvetteShip extends Ship {
 	energy  () {return 300;}
 	
 	health  () {return 150;}
-	attack  () {return 3;}
+	attack  () {return 10;}
 	defence () {return 15;}
 	damage  () {return {x: 2, d: 14}}
 	armor   () {return 4;}
@@ -167,9 +167,9 @@ class FrigateShip extends Ship {
 	energy  () {return 400;}
 	
 	health  () {return 250;}
-	attack  () {return 4;}
+	attack  () {return 14;}
 	defence () {return 14;}
-	damage  () {return {x: 1, d: 20}}
+	damage  () {return {x: 20, d: 6}}
 	armor   () {return 6;}
 }
 
@@ -182,8 +182,8 @@ class CruiserShip extends Ship {
 	price   () {return 500;}
 	energy  () {return 500;}
 	
-	health  () {return 400;}
-	attack  () {return 5;}
+	health  () {return 500;}
+	attack  () {return 18;}
 	defence () {return 12;}
 	damage  () {return {x: 4, d: 20}}
 	armor   () {return 8;}
@@ -220,7 +220,7 @@ class EnemyJunior extends Ship {
 	energy  () {return 0;}
 	
 	health  () {return 10;}
-	attack  () {return 1;}
+	attack  () {return 5;}
 	defence () {return 10;}
 	damage  () {return {x: 1, d: 8}}
 	armor   () {return 2;}
@@ -236,7 +236,7 @@ class EnemyMiddle extends Ship {
 	energy  () {return 0;}
 	
 	health  () {return 100;}
-	attack  () {return 4;}
+	attack  () {return 10;}
 	defence () {return 12;}
 	damage  () {return {x: 1, d: 20}}
 	armor   () {return 5;}
@@ -252,7 +252,7 @@ class EnemySenior extends Ship {
 	energy  () {return 0;}
 	
 	health  () {return 1000;}
-	attack  () {return 10;}
+	attack  () {return 15;}
 	defence () {return 20;}
 	damage  () {return {x: 5, d: 20}}
 	armor   () {return 10;}
