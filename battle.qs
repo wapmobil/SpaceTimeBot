@@ -92,11 +92,11 @@ class Battle {
 					this.list[this.mode] = 1;
 					if (this.cur_id == this.nv1.chat_id) {
 						this.attack(this.nv1.m[this.mode], this.nv2.m[oi]);
-						if (!this.nv2.battleList().some(e => e == 0)) {this.finish(1); return;}
 					} else {
 						this.attack(this.nv2.m[this.mode], this.nv1.m[oi]);
-						if (!this.nv1.battleList().some(e => e == 0)) {this.finish(2); return;}
 					}
+					if (!this.nv2.battleList().some(e => e == 0)) {this.finish(1); return;}
+					if (!this.nv1.battleList().some(e => e == 0)) {this.finish(2); return;}
 				} else print(oi, sz);
 			}
 			this.mode = -1;
@@ -144,7 +144,7 @@ class Battle {
 	attack(s1, s2) {
 		let res_1_hit_2 = s1.hitTo(s2);
 		let res_2_hit_1 = s2.hitTo(s1);
-		this.lastAction = `${res_1_hit_2.msg}\n${res_2_hit_1.msg}`;
+		this.lastAction = `${res_1_hit_2.msg}\n${res_2_hit_1.msg}\n${res_1_hit_2.msgf}${res_2_hit_1.msgf}\n`;
 		s2.applyHit(res_1_hit_2);
 		s1.applyHit(res_2_hit_1);
 	}

@@ -33,7 +33,7 @@ class Ship {
 	}
 	
 	hitTo(ship) {
-		let ret = {msg:"", new_cnt: ship.count, new_hp: ship.hp};
+		let ret = {msg:"", new_cnt: ship.count, new_hp: ship.hp, msgf: ""};
 		if (ship.count <= 0) return ret;
 		const thisAR = this.baseRoll();
 		let dam = this.damageRoll();
@@ -66,10 +66,11 @@ class Ship {
 					ship_hp = ship.health();
 				}
 			}
+			if (killed > 0) {
+				ret.msgf += `\n 💥 уничтожено ${killed} ${ship.name()}`;
+			}
 			if (ship_cnt <= 0) {
-				msg += `\n ☠️ отряд ${ship.name()} уничтожен`
-			} else if (killed > 0) {
-				msg += `\n 💥 уничтожено ${killed} ${ship.name()}`
+				ret.msgf += `\n ☠️ отряд ${ship.name()} уничтожен`;
 			}
 			ret.new_cnt = ship_cnt;
 			ret.new_hp  = ship_hp ;
