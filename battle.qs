@@ -10,6 +10,7 @@ class Battle {
 		this.list = this.nv1.battleList();
 		this.msg_id1 = 0;
 		this.msg_id2 = 0;
+		this.round = 0;
 		if (this.nv1.chat_id == 1) this.msg_id1 = 1;
 		if (this.nv2.chat_id == 1) this.msg_id2 = 1;
 	}
@@ -37,8 +38,9 @@ class Battle {
 		}
 		msg += this.lastAction + "\n";
 		if (your) {
-			if (this.mode < 0) msg += "Выбери отряд";
-			if (this.mode >= 0) msg += "Выбери действие";
+			if (this.mode == -99) msg += "Ты ходишь первым";
+			else if (this.mode < 0) msg += "Выбери отряд";
+			else if (this.mode >= 0) msg += "Выбери действие";
 		} else msg += "Ждём ход противника...";
 		return msg;
 	}
@@ -65,7 +67,7 @@ class Battle {
 				bt.push({button: `атаковать ${a[j]}`, script: "battle_step", data: j});
 			}
 		}
-		if (this.mode >= 0) {
+		if (this.mode >= 0 && chat_id > 1) {
 			bt.push({button: "защищаться", script: "battle_step", data: "skip"});
 			bt.push({button: "назад к выбору отряда", script: "battle_step", data: "back"});
 		}
@@ -89,10 +91,10 @@ class Battle {
 				if (oi >=0 && oi < sz) {
 					this.list[this.mode] = 1;
 					if (this.cur_id == this.nv1.chat_id) {
-						this.lastAction = this.nv1.m[this.mode].hitTo(this.nv2.m[oi]);
+						this.attack(this.nv1.m[this.mode], this.nv2.m[oi]);
 						if (!this.nv2.battleList().some(e => e == 0)) {this.finish(1); return;}
 					} else {
-						this.lastAction = this.nv2.m[this.mode].hitTo(this.nv1.m[oi]);
+						this.attack(this.nv2.m[this.mode], this.nv1.m[oi]);
 						if (!this.nv1.battleList().some(e => e == 0)) {this.finish(2); return;}
 					}
 				} else print(oi, sz);
@@ -139,6 +141,14 @@ class Battle {
 				Telegram.edit(this.nv2.chat_id, this.msg_id2, msg1);
 		}
 	}
+	attack(s1, s2) {
+		let ts1 = s1;
+		let ts2 = s2;
+		this.lastAction = s1.hitTo(ts2) + "\n";
+		this.lastAction += s2.hitTo(ts1);
+		s1 = ts1;
+		s2 = ts2;
+	}
 }
 
 
@@ -155,7 +165,8 @@ class BattleList {
 	stepNPC() {
 		for (var [key, value] of this.b) {
 			if (value.cur_id == 1) {
-				value.step(1, value.buttons(1)[0].data);
+				const bts = value.buttons(1);
+				value.step(1, bts[getRandom(bts.length)].data);
 			}
 		}
 	}

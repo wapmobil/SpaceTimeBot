@@ -710,9 +710,10 @@ function createTestBattle(chat_id) {
 	enemy.m[2].count = 3;
 	let nv = new Navy(chat_id);
 	nv.type = 1;
+	nv.m[1].count = 200;
 	nv.m[2].count = 20;
 	nv.m[3].count = 7;
-	nv.m[4].count = 5;
+	//nv.m[4].count = 5;
 	nv.m[5].count = 4;
 	return new Battle(nv, enemy);
 }

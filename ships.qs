@@ -121,7 +121,7 @@ class SmallShip extends Ship {
 	health  () {return 10;}
 	attack  () {return 1+3;}
 	defence () {return 10;}
-	damage  () {return {x: 1, d: 4}}
+	damage  () {return {x: 1, d: 2}}
 	armor   () {return 2;}
 }
 
@@ -137,7 +137,7 @@ class InterceptorShip extends Ship {
 	health  () {return 25;}
 	attack  () {return 6+3;}
 	defence () {return 18;}
-	damage  () {return {x: 4, d: 10}}
+	damage  () {return {x: 8, d: 10}}
 	armor   () {return 3;}
 }
 
@@ -153,7 +153,7 @@ class CorvetteShip extends Ship {
 	health  () {return 150;}
 	attack  () {return 3+3;}
 	defence () {return 15;}
-	damage  () {return {x: 2, d: 16}}
+	damage  () {return {x: 4, d: 16}}
 	armor   () {return 4;}
 }
 
@@ -169,7 +169,7 @@ class FrigateShip extends Ship {
 	health  () {return 250;}
 	attack  () {return 4+3;}
 	defence () {return 14;}
-	damage  () {return {x: 3, d: 20}}
+	damage  () {return {x: 6, d: 20}}
 	armor   () {return 6;}
 }
 
@@ -185,7 +185,7 @@ class CruiserShip extends Ship {
 	health  () {return 500;}
 	attack  () {return 6+3;}
 	defence () {return 12;}
-	damage  () {return {x: 5, d: 20}}
+	damage  () {return {x: 10, d: 20}}
 	armor   () {return 8;}
 }
 
@@ -238,7 +238,7 @@ class EnemyMiddle extends Ship {
 	health  () {return 100;}
 	attack  () {return 8+3;}
 	defence () {return 12;}
-	damage  () {return {x: 1, d: 20}}
+	damage  () {return {x: 2, d: 20}}
 	armor   () {return 5;}
 }
 
@@ -254,7 +254,7 @@ class EnemySenior extends Ship {
 	health  () {return 1000;}
 	attack  () {return 10+3;}
 	defence () {return 16;}
-	damage  () {return {x: 4, d: 20}}
+	damage  () {return {x: 8, d: 20}}
 	armor   () {return 10;}
 }
 
