@@ -142,12 +142,11 @@ class Battle {
 		}
 	}
 	attack(s1, s2) {
-		let ts1 = s1;
-		let ts2 = s2;
-		this.lastAction = s1.hitTo(ts2) + "\n";
-		this.lastAction += s2.hitTo(ts1);
-		s1 = ts1;
-		s2 = ts2;
+		let res_1_hit_2 = s1.hitTo(s2);
+		let res_2_hit_1 = s2.hitTo(s1);
+		this.lastAction = `${res_1_hit_2.msg}\n${res_2_hit_1.msg}`;
+		s2.applyHit(res_1_hit_2);
+		s1.applyHit(res_2_hit_1);
 	}
 }
 
