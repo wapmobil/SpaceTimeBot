@@ -7,7 +7,6 @@ class Battle {
 		this.lastAction = "";
 		this.mode = -2;
 		this.cur_id = this.nv1.chat_id;
-		this.list = this.nv1.battleList();
 		this.msg_id1 = 0;
 		this.msg_id2 = 0;
 		this.round = 0;
@@ -49,19 +48,22 @@ class Battle {
 		let a = [];
 		let bt = [];
 		if (chat_id != this.cur_id) return bt;
+		let list = [];
 		if (this.cur_id == this.nv1.chat_id) {
 			if (this.mode == -1) a = this.nv1.infoBattle(true);
 			if (this.mode >= 0) a = this.nv2.infoBattle(true);
+			list = this.list1;
 		}
 		if (this.cur_id == this.nv2.chat_id) {
 			if (this.mode == -1) a = this.nv2.infoBattle(true);
 			if (this.mode >= 0) a = this.nv1.infoBattle(true);
+			list = this.list2;
 		}
 		for(let j=0; j<a.length; j++) { 
 			//print("=== ", a[j].length);
 			if (a[j].length == 0) continue;
 			if (this.mode == -1) {
-				if (this.list[j] == 0)
+				if (list[j] == 0)
 					bt.push({button: a[j], script: "battle_step", data: j});
 			} else {
 				bt.push({button: `атаковать ${a[j]}`, script: "battle_step", data: j});
@@ -77,39 +79,42 @@ class Battle {
 		if (chat_id == this.nv1.chat_id) this.msg_id1 = msg_id;
 		if (chat_id == this.nv2.chat_id) this.msg_id2 = msg_id;
 		if (this.msg_id1 > 0 && this.msg_id2 > 0) {
-			this.mode = -1;
-			this.round = 1;
+			this.newRound();
 		}
 	}
 	step(chat_id, data) {
 		if (chat_id != this.cur_id) return;
 		if (this.mode >= 0) {
 			if (data == "skip") {
-				this.list[this.mode] = 1;
+				if (this.cur_id == this.nv1.chat_id) this.list1[this.mode] = 1;
+				else this.list2[this.mode] = 1;
 			} else if (data != "back") {
 				const oi = parseInt(data);
 				let sz = 0;
 				if (this.cur_id == this.nv1.chat_id) sz = this.nv2.m.length
 				else sz = this.nv1.m.length
 				if (oi >=0 && oi < sz) {
-					this.list[this.mode] = 1;
 					if (this.cur_id == this.nv1.chat_id) {
+						this.list1[this.mode] = 2;
 						this.attack(this.nv1.m[this.mode], this.nv2.m[oi]);
+						if (this.nv2.m[oi].count == 0) this.list2[oi] = -1;
 					} else {
+						this.list2[this.mode] = 2;
 						this.attack(this.nv2.m[this.mode], this.nv1.m[oi]);
+						if (this.nv1.m[oi].count == 0) this.list1[oi] = -1;
 					}
-					if (checkFinish()) return;
+					if (this.checkFinish()) return;
 				} else print("error", oi, sz);
 			}
 			this.mode = -1;
-			if (!this.list.some(e => e == 0)) {
-				if (this.cur_id == this.nv1.chat_id) {
+			if (this.cur_id == this.nv1.chat_id) {
+				if (this.list2.some(e => e == 0))
 					this.cur_id = this.nv2.chat_id;
-					this.list = this.nv2.battleList();
-				} else {
+				else if (!this.list1.some(e => e == 0)) this.newRound();
+			} else if (this.cur_id == this.nv2.chat_id) {
+				if (this.list1.some(e => e == 0))
 					this.cur_id = this.nv1.chat_id;
-					this.list = this.nv1.battleList();
-				}
+				else if (!this.list2.some(e => e == 0)) this.newRound();
 			}
 		} else {
 			const oi = parseInt(data);
@@ -129,9 +134,12 @@ class Battle {
 		return false;
 	}
 	newRound() {
+		print("new round");
 		this.list1 = this.nv1.battleList();
 		this.list2 = this.nv2.battleList();
+		this.mode = -1;
 		this.round++;
+		this.lastAction += `<b>Начался раунд ${this.round}</b>\n`;
 	}
 	finish(side) {
 		print("finish");
@@ -180,9 +188,10 @@ class BattleList {
 		let del = [];
 		for (var [key, value] of this.b) {
 			if (value.cur_id == 1) {
-				print("step", value.cur_id);
 				const bts = value.buttons(1);
-				value.step(1, bts[getRandom(bts.length)].data);
+				let rb = getRandom(bts.length);
+				//print("step", value.cur_id, bts.length, rb);
+				value.step(1, bts[rb].data);
 			}
 			if (value.mode == -3) del.push(key);
 		}
