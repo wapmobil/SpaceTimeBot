@@ -5,7 +5,7 @@ class Battle {
 		this.nv1 = nv1;
 		this.nv2 = nv2;
 		this.lastAction = "";
-		this.mode = -99;
+		this.mode = -2;
 		this.cur_id = this.nv1.chat_id;
 		this.list = this.nv1.battleList();
 		this.msg_id1 = 0;
@@ -23,7 +23,7 @@ class Battle {
 		}
 	}
 	infoBattle(a1, a2, your) {
-		let msg = "Битва: \n";
+		let msg = `Битва: ${this.round} раунд\n`;
 		const n1 = a1.filter(word => word.length > 0);
 		const n2 = a2.filter(word => word.length > 0);
 		const sz = Math.max(n1.length, n2.length);
@@ -38,29 +38,29 @@ class Battle {
 		}
 		msg += this.lastAction + "\n";
 		if (your) {
-			if (this.mode == -99) msg += "Ты ходишь первым";
-			else if (this.mode < 0) msg += "Выбери отряд";
+			if (this.mode == -2) msg += "Ты ходишь первым";
+			else if (this.mode == -1) msg += "Выбери отряд";
 			else if (this.mode >= 0) msg += "Выбери действие";
 		} else msg += "Ждём ход противника...";
 		return msg;
 	}
 	buttons(chat_id) {
-		if (this.mode == -99) return [{button: "Начать сражение!", script: "battle_start", data: 0}];
+		if (this.mode == -2) return [{button: "Начать сражение!", script: "battle_start", data: 0}];
 		let a = [];
 		let bt = [];
 		if (chat_id != this.cur_id) return bt;
 		if (this.cur_id == this.nv1.chat_id) {
-			if (this.mode < 0) a = this.nv1.infoBattle(true);
+			if (this.mode == -1) a = this.nv1.infoBattle(true);
 			if (this.mode >= 0) a = this.nv2.infoBattle(true);
 		}
 		if (this.cur_id == this.nv2.chat_id) {
-			if (this.mode < 0) a = this.nv2.infoBattle(true);
+			if (this.mode == -1) a = this.nv2.infoBattle(true);
 			if (this.mode >= 0) a = this.nv1.infoBattle(true);
 		}
 		for(let j=0; j<a.length; j++) { 
 			//print("=== ", a[j].length);
 			if (a[j].length == 0) continue;
-			if (this.mode < 0) {
+			if (this.mode == -1) {
 				if (this.list[j] == 0)
 					bt.push({button: a[j], script: "battle_step", data: j});
 			} else {
@@ -76,7 +76,10 @@ class Battle {
 	start(chat_id, msg_id) {
 		if (chat_id == this.nv1.chat_id) this.msg_id1 = msg_id;
 		if (chat_id == this.nv2.chat_id) this.msg_id2 = msg_id;
-		if (this.msg_id1 > 0 && this.msg_id2 > 0) this.mode = -1;
+		if (this.msg_id1 > 0 && this.msg_id2 > 0) {
+			this.mode = -1;
+			this.round = 1;
+		}
 	}
 	step(chat_id, data) {
 		if (chat_id != this.cur_id) return;
@@ -95,9 +98,8 @@ class Battle {
 					} else {
 						this.attack(this.nv2.m[this.mode], this.nv1.m[oi]);
 					}
-					if (!this.nv2.battleList().some(e => e == 0)) {this.finish(1); return;}
-					if (!this.nv1.battleList().some(e => e == 0)) {this.finish(2); return;}
-				} else print(oi, sz);
+					if (checkFinish()) return;
+				} else print("error", oi, sz);
 			}
 			this.mode = -1;
 			if (!this.list.some(e => e == 0)) {
@@ -121,9 +123,20 @@ class Battle {
 		if (this.nv2.chat_id > 1)
 			Telegram.edit(this.nv2.chat_id, this.msg_id2, this.info(this.nv2.chat_id), this.buttons(this.nv2.chat_id));
 	}
+	checkFinish() {
+		if (!this.nv2.battleList().some(e => e == 0)) {this.finish(1); return true;}
+		if (!this.nv1.battleList().some(e => e == 0)) {this.finish(2); return true;}
+		return false;
+	}
+	newRound() {
+		this.list1 = this.nv1.battleList();
+		this.list2 = this.nv2.battleList();
+		this.round++;
+	}
 	finish(side) {
 		print("finish");
 		let msg = this.lastAction + "\n<b>Сражение завершено</b>\n";
+		msg += "Прошло раундов: "+this.round+"\n";
 		let msg1 = msg + "<b>Вы победили</b>😀\n";
 		let msg2 = msg + "<b>Вы проиграли</b>😒\n"; 
 		if (side == 1) {
@@ -140,6 +153,7 @@ class Battle {
 			if (this.nv2.chat_id > 1)
 				Telegram.edit(this.nv2.chat_id, this.msg_id2, msg1);
 		}
+		this.mode = -3;
 	}
 	attack(s1, s2) {
 		let res_1_hit_2 = s1.hitTo(s2);
@@ -162,12 +176,17 @@ class BattleList {
 		return this.gid;
 	}
 	stepNPC() {
+		print("...", this.b.size);
+		let del = [];
 		for (var [key, value] of this.b) {
 			if (value.cur_id == 1) {
+				print("step", value.cur_id);
 				const bts = value.buttons(1);
 				value.step(1, bts[getRandom(bts.length)].data);
 			}
+			if (value.mode == -3) del.push(key);
 		}
+		for (var k of del) this.b.delete(k);
 	}
 }
 
