@@ -28,8 +28,8 @@ class Ship {
 	roll      (d) {return getRandom(d) + 1;}
 	baseRoll   () {return this.roll(20);}
 	damageRoll () {
-		const c = this.count * this.damage().x;
-		return getRandom((this.damage().d - 1) * c + 1) + c;
+		const x = this.damage().x;
+		return getRandom(this.count * x * this.damage().d - x + 1) + x;
 	}
 	
 	hitTo(ship) {
@@ -144,7 +144,7 @@ class InterceptorShip extends Ship {
 	price   () {return 100;}
 	energy  () {return 100;}
 	
-	health  () {return 25;}
+	health  () {return 40;}
 	attack  () {return 6+3;}
 	defence () {return 18;}
 	damage  () {return {x: 8, d: 10}}
