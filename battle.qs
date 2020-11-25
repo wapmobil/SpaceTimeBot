@@ -22,7 +22,9 @@ class Battle {
 		}
 	}
 	infoBattle(a1, a2, your) {
-		let msg = `Битва: ${this.round} раунд\n`;
+		let msg = "Битва:";
+		if (this.round > 0) msg += ` ${this.round} раунд\n`;
+		else msg += "\n";
 		const n1 = a1.filter(word => word.length > 0);
 		const n2 = a2.filter(word => word.length > 0);
 		const sz = Math.max(n1.length, n2.length);
@@ -37,9 +39,9 @@ class Battle {
 		}
 		msg += this.lastAction + "\n";
 		if (your) {
-			if (this.mode == -2) msg += "Ты ходишь первым";
-			else if (this.mode == -1) msg += "Выбери отряд";
-			else if (this.mode >= 0) msg += "Выбери действие";
+			//if (this.mode == -2) msg += "Ты ходишь первым";
+			if (this.mode == -1) msg += "Выбери отряд";
+			if (this.mode >= 0) msg += "Выбери действие";
 		} else msg += "Ждём ход противника...";
 		return msg;
 	}
@@ -139,6 +141,7 @@ class Battle {
 		this.list2 = this.nv2.battleList();
 		this.mode = -1;
 		this.round++;
+		this.cur_id = this.nv1.chat_id;
 		this.lastAction += `<b>Начался раунд ${this.round}</b>\n`;
 	}
 	finish(side) {
@@ -166,6 +169,7 @@ class Battle {
 	attack(s1, s2) {
 		let res_1_hit_2 = s1.hitTo(s2);
 		let res_2_hit_1 = s2.hitTo(s1);
+		//this.lastAction = `${res_1_hit_2.msg}\n${res_1_hit_2.msgf}\n`;
 		this.lastAction = `${res_1_hit_2.msg}\n${res_2_hit_1.msg}\n${res_1_hit_2.msgf}${res_2_hit_1.msgf}\n`;
 		s2.applyHit(res_1_hit_2);
 		s1.applyHit(res_2_hit_1);
