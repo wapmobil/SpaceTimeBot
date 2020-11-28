@@ -160,11 +160,11 @@ class CorvetteShip extends Ship {
 	price   () {return 300;}
 	energy  () {return 300;}
 	
-	health  () {return 150;}
+	health  () {return 200;}
 	attack  () {return 3+3;}
 	defence () {return 15;}
-	damage  () {return {x: 4, d: 16}}
-	armor   () {return 4;}
+	damage  () {return {x: 4, d: 20}}
+	armor   () {return 6;}
 }
 
 class FrigateShip extends Ship {
@@ -195,8 +195,8 @@ class CruiserShip extends Ship {
 	health  () {return 500;}
 	attack  () {return 6+3;}
 	defence () {return 12;}
-	damage  () {return {x: 10, d: 20}}
-	armor   () {return 8;}
+	damage  () {return {x: 20, d: 10}}
+	armor   () {return 10;}
 }
 
 
@@ -265,7 +265,7 @@ class EnemySenior extends Ship {
 	attack  () {return 10+3;}
 	defence () {return 16;}
 	damage  () {return {x: 8, d: 20}}
-	armor   () {return 10;}
+	armor   () {return 12;}
 }
 
 function enemyShips() {return [new EnemyJunior(), new EnemyMiddle(), new EnemySenior()]}

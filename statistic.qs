@@ -6,7 +6,10 @@ var Statistica = {
 	mining_fail      : 0,
 	mining_ok        : 0,
 	mining_money_all : 0,
-	mining_money_max : 0
+	mining_money_max : 0,
+	battle_win       : 0,
+	battle_lose      : 0,
+	battle_rounds    : 0
 	};
 
 var StatisticaDay = {

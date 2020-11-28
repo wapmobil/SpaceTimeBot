@@ -1,3 +1,4 @@
+
 buttonCopyText["clicked()"].connect(on_buttonCopyText_clicked);
 pushButton_2["clicked()"].connect(on_pushButton_2_clicked);
 sliderInfo["valueChanged"].connect(on_sliderInfo_valueChanged);
@@ -8,9 +9,9 @@ include("planet.qs")
 include("mininig.qs")
 
 
-const isProduction = false;
+const isProduction = true;
 const NPC_count = isProduction ? 2 : 3;
-const npc_delay = 2;
+const npc_delay = 5;
 
 buttonLoad["clicked()"].connect(on_buttonLoad_clicked);
 buttonSave["clicked()"].connect(on_buttonSave_clicked);
@@ -46,8 +47,8 @@ Telegram.addCommand("✈️Флот/🏗Строительство ✈Кораб
 Telegram.addCommand("✈️Флот/🏗Строительство ✈Кораблей/🏗Cтроить Грузовик", "ship_create0");
 Telegram.addCommand("✈️Флот/🏗Строительство ✈Кораблей/🏗Cтроить Малютку", "ship_create1");
 Telegram.addCommand("✈️Флот/ℹ️Cправка", "help_ships");
-Telegram.addCommand("Тест битвы", "battle_test");
-Telegram.addCommand("✈️Флот/👣️Экспедиции/Тест битвы", "battle_test");
+//Telegram.addCommand("Тест битвы", "battle_test");
+Telegram.addCommand("📖Инфоцентр/Тест сражения", "battle_test");
 Telegram.addCommand("🛠Строительство/📖Инфо", "planet_info");
 Telegram.addCommand("🛠Строительство/🍍Ферма", "info_farm");
 Telegram.addCommand("🛠Строительство/🍍Ферма/📖Инфо", "info_farm");

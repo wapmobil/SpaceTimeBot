@@ -22,7 +22,7 @@ class Battle {
 		}
 	}
 	infoBattle(a1, a2, your) {
-		let msg = "Битва:";
+		let msg = "Сражение:";
 		if (this.round > 0) msg += ` ${this.round} раунд\n`;
 		else msg += "\n";
 		const n1 = a1.filter(word => word.length > 0);
@@ -32,7 +32,7 @@ class Battle {
 			msg += "<code>"
 			if (n1.length > j) msg += "🟢"+n1[j];
 			else msg += "⚪️------------";
-			msg += "⏹  ";
+			//msg += "⏹  ";
 			if (n2.length > j) msg += "🟠"+n2[j];
 			else msg += "⚪️------------";
 			msg += "</code>\n\n";
@@ -109,14 +109,16 @@ class Battle {
 				} else print("error", oi, sz);
 			}
 			this.mode = -1;
-			if (this.cur_id == this.nv1.chat_id) {
-				if (this.list2.some(e => e == 0))
-					this.cur_id = this.nv2.chat_id;
-				else if (!this.list1.some(e => e == 0)) this.newRound();
-			} else if (this.cur_id == this.nv2.chat_id) {
-				if (this.list1.some(e => e == 0))
-					this.cur_id = this.nv1.chat_id;
-				else if (!this.list2.some(e => e == 0)) this.newRound();
+			if (data != "back") {
+				if (this.cur_id == this.nv1.chat_id) {
+					if (this.list2.some(e => e == 0))
+						this.cur_id = this.nv2.chat_id;
+					else if (!this.list1.some(e => e == 0)) this.newRound();
+				} else if (this.cur_id == this.nv2.chat_id) {
+					if (this.list1.some(e => e == 0))
+						this.cur_id = this.nv1.chat_id;
+					else if (!this.list2.some(e => e == 0)) this.newRound();
+				}
 			}
 		} else {
 			const oi = parseInt(data);
@@ -136,21 +138,23 @@ class Battle {
 		return false;
 	}
 	newRound() {
-		print("new round");
+		//print("new round");
 		this.list1 = this.nv1.battleList();
 		this.list2 = this.nv2.battleList();
 		this.mode = -1;
 		this.round++;
 		this.cur_id = this.nv1.chat_id;
 		this.lastAction += `<b>Начался раунд ${this.round}</b>\n`;
+		Statistica.battle_rounds++;
 	}
 	finish(side) {
-		print("finish");
+		//print("finish");
 		let msg = this.lastAction + "\n<b>Сражение завершено</b>\n";
 		msg += "Прошло раундов: "+this.round+"\n";
 		let msg1 = msg + "<b>Вы победили</b>😀\n";
 		let msg2 = msg + "<b>Вы проиграли</b>😒\n"; 
 		if (side == 1) {
+			Statistica.battle_win++;
 			msg1 += this.nv1.info("Оставшиеся корабли");
 			if (this.nv1.chat_id > 1)
 				Telegram.edit(this.nv1.chat_id, this.msg_id1, msg1);
@@ -158,6 +162,7 @@ class Battle {
 				Telegram.edit(this.nv2.chat_id, this.msg_id2, msg2);
 		}
 		if (side == 2) {
+			Statistica.battle_lose++;
 			msg1 += this.nv2.info("Оставшиеся корабли");
 			if (this.nv1.chat_id > 1)
 				Telegram.edit(this.nv1.chat_id, this.msg_id1, msg2);
@@ -188,7 +193,7 @@ class BattleList {
 		return this.gid;
 	}
 	stepNPC() {
-		print("...", this.b.size);
+		//print("...", this.b.size);
 		let del = [];
 		for (var [key, value] of this.b) {
 			if (value.cur_id == 1) {
