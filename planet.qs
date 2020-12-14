@@ -618,5 +618,7 @@ class Planet {
 			Telegram.send(this.chat_id, "Требуется построить 🏗Верфь");
 		}
 	}
-
+	startExpedition2() {
+		
+	}
 }

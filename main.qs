@@ -762,6 +762,6 @@ function on_pushButton_2_clicked() {
 	Telegram.sendAll(pushButton_2.text);
 }
 
-function on_buttonCopyText_clicked() {
-	lineEdit.setText(textEdit.plainText);
+function expedition_start(chat_id) {
+	Planets.get(chat_id).startExpedition2();
 }
