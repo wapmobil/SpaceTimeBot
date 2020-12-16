@@ -7,31 +7,28 @@ class Navy {
 		this.dst = 0;
 		this.type = 0; // 0 - торговля, 1 - атака, 2 - исследование
 		this.aim = 0; // id заявки для торговли
-		for(let i=0; i<Resources.length; i++)
+		for (let i=0; i<Resources.length; i++)
 			this[Resources[i].name] = 0;
 		this.money = 0;
 		this.m = ShipModels();
 	}
-	info(desc) {
+	info(desc, inf) {
 		let msg = `<b>*** ${desc} ***</b>\n`;
-		if (this.type == 0) {
-			msg += `  Энергия пуска: ${this.energy()}🔋\n`;
-			msg += `  Груз: ${this.totalResources()}/${this.capacity()}📦\n`;
-			for(let i=0; i<Resources.length; i++) {
-				msg += "  " + getResourceInfo(i, this.resourceCount(i)) + "\n";
-			}
-			msg += `  Деньги: ${money2text(this.money)}\n`;
-		} else if (this.type == 2) {
-			msg += `  Энергия пуска: ${this.startEnergy(10)}🔋\n`;
+		if (inf) msg += inf + "\n";
+		msg += `  Энергия: ${Math.round(this.energy())}🔋\n`;
+		msg += `  Груз: ${this.totalResources()}/${this.capacity()}📦\n`;
+		for (let i=0; i<Resources.length; i++) {
+			if (this.resourceCount(i) > 0) msg += "  " + getResourceInfo(i, this.resourceCount(i)) + "\n";
 		}
+		if (this.money > 0) msg += `  Деньги: ${money2text(this.money)}\n`;
 		for (const value of this.m) {
 			if (value.count > 0) msg += value.info(false);
 		}
-		return msg;
+		return msg + "\n";
 	}
 	infoBattle(bt) {
 		let arr = [];
-		for(let j=0; j<this.m.length; j++) {
+		for (let j=0; j<this.m.length; j++) {
 			if (this.m[j].count > 0) {
 				arr.push(this.m[j].infoBattle(bt));
 			} else arr.push("");
@@ -40,7 +37,7 @@ class Navy {
 	}
 	battleList() {
 		let arr = [];
-		for(let j=0; j<this.m.length; j++) {
+		for (let j=0; j<this.m.length; j++) {
 			if (this.m[j].count > 0) {
 				arr.push(0);
 			} else arr.push(-1);
@@ -56,12 +53,12 @@ class Navy {
 			}
 		}
 	}
-	buttons() {
+	buttons(scr) {
 		let b = [];
-		for(let j=0; j<this.m.length; j++) {
+		for (let j=0; j<this.m.length; j++) {
 			if (this.m[j].count > 0) {
-				b.push([{button: `${this.m[j].name()} -1`, data: `${j} -1`, script: "processExpedition"},
-						{button: `${this.m[j].name()} +1`, data: `${j} +1`, script: "processExpedition"}]);
+				b.push([{button: `${this.m[j].name()} -1`, data: `${j} -1`, script: scr},
+						{button: `${this.m[j].name()} +1`, data: `${j} +1`, script: scr}]);
 			}
 		}
 		return b;
@@ -82,24 +79,30 @@ class Navy {
 	}
 	countAll() {
 		let cnt = 0;
-		for(let j=0; j<this.m.length; j++) cnt += this.m[j].count;
+		for (let j=0; j<this.m.length; j++) cnt += this.m[j].count;
 		return cnt;
 	}
 	size() {
 		let cnt = 0;
-		for(let j=0; j<this.m.length; j++) cnt += this.m[j].count * this.m[j].size();
+		for (let j=0; j<this.m.length; j++) cnt += this.m[j].count * this.m[j].size();
 		return cnt;
 	}
+	check(nv) {
+		for (let j=0; j<this.m.length; j++) {
+			if (this.m[j].count < nv.m[j].count) return false;
+		}
+		return true;
+	}
 	split(nv) {
-		for(let j=0; j<this.m.length; j++) {
+		for (let j=0; j<this.m.length; j++) {
 			this.m[j].count -= nv.m[j].count;
 		}
 	}
 	join(nv) {
-		for(let j=0; j<this.m.length; j++) {
+		for (let j=0; j<this.m.length; j++) {
 			this.m[j].count += nv.m[j].count;
 		}
-		for(let i=0; i<Resources.length; i++) {
+		for (let i=0; i<Resources.length; i++) {
 			this[Resources[i].name] += nv[Resources[i].name];
 		}
 		this.money += nv.money;
@@ -115,6 +118,7 @@ class Navy {
 	energy() {
 		let e = 0;
 		for (const value of this.m) e += value.energy()*value.count;
+		if (this.type == 2) e = e * this.arrived / 360;
 		return e;
 	}
 	resourceCount(res) {

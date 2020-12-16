@@ -17,7 +17,6 @@ class Ship {
 	capacity() {return 0;} // max cargo
 	price   () {return 0;} // each resource
 	energy  () {return 0;} // launch price
-	startEnergy(x) {return x*this.energy();}
 	
 	health  () {return 1;}
 	attack  () {return 0;}
@@ -214,9 +213,9 @@ const ShipsDescription = function() {
 		msg += `  ${s.health()}❤️ ${s.attack()}⚔️ ${s.defence()}🛡\n`;
 		msg += `  ${s.damage().x}d${s.damage().d}🗡 ${s.armor()}👕\n`;
 		msg += "  стоимость: ";
-		for (let i = 0; i < Resources.length; i++) msg += getResourceCount(i, s.price());
+		for (let i = 0; i < Resources_base; i++) msg += getResourceCount(i, s.price());
 		msg += "\n";
-		msg += `  время строительства: ${time2text(s.price()*Resources.length)}\n`;
+		msg += `  время строительства: ${time2text(s.price()*Resources_base)}\n`;
 	}
 	return msg;
 }();

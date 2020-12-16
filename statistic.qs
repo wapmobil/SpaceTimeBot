@@ -1,7 +1,7 @@
 var Statistica = {
 	messages         : 0,
 	mining           : 0,
-	expeditions_total: 0,
+	expeditions_trade: 0,
 	stock_items      : 0,
 	mining_fail      : 0,
 	mining_ok        : 0,
@@ -10,7 +10,7 @@ var Statistica = {
 	battle_win       : 0,
 	battle_lose      : 0,
 	battle_rounds    : 0,
-	expeditions2     : 0
+	expeditions_rs   : 0
 	};
 
 var StatisticaDay = {
@@ -40,6 +40,10 @@ function statisticStep(on) {
 		active_players = PlanetStats.size;
 		dayly_players = PlanetStatsDay.size;
 		battle_active = Battles.b.size;
+		resource1 = arr[0];
+		resource2 = arr[1];
+		resource3 = arr[2];
+		resource4 = arr[3];
 		PlanetStats = new Map();
 	}
 }

@@ -10,6 +10,10 @@ const Resources  = [{
 	name : "resource3",
 	desc : "Реагенты",
 	icon : "🛢"
+}, {
+	name : "ino_tech",
+	desc : "Технологии",
+	icon : "📟"
 }];
 
 function getResourceInfo(r, c) {
@@ -36,3 +40,4 @@ function createResourcesDesc() {
 
 const Resources_icons = createResourcesIcons();
 const Resources_desc = createResourcesDesc();
+const Resources_base = 3;

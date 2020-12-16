@@ -1,5 +1,4 @@
 
-buttonCopyText["clicked()"].connect(on_buttonCopyText_clicked);
 pushButton_2["clicked()"].connect(on_pushButton_2_clicked);
 sliderInfo["valueChanged"].connect(on_sliderInfo_valueChanged);
 console.clear();
@@ -310,14 +309,17 @@ function stat_info(chat_id) {
 	msg += `Заявок в маркете ${GlobalMarket.items.size}\n`;
 	let arr = new Array();
 	let money = 0;
+	let exps = 0;
 	for(let i=0; i<Resources.length; i++) arr.push(0);
 	for (var [key, value] of Planets) {
 		for(let i=0; i<Resources.length; i++) arr[i] += value[Resources[i].name];
 		money += value.money;
+		exps += value.expeditions.length;
 	}
 	msg += "Всего ресурсов:\n";
 	for(let i=0; i<Resources.length; i++) msg += getResourceInfo(i, arr[i]) + "\n";
 	msg += `Деньги: ${money2text(money)}\n`;
+	msg += `Экспедиций в процессе ${exps}\n`;
 	Telegram.send(chat_id, msg);
 }
 
@@ -466,7 +468,7 @@ const TradeButtons = function() {
 	let arr = [];
 	for(let j=0; j<3; j++) {
 		let a = [];
-		for(let i=0; i<Resources.length; i++) {
+		for(let i=0; i<Resources_base; i++) {
 			a.push({button: `${Math.pow(10, j)} ${Resources_icons[i]}`, data: `${i} ${Math.pow(10, j)}`, script: "processSellResources"});
 		}
 		arr.push(a);
@@ -671,18 +673,18 @@ function processTradeNPC(on) {
 			}
 			NPCstock[j].buy = b;
 			while (NPCstock[j].sell.length < 4) {
-				NPCstock[j].add(true, getRandom(Resources.length), (2*j*j+1)*(getRandom(20)+1), 100+getRandom(100));
+				NPCstock[j].add(true, getRandom(Resources_base), (2*j*j+1)*(getRandom(20)+1), 100+getRandom(100));
 			}
 			while (NPCstock[j].buy.length < 4) {
-				NPCstock[j].add(false, getRandom(Resources.length), (2*j*j+1)*(getRandom(20)+1), 50+getRandom(100));
+				NPCstock[j].add(false, getRandom(Resources_base), (2*j*j+1)*(getRandom(20)+1), 50+getRandom(100));
 			}
 			//print(NPCstock[j].info().msg);
 		}
 	}
 }
 
-function processExpedition(chat_id, msg_id, data) {
-	Planets.get(chat_id).prepareExpedition(msg_id, data);
+function processTradeExpedition(chat_id, msg_id, data) {
+	Planets.get(chat_id).prepareTradeExpedition(msg_id, data);
 }
 
 function navy_unload(chat_id) {
@@ -771,5 +773,9 @@ function expeditionStep() {
 }
 
 function expedition_start(chat_id) {
-	Planets.get(chat_id).initExpedition2();
+	Planets.get(chat_id).initExpeditionRS();
+}
+
+function processExpeditionRS(chat_id, msg_id, data) {
+	Planets.get(chat_id).prepareExpeditionRS(msg_id, data);
 }
