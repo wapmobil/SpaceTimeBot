@@ -15,3 +15,5 @@ money_total = {1 y} #s
 battle_win = {1 y} #s 
 battle_lose = {1 y} #s 
 battle_rounds = {1 y} #s 
+battle_active = {1 y} #s 
+expeditions2 = {1 y} #s 

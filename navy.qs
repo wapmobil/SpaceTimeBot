@@ -14,12 +14,16 @@ class Navy {
 	}
 	info(desc) {
 		let msg = `<b>*** ${desc} ***</b>\n`;
-		msg += `  Энергия пуска: ${this.energy()}🔋\n`;
-		msg += `  Груз: ${this.totalResources()}/${this.capacity()}📦\n`;
-		for(let i=0; i<Resources.length; i++) {
-			msg += "  " + getResourceInfo(i, this.resourceCount(i)) + "\n";
+		if (this.type == 0) {
+			msg += `  Энергия пуска: ${this.energy()}🔋\n`;
+			msg += `  Груз: ${this.totalResources()}/${this.capacity()}📦\n`;
+			for(let i=0; i<Resources.length; i++) {
+				msg += "  " + getResourceInfo(i, this.resourceCount(i)) + "\n";
+			}
+			msg += `  Деньги: ${money2text(this.money)}\n`;
+		} else if (this.type == 2) {
+			msg += `  Энергия пуска: ${this.startEnergy(10)}🔋\n`;
 		}
-		msg += `  Деньги: ${money2text(this.money)}\n`
 		for (const value of this.m) {
 			if (value.count > 0) msg += value.info(false);
 		}

@@ -29,7 +29,7 @@
    <item>
     <widget class="SHSTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>4</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tabService">
       <attribute name="title">
@@ -178,6 +178,7 @@
            <string>players=players</string>
            <string>stock_items=stocks</string>
            <string>money_total=total money</string>
+           <string>battle_active=battles</string>
           </stringlist>
          </property>
         </widget>

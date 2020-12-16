@@ -9,7 +9,8 @@ var Statistica = {
 	mining_money_max : 0,
 	battle_win       : 0,
 	battle_lose      : 0,
-	battle_rounds    : 0
+	battle_rounds    : 0,
+	expeditions2     : 0
 	};
 
 var StatisticaDay = {
@@ -38,6 +39,7 @@ function statisticStep(on) {
 		money_total = money;
 		active_players = PlanetStats.size;
 		dayly_players = PlanetStatsDay.size;
+		battle_active = Battles.b.size;
 		PlanetStats = new Map();
 	}
 }

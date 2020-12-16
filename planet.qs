@@ -49,13 +49,15 @@ class Planet {
 		if (!isProduction) {
 			this.money = 9999999;
 			this.food = 9999999;
-			this.farm.level = 0;
-			this.solar.level = 30;
-			this.storage.level = 60;
-			this.facility.level = 0;
+			this.farm.level = 30;
+			this.solar.level = 100;
+			this.storage.level = 100;
+			this.facility.level = 5;
 			this.build_speed = 100;
 			this.sience_speed = 200;
 			this.ship_speed = 20;
+			this.ships.m[0].count = 10;
+			this.ships.m[1].count = 10;
 		}
 	}
 	getBuildings() {
@@ -388,13 +390,14 @@ class Planet {
 	expeditionInfo() {
 		const nv = tmpNavy.get(this.chat_id);
 		let msg = "Начать экспедицию\n";
-		msg += GlobalMarket.get(nv.aim).info() + "\n";
+		if (nv.type == 0)
+			msg += GlobalMarket.get(nv.aim).info() + "\n";
 		msg += this.ships.info("✈️Флот на базе");
 		msg += "\n";
 		msg += nv.info("✈️Флот для отправки");
 		return msg;
 	}
-	initExpedition(item) {
+	initTradeExpedition(item) {
 		if (!this.trading) {
 			Telegram.send(this.chat_id, "Необходимо исследовать торговлю");
 			return false;
@@ -423,6 +426,7 @@ class Planet {
 		let nv = new Navy(this.chat_id);
 		nv.aim = item.id;
 		nv.dst = item.owner;
+		nv.type = 0;
 		nv.arrived = 500;
 		if (item.is_sell) {
 			nv.money = item.price * item.count;
@@ -465,6 +469,10 @@ class Planet {
 		if (!nv) {
 			Telegram.edit(this.chat_id, msg_id, "Ошибка");
 			print("error");
+			return;
+		}
+		if(nv.type != 0)  {
+			Telegram.edit(this.chat_id, msg_id, "Ошибка");
 			return;
 		}
 		nv.money = 0;
@@ -618,7 +626,26 @@ class Planet {
 			Telegram.send(this.chat_id, "Требуется построить 🏗Верфь");
 		}
 	}
-	startExpedition2() {
-		
+	reclaimShip(si) {
+		if (this.spaceyard.level > 0) {
+			// TODO
+		} else {
+			Telegram.send(this.chat_id, "Требуется построить 🏗Верфь");
+		}
+	}
+	initExpedition2() {
+		if (this.enabled_exp == 0) {
+			Telegram.send(this.chat_id, "Необходимо исследовать экспедиции");
+		}
+		if (this.ships.countAll() == 0) {
+			Telegram.send(this.chat_id, "На базе отсутствуют свободные корабли");
+		}
+		let nv = new Navy(this.chat_id);
+		nv.aim = 0;
+		nv.dst = 0;
+		nv.type = 2;
+		tmpNavy.set(this.chat_id, nv);
+		let btns = [{button: "Отправить", script: "processExpedition2"}];
+		Telegram.send(this.chat_id, this.expeditionInfo(), this.ships.buttons().concat(btns));
 	}
 }

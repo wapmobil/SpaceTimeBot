@@ -17,6 +17,7 @@ class Ship {
 	capacity() {return 0;} // max cargo
 	price   () {return 0;} // each resource
 	energy  () {return 0;} // launch price
+	startEnergy(x) {return x*this.energy();}
 	
 	health  () {return 1;}
 	attack  () {return 0;}
