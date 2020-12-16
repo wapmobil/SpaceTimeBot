@@ -46,6 +46,7 @@ class Planet {
 		this.stock = new Stock(id);
 		this.battle = -1;
 		this.enabled_exp = 0;
+		this.max_exp = 1;
 		if (!isProduction) {
 			this.money = 9999999;
 			this.food = 9999999;
@@ -369,11 +370,11 @@ class Planet {
 		return `Слоты кораблей: ${this.totalShipsSize()}/${this.maxShipsSize()}\n`;
 	}
 	navyInfo() {
-		if (this.trading) {
-			let msg = this.shipsCountInfo() + "\n";
-			//msg += this.shipsCountInfo();
+		if (this.spaceyard.level > 0) {
+			let msg = this.shipsCountInfo();
+			msg += `Аккум.: ${Math.floor(this.accum.energy)}/${this.accum.capacity(this.accum.level)}🔋` + "\n\n";
 			if (this.spaceyard.ship_id >= 0) {
-				msg += `Идёт сборка ${this.ships.m[this.spaceyard.ship_id].name()}, осталось ${time2text(this.spaceyard.ship_bt)}\n`;
+				msg += `Идёт сборка ${this.ships.m[this.spaceyard.ship_id].name()}, осталось ${time2text(this.spaceyard.ship_bt)}\n\n`;
 			}
 			msg += this.ships.info("✈️Флот на базе", "Для запуска требуется:");
 			for (const value of this.expeditions) {
@@ -381,6 +382,7 @@ class Planet {
 					msg += value.info("✈️Флот возвращается на базу", `  до прибытия ${time2text(value.arrived)}`); 
 				} else {
 					if (value.type == 2) {
+						msg += `Шанс: ${value.aim}\n`;
 						msg += value.info("✈️Флот находится в 👣️Экспедиции", `  осталось ${time2text(value.arrived)}`);
 					} else {
 						msg += value.info(`✈️Флот летит на планету ${value.dst}`, `  до прибытия ${time2text(value.arrived)}`);
@@ -732,11 +734,27 @@ class Planet {
 			Telegram.edit(this.chat_id, msg_id, "Не хватает 🔋 для отправки, дождитесь зарядки аккумуляторов");
 			return;
 		}
+		if (this.expeditionsCount() == this.max_exp) {
+			Telegram.edit(this.chat_id, msg_id, `Вы не можете отправить больше ${this.max_exp} экспедиций`);
+			return;
+		}
 		this.accum.energy -= nv.energy();
 		this.ships.split(nv);
 		this.expeditions.push(nv);
 		tmpNavy.delete(this.chat_id);
 		Statistica.expeditions_rs++;
 		Telegram.edit(this.chat_id, msg_id, "Экспедиция успешно отправлена!");
+	}
+	expeditionsCount() {
+		let res = 0;
+		for (const value of this.expeditions) {
+			if (value.type == 2) res++;
+		}
+		return res;
+	}
+	expeditionStep() {
+		for (let value of this.expeditions) {
+			if (value.type == 2) value.aim++;
+		}
 	}
 }

@@ -123,18 +123,18 @@ function telegramDisconnect() {
 }
 
 function timerDone() {
+	expedition_cnt++;
+	if (expedition_cnt >= (isProduction ? 60 : 3)) {
+		expedition_cnt = 0;
+	}
 	for (var value of Planets.values()) {
 		value.step();
+		if(expedition_cnt == 0) value.expeditionStep();
 	}
 	npc_delay_cnt--;
 	if (npc_delay_cnt == 0) {
 		Battles.stepNPC();
 		npc_delay_cnt = npc_delay;
-	}
-	expedition_cnt++;
-	if (expedition_cnt >= (isProduction ? 60 : 1)) {
-		expeditionStep();
-		expedition_cnt = 0;
 	}
 }
 
@@ -766,10 +766,6 @@ function on_sliderInfo_valueChanged(val) {
 
 function on_pushButton_2_clicked() {
 	Telegram.sendAll(pushButton_2.text);
-}
-
-function expeditionStep() {
-	
 }
 
 function expedition_start(chat_id) {
