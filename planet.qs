@@ -8,6 +8,7 @@ include("storage.qs")
 include("facility.qs")
 include("farm.qs")
 include("energystorage.qs")
+include("npcplanets.qs")
 
 // Планета
 class Planet {
@@ -59,6 +60,7 @@ class Planet {
 			this.ship_speed = 20;
 			this.ships.m[0].count = 10;
 			this.ships.m[1].count = 10;
+			this.max_exp = 10;
 		}
 	}
 	getBuildings() {
@@ -268,7 +270,8 @@ class Planet {
 		//	this.food = Math.max(this.food, 100000, this.storage.capacity(this.storage.level));
 		//	this.farm.level = this.facility.level+1;
 		//}
-		if (!this.hasMoney(0)) this.money += 2000;
+		this.max_exp = 10;
+		//if (!this.hasMoney(0)) this.money += 2000;
 		//this.energy_eco = 1;
 		//this.build_speed = 1;
 		//this.food = this.money;
@@ -369,23 +372,26 @@ class Planet {
 	shipsCountInfo() {
 		return `Слоты кораблей: ${this.totalShipsSize()}/${this.maxShipsSize()}\n`;
 	}
-	navyInfo() {
+	navyInfo(exp_only) {
 		if (this.spaceyard.level > 0) {
-			let msg = this.shipsCountInfo();
-			msg += `Аккум.: ${Math.floor(this.accum.energy)}/${this.accum.capacity(this.accum.level)}🔋` + "\n\n";
-			if (this.spaceyard.ship_id >= 0) {
-				msg += `Идёт сборка ${this.ships.m[this.spaceyard.ship_id].name()}, осталось ${time2text(this.spaceyard.ship_bt)}\n\n`;
+			let msg = "";
+			if (!exp_only) {
+				msg += this.shipsCountInfo();
+				msg += `Аккум.: ${Math.floor(this.accum.energy)}/${this.accum.capacity(this.accum.level)}🔋` + "\n\n";
+				if (this.spaceyard.ship_id >= 0) {
+					msg += `Идёт сборка ${this.ships.m[this.spaceyard.ship_id].name()}, осталось ${time2text(this.spaceyard.ship_bt)}\n\n`;
+				}
+				msg += this.ships.info("✈️Флот на базе", "Для запуска требуется:");
 			}
-			msg += this.ships.info("✈️Флот на базе", "Для запуска требуется:");
 			for (const value of this.expeditions) {
 				if (value.dst == this.chat_id) {
-					msg += value.info("✈️Флот возвращается на базу", `  до прибытия ${time2text(value.arrived)}`); 
+					if (!exp_only) msg += value.info("✈️Флот возвращается на базу", `  до прибытия ${time2text(value.arrived)}`); 
 				} else {
 					if (value.type == 2) {
 						msg += `Шанс: ${value.aim}\n`;
 						msg += value.info("✈️Флот находится в 👣️Экспедиции", `  осталось ${time2text(value.arrived)}`);
 					} else {
-						msg += value.info(`✈️Флот летит на планету ${value.dst}`, `  до прибытия ${time2text(value.arrived)}`);
+						if (!exp_only) msg += value.info(`✈️Флот летит на планету ${value.dst}`, `  до прибытия ${time2text(value.arrived)}`);
 					}
 				}
 			}
@@ -485,6 +491,10 @@ class Planet {
 			Telegram.edit(this.chat_id, msg_id, "Ошибка");
 			return;
 		}
+		if (nv.countAll() <= 0) {
+			Telegram.edit(this.chat_id, msg_id, "Необходимо выбрать минимум 1 корабль");
+			return;
+		}
 		nv.money = 0;
 		for(let i=0; i<Resources.length; i++) nv[Resources[i].name] = 0;
 		const si = GlobalMarket.get(nv.aim);
@@ -553,48 +563,49 @@ class Planet {
 	}
 	returnExpedition(i) {
 		let e = this.expeditions[i];
-		if (e.dst == this.chat_id) {
-			this.ships.join(e);
-			this.expeditions.splice(i, 1);
-			Telegram.send(this.chat_id, "✈️Флот вернулся на базу!");
-			this.navyUnload();
-		} else {
-			if (e.type == 0) {
-				const si = GlobalMarket.get(e.aim);
-				if (si.owner < 100) {
-					NPCstock[si.owner-1].delete(si.id);
-					if (si.is_sell) {
-						e.money -= si.price * si.count;
-						e[Resources[si.res].name] += si.count;
-					} else {
-						e[Resources[si.res].name] -= si.count;
-						e.money += si.price * si.count;
-					}
-				} else {
-					Planets.get(si.owner).stock.delete(si.id);
-					if (si.is_sell) {
-						e.money -= si.price * si.count;
-						Planets.get(si.owner).money += si.price * si.count;
-						Planets.get(si.owner)[Resources[si.res].name] -= si.count;
-						e[Resources[si.res].name] += si.count;
-					} else {
-						e[Resources[si.res].name] -= si.count;
-						Planets.get(si.owner)[Resources[si.res].name] += si.count;
-						Planets.get(si.owner).money -= si.price * si.count;
-						e.money += si.price * si.count;
-					}
-					Telegram.send(si.owner, `Ваша заявка выполнена успешно:\n  ${si.info()}`);
-				}
-				e.dst = this.chat_id;
-				e.arrived = 500;
-				this.expeditions[i] = e;
-				Telegram.send(this.chat_id, "✈️Флот достиг заданной планеты, обмен ресурсов выполнен.");
+		if (e.type == 0) {
+			if (e.dst == this.chat_id) {
+				this.ships.join(e);
+				this.expeditions.splice(i, 1);
+				Telegram.send(this.chat_id, "✈️Флот вернулся на базу!");
+				this.navyUnload();
 			} else {
-				e.dst = this.chat_id;
-				e.arrived = 500;
-				this.expeditions[i] = e;
-				Telegram.send(this.chat_id, "👣️Экспедиция закончилась, ✈️Флот возвращается на базу.");
+					const si = GlobalMarket.get(e.aim);
+					if (si.owner < 100) {
+						NPCstock[si.owner-1].delete(si.id);
+						if (si.is_sell) {
+							e.money -= si.price * si.count;
+							e[Resources[si.res].name] += si.count;
+						} else {
+							e[Resources[si.res].name] -= si.count;
+							e.money += si.price * si.count;
+						}
+					} else {
+						Planets.get(si.owner).stock.delete(si.id);
+						if (si.is_sell) {
+							e.money -= si.price * si.count;
+							Planets.get(si.owner).money += si.price * si.count;
+							Planets.get(si.owner)[Resources[si.res].name] -= si.count;
+							e[Resources[si.res].name] += si.count;
+						} else {
+							e[Resources[si.res].name] -= si.count;
+							Planets.get(si.owner)[Resources[si.res].name] += si.count;
+							Planets.get(si.owner).money -= si.price * si.count;
+							e.money += si.price * si.count;
+						}
+						Telegram.send(si.owner, `Ваша заявка выполнена успешно:\n  ${si.info()}`);
+					}
+					e.dst = this.chat_id;
+					e.arrived = 500;
+					this.expeditions[i] = e;
+					Telegram.send(this.chat_id, "✈️Флот достиг заданной планеты, обмен ресурсов выполнен.");
 			}
+		} else {
+			e.dst = this.chat_id;
+			e.type = 0;
+			e.arrived = 500;
+			this.expeditions[i] = e;
+			Telegram.send(this.chat_id, "👣️Экспедиция закончилась, ✈️Флот возвращается на базу.");
 		}
 	}
 	navyUnload() {
@@ -724,6 +735,10 @@ class Planet {
 			Telegram.edit(this.chat_id, msg_id, "Ошибка");
 			return;
 		}
+		if (nv.countAll() <= 0) {
+			Telegram.edit(this.chat_id, msg_id, "Необходимо выбрать минимум 1 корабль");
+			return;
+		}
 		nv.money = 0;
 		for(let i=0; i<Resources.length; i++) nv[Resources[i].name] = 0;
 		if (!this.ships.check(nv)) {
@@ -754,7 +769,12 @@ class Planet {
 	}
 	expeditionStep() {
 		for (let value of this.expeditions) {
-			if (value.type == 2) value.aim++;
+			if (value.type == 2) {
+				value.aim++;
+				let chs = Math.round(value.aim*value.countAll());
+				if (getRandom(100000) < chs)
+					Telegram.send(this.chat_id, "Ура " + value.aim);
+			}
 		}
 	}
 }
