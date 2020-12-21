@@ -96,12 +96,13 @@ if (isProduction) {
 
 
  // Здесь вся БД
+let GlobalMarket = loadMarket();
+let NPCstock = loadNPC();
+let GlobalNPCPlanets = loadNPCPlanets();
 let Planets = loadPlanets();
 let tmpNavy = new Map();
 let MiningGames = new Map();
 let StockTasks = new Map();
-let GlobalMarket = loadMarket();
-let NPCstock = loadNPC();
 let Battles = loadBattles();
 
 //Старт
@@ -148,18 +149,6 @@ function received(chat_id, msg) {
 	if(!PlanetStatsDay.has(chat_id)) {
 		PlanetStatsDay.set(chat_id, 0);
 	}
-	if (msg == "📈Биржа ресурсов") {
-		if (!Planets.get(chat_id).trading) {
-			Telegram.send(chat_id, "Требуется исследование - 💸Торговля");
-			Telegram.cancelCommand();
-		}
-	}
-	if (msg == "👣️Экспедиции") {
-		if (Planets.get(chat_id).enabled_exp == 0) {
-			Telegram.send(chat_id, "Требуется исследование - 👣️Экспедиции");
-			Telegram.cancelCommand();
-		}
-	}
 	if (!Planets.has(chat_id)) {
 		Planets.set(chat_id, new Planet(chat_id));
 		Telegram.send(chat_id,
@@ -173,14 +162,36 @@ function received(chat_id, msg) {
 		Telegram.cancelCommand();
 		return;
 	}
+	if (msg == "📈Биржа ресурсов") {
+		if (!Planets.get(chat_id).trading) {
+			Telegram.send(chat_id, "Требуется исследование - 💸Торговля");
+			Telegram.cancelCommand();
+		}
+		return;
+	}
+	if (msg == "👣️Экспедиции") {
+		if (Planets.get(chat_id).enabled_exp == 0) {
+			Telegram.send(chat_id, "Требуется исследование - 👣️Экспедиции");
+			Telegram.cancelCommand();
+		}
+		return;
+	}
 }
 
 function receivedSpecial(chat_id, msg) {
 	if (Planets.has(chat_id)) {
-		const s = "/go_";
+		let s = "";
+		s = "/go_";
 		if (msg.substring(0,s.length) == s) {
 			const id = parseInt(msg.match(/\/go_(\d+)/i)[1]);
 			Planets.get(chat_id).initTradeExpedition(GlobalMarket.get(id));
+			return;
+		}
+		s = "/commande_";
+		if (msg.substring(0,s.length) == s) {
+			const id = parseInt(msg.match(/\/commande_(\d+)/i)[1]);
+			processExpeditionCommand(chat_id, 0, id);
+			return;
 		}
 	}
 }
@@ -337,6 +348,7 @@ function on_buttonSave_clicked() {
 	SHS.save(isProduction ? 1 : 101, JSON.stringify(a));
 	SHS.save(isProduction ? 2 : 102, JSON.stringify(GlobalMarket.save()));
 	SHS.save(isProduction ? 3 : 103, JSON.stringify(NPCstock));
+	SHS.save(isProduction ? 4 : 104, JSON.stringify(GlobalNPCPlanets.save()));
 	//print(SHS.load(isProduction ? 3 : 103));
 }
 
@@ -387,10 +399,20 @@ function loadNPC() {
 	return npc;
 }
 
+function loadNPCPlanets() {
+	let m = new NPCPlanets();
+	let data = SHS.load(isProduction ? 4 : 104);
+	if (typeof data == 'string') {
+		m.load(JSON.parse(data));
+	}
+	return m;
+}
+
 function on_buttonLoad_clicked() {
-	Planets = loadPlanets();
 	GlobalMarket = loadMarket();
 	NPCstock = loadNPC();
+	GlobalNPCPlanets = loadNPCPlanets();
+	Planets = loadPlanets();
 	Battles = loadBattles();
 }
 
@@ -399,6 +421,8 @@ function on_buttonReset_clicked() {
 	if (isProduction) return;
 	Planets = new Map();
 	GlobalMarket = new Marketplace();
+	GlobalNPCPlanets = new NPCPlanets();
+	Battles = new BattleList();
 	//NPCstock = new Array();
 	//for(let j=0; j<NPC_count; j++) NPCstock.push(new Stock(j+1));
 }
@@ -750,4 +774,24 @@ function processExpeditionRS(chat_id, msg_id, data) {
 
 function info_expeditions(chat_id) {
 	Planets.get(chat_id).navyInfo(true);
+	Telegram.send(chat_id, `Обнаруженные планеты: ${GlobalNPCPlanets.planets.size}`);
+}
+
+function processExpeditionCommand(chat_id, msg_id, data) {
+	let npc = GlobalNPCPlanets.getPlanet(parseInt(data));
+	if (npc) {
+		Planets.get(chat_id).expeditionCommand(npc, msg_id);
+	} else {
+		Telegram.send(chat_id, "Ошибка, координаты потеряны или корабли уже покинули это место");
+	}
+}
+
+function processExpeditionCommand2(chat_id, msg_id, data) {
+	const sid = data.split(" ");
+	if (sid.length != 2)  {
+		print(sid,  data);
+		Telegram.edit(chat_id, msg_id, "Ошибка");
+		return;
+	}
+	Planets.get(chat_id).expeditionProcessCommand(msg_id, parseInt(sid[0]), parseInt(sid[1]));
 }

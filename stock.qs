@@ -9,6 +9,7 @@ class StockItem {
 		this.count = count;
 		this.price = price;
 		this.is_sell = is_sell;
+		this.private = false; // TODO
 	}
 	load(o) {
 		for (const [key, value] of Object.entries(o)) {
@@ -76,6 +77,7 @@ class Marketplace {
 		let r = -1;
 		if (butt) r = parseInt(butt);
 		for (const v of this.items.values()) {
+			if (v.private) continue;
 			if (r >= 0 && r < Resources.length*2) {
 				if (!v.is_sell && r%2 == 0) continue;
 				if (v.is_sell && r%2 != 0) continue;
@@ -131,11 +133,11 @@ class Stock {
 		}
 		return {msg, buttons};
 	}
-	add(sell, res, count, price) {
+	add(sell, res, count, price, max_stocks) {
 		let arr;
 		if (sell) arr = this.sell;
 		else arr = this.buy;
-		if (arr.length >= 5) {
+		if (arr.length >= max_stocks) {
 			Telegram.send(this.chat_id, "Достигнуто максимальное число заявок");
 		} else {
 			arr.push(GlobalMarket.addItem(this.chat_id, res, count, price, sell));
