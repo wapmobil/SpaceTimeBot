@@ -35,6 +35,7 @@ Telegram.addCommand("💸Торговля/Продать ресурсы", "sell_
 Telegram.addCommand("💸Торговля/📖Мои ресурсы", "info_resources");
 Telegram.addCommand("💸Торговля/📈Биржа ресурсов/📗️Мои заявки", "my_stock");
 Telegram.addCommand("💸Торговля/📈Биржа ресурсов/✳️Создать заявку", "new_stock");
+Telegram.addCommand("💸Торговля/📈Биржа ресурсов/✳️Создать 🔐скрытую заявку", "new_stock_priv");
 Telegram.addCommand("💸Торговля/📈Биржа ресурсов/ℹ️Cправка", "help_stock");
 Telegram.addCommand("💸Торговля/📈Биржа ресурсов/🖥Смотреть заявки", "show_stock");
 Telegram.addCommand("📖Инфоцентр/🌍Планета", "planet_info");
@@ -50,7 +51,7 @@ Telegram.addCommand("✈️Флот/🏗Строительство ✈Кораб
 Telegram.addCommand("✈️Флот/ℹ️Cправка", "help_ships");
 Telegram.addCommand("✈️Флот/👣️Экспедиции/ℹ️Cправка", "help_expeditions");
 Telegram.addCommand("✈️Флот/👣️Экспедиции/📖Инфо", "info_expeditions");
-Telegram.addCommand("✈️Флот/👣️Экспедиции/🚀Отправить экспедицию", "expedition_start");
+Telegram.addCommand("✈️Флот/👣️Экспедиции/👣Отправить экспедицию", "expedition_start");
 Telegram.addCommand("🛠Строительство/📖Инфо", "planet_info");
 Telegram.addCommand("🛠Строительство/🍍Ферма", "info_farm");
 Telegram.addCommand("🛠Строительство/🍍Ферма/📖Инфо", "info_farm");
@@ -182,15 +183,23 @@ function receivedSpecial(chat_id, msg) {
 	if (Planets.has(chat_id)) {
 		let s = "";
 		s = "/go_";
-		if (msg.substring(0,s.length) == s) {
+		if (msg.substring(0, s.length) == s) {
 			const id = parseInt(msg.match(/\/go_(\d+)/i)[1]);
 			Planets.get(chat_id).initTradeExpedition(GlobalMarket.get(id));
 			return;
 		}
 		s = "/commande_";
-		if (msg.substring(0,s.length) == s) {
+		if (msg.substring(0, s.length) == s) {
 			const id = parseInt(msg.match(/\/commande_(\d+)/i)[1]);
 			processExpeditionCommand(chat_id, 0, id);
+			return;
+		}
+		s = "/e_";
+		if (msg.substring(0, s.length) == s) {
+			let cd = msg.match(/\/e_(\d+)x(\d+)/i);
+			//print(cd[1], cd[2]);
+			//const id = parseInt([1]);
+			Planets.get(chat_id).expeditionSupport(parseInt(cd[1]), parseInt(cd[2]));
 			return;
 		}
 	}
@@ -573,6 +582,11 @@ function new_stock(chat_id) {
 	Telegram.send(chat_id, "Создание заявки:", [[{button: "Купить", script: "processStockAdd"}, {button: "Продать", script: "processStockAdd"}]]);
 }
 
+function new_stock_priv(chat_id) {
+	StockTasks.set(chat_id, {priv: true});
+	Telegram.send(chat_id, "Создание заявки:", [[{button: "Купить", script: "processStockAdd"}, {button: "Продать", script: "processStockAdd"}]]);
+}
+
 function processStockAdd(chat_id, msg_id, data) {
 	let t = StockTasks.get(chat_id);
 	let nbuttons = [];
@@ -606,7 +620,7 @@ function processStockAdd(chat_id, msg_id, data) {
 		t.step = 2;
 	}
 	if (data == "Готово") {
-		if(Planets.get(chat_id).addStockTask(t.sell, t.res, t.cnt, t.price))
+		if(Planets.get(chat_id).addStockTask(t.sell, t.res, t.cnt, t.price, t.priv))
 			Telegram.edit(chat_id, msg_id, "Заявка создана");
 		return;
 	}
@@ -765,7 +779,7 @@ function on_pushButton_2_clicked() {
 }
 
 function expedition_start(chat_id) {
-	Planets.get(chat_id).initExpeditionRS();
+	Planets.get(chat_id).initExpeditionRS(2);
 }
 
 function processExpeditionRS(chat_id, msg_id, data) {

@@ -54,9 +54,10 @@ class Marketplace {
 		}
 		return {gid: this.gid, items : arr};
 	}
-	addItem(chat, res, count, price, is_sell) {
+	addItem(chat, res, count, price, is_sell, priv) {
 		this.gid += 1;
-		const si = new StockItem(this.gid, chat, res, count, price, is_sell);
+		let si = new StockItem(this.gid, chat, res, count, price, is_sell);
+		if (priv) si.private = true;
 		this.items.set(si.id, si);
 		return si;
 	}
@@ -133,14 +134,14 @@ class Stock {
 		}
 		return {msg, buttons};
 	}
-	add(sell, res, count, price, max_stocks) {
+	add(sell, res, count, price, max_stocks, priv) {
 		let arr;
 		if (sell) arr = this.sell;
 		else arr = this.buy;
 		if (arr.length >= max_stocks) {
 			Telegram.send(this.chat_id, "Достигнуто максимальное число заявок");
 		} else {
-			arr.push(GlobalMarket.addItem(this.chat_id, res, count, price, sell));
+			arr.push(GlobalMarket.addItem(this.chat_id, res, count, price, sell, priv));
 		}
 	}
 	remove(id) {

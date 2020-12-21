@@ -53,7 +53,7 @@ class NPCPlanet {
 				this.ships.m[2].count += 10 + getRandom(10);
 			}
 		}
-		print(this.type, rnd);
+		//print(this.type, rnd);
 	}
 	load(o) {
 		for (const [key, value] of Object.entries(o)) {
@@ -70,10 +70,9 @@ class NPCPlanet {
 		let msg = "";
 		let pn = "";
 		if (this.type < 2) {msg += "Вы обнаружили хлам"; pn = "Хлам";}
-		else if (this.type < 10) {
-			if (getRandom(2) == 0) {msg += "Найдены обломки"; pn = "Обломки";}
-			else {msg += "Обнаружен космический мусор"; pn = "Космический мусор";}
-		} else if (this.type < 15) {msg += "Вы обнаружили астероид"; pn = "Астероид";}
+		else if (this.type < 8) {msg += "Найдены обломки"; pn = "Обломки";}
+		else if (this.type < 10) {msg += "Обнаружен космический мусор"; pn = "Космический мусор";}
+		else if (this.type < 15) {msg += "Вы обнаружили астероид"; pn = "Астероид";}
 		else {msg += "Ура! Неизвестная планета!"; pn = "Неизвестная планета";}
 		if (!first) msg = "<b>"+pn+"</b>";
 		msg += "\n координаты: /e_" + this.owner + "x" + this.id + "\n";
