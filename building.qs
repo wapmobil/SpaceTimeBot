@@ -11,7 +11,7 @@ class Building {
 	description() {return "";}
 	load(o) {
 		for (const [key, value] of Object.entries(o)) {
-			if (typeof value == 'object') {
+			if (typeof value == 'object' && !Array.isArray(value)) {
 				this[key].load(value);
 			} else {
 				this[key] = value;

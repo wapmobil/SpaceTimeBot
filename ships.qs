@@ -17,6 +17,7 @@ class Ship {
 	capacity() {return 0;} // max cargo
 	price   () {return 0;} // each resource
 	energy  () {return 0;} // launch price
+	level   () {return 1;} // requred spaceyard level
 	
 	health  () {return 1;}
 	attack  () {return 0;}
@@ -143,6 +144,7 @@ class InterceptorShip extends Ship {
 	capacity() {return 0;}
 	price   () {return 100;}
 	energy  () {return 100;}
+	level   () {return 2;}
 	
 	health  () {return 40;}
 	attack  () {return 6+3;}
@@ -156,11 +158,12 @@ class CorvetteShip extends Ship {
 	shortName() {return "Кв";}
 	description() {return "Средний боевой корабль";}
 	size    () {return 3;}
-	capacity() {return 0;}
+	capacity() {return 10;}
 	price   () {return 300;}
-	energy  () {return 300;}
+	energy  () {return 200;}
+	level   () {return 3;}
 	
-	health  () {return 200;}
+	health  () {return 250;}
 	attack  () {return 3+3;}
 	defence () {return 15;}
 	damage  () {return {x: 4, d: 20}}
@@ -172,15 +175,16 @@ class FrigateShip extends Ship {
 	shortName() {return "Фр";}
 	description() {return "Крупный боевой корабль";}
 	size    () {return 5;}
-	capacity() {return 0;}
-	price   () {return 400;}
+	capacity() {return 20;}
+	price   () {return 700;}
 	energy  () {return 400;}
+	level   () {return 4;}
 	
-	health  () {return 250;}
+	health  () {return 300;}
 	attack  () {return 4+3;}
-	defence () {return 14;}
+	defence () {return 13;}
 	damage  () {return {x: 6, d: 20}}
-	armor   () {return 6;}
+	armor   () {return 8;}
 }
 
 class CruiserShip extends Ship {
@@ -189,10 +193,11 @@ class CruiserShip extends Ship {
 	description() {return "Боевой крейсер";}
 	size    () {return 6;}
 	capacity() {return 0;}
-	price   () {return 500;}
+	price   () {return 1500;}
 	energy  () {return 500;}
+	level   () {return 5;}
 	
-	health  () {return 500;}
+	health  () {return 600;}
 	attack  () {return 6+3;}
 	defence () {return 12;}
 	damage  () {return {x: 20, d: 10}}
@@ -206,7 +211,8 @@ function ShipModels() {return [new TradeShip(), new SmallShip(), new Interceptor
 const ShipsDescription = function() {
 	let msg = "\n<b> ✈️ Модели кораблей ✈️ </b>\n";
 	for (const s of ShipModels()) {
-		msg += `<b>${s.name()}:</b> ${s.description()}\n`;
+		msg += `<b>${s.name()}:</b>\n`
+		msg += `  ${s.description()}\n`;
 		msg += `  слоты: ${s.size()}\n`;
 		msg += `  вместимость: ${s.capacity()}📦\n`;
 		msg += `  энергия пуска: ${s.energy()}🔋\n`;
@@ -216,6 +222,7 @@ const ShipsDescription = function() {
 		for (let i = 0; i < Resources_base; i++) msg += getResourceCount(i, s.price());
 		msg += "\n";
 		msg += `  время строительства: ${time2text(s.price()*Resources_base)}\n`;
+		msg += `  требеутся 🏗Верфь ${s.level()} уровня\n`;
 	}
 	return msg;
 }();
@@ -230,8 +237,8 @@ class EnemyJunior extends Ship {
 	energy  () {return 0;}
 	
 	health  () {return 10;}
-	attack  () {return 5+3;}
-	defence () {return 10;}
+	attack  () {return 4+3;}
+	defence () {return 12;}
 	damage  () {return {x: 1, d: 8}}
 	armor   () {return 2;}
 }
@@ -242,12 +249,12 @@ class EnemyMiddle extends Ship {
 	description() {return "";}
 	size    () {return 1;}
 	capacity() {return 0;}
-	price   () {return 0;}
+	price   () {return 2;}
 	energy  () {return 0;}
 	
 	health  () {return 100;}
-	attack  () {return 8+3;}
-	defence () {return 12;}
+	attack  () {return 5+3;}
+	defence () {return 14;}
 	damage  () {return {x: 2, d: 20}}
 	armor   () {return 5;}
 }
@@ -258,14 +265,14 @@ class EnemySenior extends Ship {
 	description() {return "";}
 	size    () {return 1;}
 	capacity() {return 0;}
-	price   () {return 0;}
+	price   () {return 25;}
 	energy  () {return 0;}
 	
 	health  () {return 1000;}
 	attack  () {return 10+3;}
-	defence () {return 16;}
-	damage  () {return {x: 8, d: 20}}
-	armor   () {return 12;}
+	defence () {return 10;}
+	damage  () {return {x: 10, d: 8}}
+	armor   () {return 14;}
 }
 
 function enemyShips() {return [new EnemyJunior(), new EnemyMiddle(), new EnemySenior()]}

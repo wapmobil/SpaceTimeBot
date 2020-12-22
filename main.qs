@@ -45,9 +45,11 @@ Telegram.addCommand("📖Инфоцентр/Тест сражения", "battle_
 Telegram.addCommand("✈️Флот", "navy_info");
 Telegram.addCommand("✈️Флот/📖Инфо", "navy_info");
 Telegram.addCommand("✈️Флот/📤Разгрузить", "navy_unload");
-Telegram.addCommand("✈️Флот/🏗Строительство ✈Кораблей", "ship_price");
-Telegram.addCommand("✈️Флот/🏗Строительство ✈Кораблей/🏗Cтроить Грузовик", "ship_create0");
-Telegram.addCommand("✈️Флот/🏗Строительство ✈Кораблей/🏗Cтроить Малютку", "ship_create1");
+Telegram.addCommand("✈️Флот/🏗Строительство ✈Кораблей", "ship_info");
+Telegram.addCommand("✈️Флот/🏗Строительство ✈Кораблей/📖Инфо", "ship_info");
+Telegram.addCommand("✈️Флот/🏗Строительство ✈Кораблей/⚖Сравнение моделей️", "ship_models");
+Telegram.addCommand("✈️Флот/🏗Строительство ✈Кораблей/🏗Cтроить", "ship_create");
+Telegram.addCommand("✈️Флот/🏗Строительство ✈Кораблей/♻️Разобрать", "ship_reclaim");
 Telegram.addCommand("✈️Флот/ℹ️Cправка", "help_ships");
 Telegram.addCommand("✈️Флот/👣️Экспедиции/ℹ️Cправка", "help_expeditions");
 Telegram.addCommand("✈️Флот/👣️Экспедиции/📖Инфо", "info_expeditions");
@@ -74,9 +76,10 @@ Telegram.addCommand("🛠Строительство/🏭Завод/🛠Cтрои
 Telegram.addCommand("🛠Строительство/🏗Верфь", "info_spaceyard");
 Telegram.addCommand("🛠Строительство/🏗Верфь/📖Инфо", "info_spaceyard");
 Telegram.addCommand("🛠Строительство/🏗Верфь/🛠Cтроить 🏗Верфь", "build_spaceyard");
-Telegram.addCommand("🛠Строительство/🏗Верфь/🏗Строительство ✈Кораблей", "ship_price");
-Telegram.addCommand("🛠Строительство/🏗Верфь/🏗Строительство ✈Кораблей/🏗Cтроить Грузовик", "ship_create0");
-Telegram.addCommand("🛠Строительство/🏗Верфь/🏗Строительство ✈Кораблей/🏗Cтроить Малютку", "ship_create1");
+Telegram.addCommand("🛠Строительство/🏗Верфь/🏗Строительство ✈Кораблей", "ship_info");
+Telegram.addCommand("🛠Строительство/🏗Верфь/🏗Строительство ✈Кораблей/📖Инфо", "ship_info");
+Telegram.addCommand("🛠Строительство/🏗Верфь/🏗Строительство ✈Кораблей/⚖Сравнение моделей️", "ship_models");
+Telegram.addCommand("🛠Строительство/🏗Верфь/🏗Строительство ✈Кораблей/🏗Cтроить", "ship_create");
 
 Telegram["receiveMessage"].connect(received);
 Telegram["receiveSpecialMessage"].connect(receivedSpecial);
@@ -261,12 +264,47 @@ function getRandom(max) {
 	return Math.floor(Math.random() * Math.floor(max));
 }
 
-function ship_create(chat_id, ship_index) {
-	Planets.get(chat_id).createShip(ship_index);
+function processShipCreate(chat_id, msg_id, data) {
+	Planets.get(chat_id).createShip(parseInt(data), msg_id);
 }
 
-function ship_create0(chat_id) {ship_create(chat_id, 0);}
-function ship_create1(chat_id) {ship_create(chat_id, 1);}
+function ship_create(chat_id) {
+	const l = Planets.get(chat_id).spaceyard.level;
+	if (l == 0) {
+		Telegram.send(this.chat_id, msg_id, "Требуется построить 🏗Верфь");
+		return;
+	}
+	let btns = [];
+	let sm = ShipModels();
+	for(let i=0; i<sm.length; i++) {
+		if (l >= sm[i].level()) {
+			btns.push({button: sm[i].name(), script: "processShipCreate", data: i});
+		}
+	}
+	btns.push({button: "Отмена", script: "processShipCreate", data: -1});
+	Telegram.send(chat_id, "Выберите корабль для постройки", btns);
+}
+
+function processShipReclaim(chat_id, msg_id, data) {
+	Planets.get(chat_id).reclaimShip(parseInt(data), msg_id);
+}
+
+function ship_reclaim(chat_id) {
+	const l = Planets.get(chat_id).spaceyard.level;
+	if (l == 0) {
+		Telegram.send(this.chat_id, "Требуется построить 🏗Верфь");
+		return;
+	}
+	let btns = [];
+	let sm = ShipModels();
+	for(let i=0; i<sm.length; i++) {
+		if (Planets.get(chat_id).ships.m[i].count > 0) {
+			btns.push({button: sm[i].name(), script: "processShipReclaim", data: i});
+		}
+	}
+	btns.push({button: "Отмена", script: "processShipReclaim", data: -1});
+	Telegram.send(chat_id, "Выберите корабль который нужно ♻️Разобрать", btns);
+}
 
 function find_money(chat_id) {
 	Statistica.mining++;
@@ -713,8 +751,12 @@ function navy_unload(chat_id) {
 	Planets.get(chat_id).navyUnload();
 }
 
-function ship_price(chat_id) {
-	Telegram.send(chat_id, Planets.get(chat_id).infoResources() + Planets.get(chat_id).shipsCountInfo() + ShipsDescription);
+function ship_info(chat_id) {
+	Telegram.send(chat_id, Planets.get(chat_id).buildShipInfo());
+}
+
+function ship_models(chat_id) {
+	Telegram.send(chat_id, ShipsDescription);
 }
 
 
@@ -788,7 +830,7 @@ function processExpeditionRS(chat_id, msg_id, data) {
 
 function info_expeditions(chat_id) {
 	Planets.get(chat_id).navyInfo(true);
-	Telegram.send(chat_id, `Обнаруженные планеты: ${GlobalNPCPlanets.planets.size}`);
+	//Telegram.send(chat_id, `Обнаруженные планеты: ${GlobalNPCPlanets.planets.size}`);
 }
 
 function processExpeditionCommand(chat_id, msg_id, data) {
