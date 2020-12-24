@@ -10,6 +10,7 @@ class Battle {
 		this.msg_id1 = 0;
 		this.msg_id2 = 0;
 		this.round = 0;
+		this.timeout = 0;
 		if (this.nv1.chat_id == 1) this.msg_id1 = 1;
 		if (this.nv2.chat_id == 1) this.msg_id2 = 1;
 	}
@@ -46,7 +47,7 @@ class Battle {
 		return msg;
 	}
 	buttons(chat_id) {
-		if (this.mode == -2) return [{button: "Начать сражение!", script: "battle_start", data: 0}];
+		if (this.mode == -2) return [{button: "Начать сражение!", script: "battle_start", data: 0}, {button: "Отмена", script: "battle_start", data: 1}];
 		let a = [];
 		let bt = [];
 		if (chat_id != this.cur_id) return bt;
@@ -90,6 +91,7 @@ class Battle {
 			if (data == "skip") {
 				if (this.cur_id == this.nv1.chat_id) this.list1[this.mode] = 1;
 				else this.list2[this.mode] = 1;
+				this.timeout = 0;
 			} else if (data != "back") {
 				const oi = parseInt(data);
 				let sz = 0;
@@ -119,6 +121,7 @@ class Battle {
 						this.cur_id = this.nv1.chat_id;
 					else if (!this.list2.some(e => e == 0)) this.newRound();
 				}
+				this.timeout = 0;
 			}
 		} else {
 			const oi = parseInt(data);
@@ -149,6 +152,7 @@ class Battle {
 	}
 	finish(side) {
 		//print("finish");
+		this.timeout = 0;
 		let msg = this.lastAction + "\n<b>Сражение завершено</b>\n";
 		msg += "Прошло раундов: "+this.round+"\n";
 		let msg1 = msg + "<b>Вы победили</b>😀\n";
@@ -169,6 +173,8 @@ class Battle {
 			if (this.nv2.chat_id > 1)
 				Telegram.edit(this.nv2.chat_id, this.msg_id2, msg1);
 		}
+		this.nv1.battle_id = 0;
+		this.nv2.battle_id = 0;
 		this.mode = -3;
 	}
 	attack(s1, s2) {
@@ -190,19 +196,23 @@ class BattleList {
 	addBattle(bt) {
 		this.gid += 1;
 		this.b.set(this.gid, bt);
+		bt.nv1.battle_id = this.gid;
+		bt.nv2.battle_id = this.gid;
 		return this.gid;
 	}
 	stepNPC() {
 		//print("...", this.b.size);
 		let del = [];
 		for (var [key, value] of this.b) {
-			if (value.cur_id == 1) {
+			//print("battle", this.cur_id, this.msg_id1, this. msg_id2);
+			if (value.cur_id == 1 || value.timeout > 60) {
 				const bts = value.buttons(1);
 				let rb = getRandom(bts.length);
 				//print("step", value.cur_id, bts.length, rb);
 				value.step(1, bts[rb].data);
 			}
 			if (value.mode == -3) del.push(key);
+			if (value.mode >= 0) value.timeout++;
 		}
 		for (var k of del) this.b.delete(k);
 	}

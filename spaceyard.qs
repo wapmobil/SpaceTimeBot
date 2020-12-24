@@ -14,12 +14,13 @@ class Spaceyard extends Building {
 	}
 	consumption() {return 16;}
 	buildTimeAdd() {return 3000;}
-	shipsBuildSpeed(l) {return l;}
 	buildShip() {
 		if (this.ship_que.length > 0) {
-			this.ship_bt -= this.shipsBuildSpeed(this.level);
+			this.ship_bt -= 1;
+			//print(this.ship_bt)
 			if (this.ship_bt <= 0) {
 				const ret = this.ship_que.shift();
+				print(ret);
 				if (this.ship_que.length > 0)
 					this.ship_bt = ShipModels()[this.ship_que[0]].price()*Resources_base;
 				return ret;
@@ -29,6 +30,7 @@ class Spaceyard extends Building {
 	}
 	queShip(si) {
 		this.ship_que.push(si);
-		this.ship_bt = ShipModels()[si].price()*Resources_base;
+		if (this.ship_que.length == 1)
+			this.ship_bt = ShipModels()[si].price()*Resources_base;
 	}
 }

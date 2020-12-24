@@ -138,6 +138,7 @@ function timerDone() {
 		if(expedition_cnt == 0) value.expeditionStep();
 	}
 	npc_delay_cnt--;
+	//print(npc_delay_cnt);
 	if (npc_delay_cnt == 0) {
 		Battles.stepNPC();
 		npc_delay_cnt = npc_delay;
@@ -790,9 +791,14 @@ function battle_test(chat_id) {
 function battle_start(chat_id, msg_id, data) {
 	let btid = Planets.get(chat_id).battle;
 	if (Battles.b.has(btid)) {
-		Battles.b.get(btid).start(chat_id, msg_id);
-		const b = Battles.b.get(btid);
-		Telegram.edit(chat_id, msg_id, b.info(chat_id), b.buttons(chat_id));
+		if (data == 0) {
+			Battles.b.get(btid).start(chat_id, msg_id);
+			const b = Battles.b.get(btid);
+			Telegram.edit(chat_id, msg_id, b.info(chat_id), b.buttons(chat_id));
+		}
+		if (data == 1) {
+			Battles.b.get(btid).mode = -3;
+		}
 	}
 }
 

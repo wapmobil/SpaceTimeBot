@@ -7,6 +7,7 @@ class Navy {
 		this.dst = 0;
 		this.type = 0; // 0 - торговля, 1 - атака, 2 - исследование, 3 - ожидание, 4 - помощь/доставка
 		this.aim = 0; // id заявки для торговли
+		this.battle_id = 0;
 		for (let i=0; i<Resources.length; i++)
 			this[Resources[i].name] = 0;
 		this.money = 0;
