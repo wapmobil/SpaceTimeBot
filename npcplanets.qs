@@ -7,6 +7,7 @@ class NPCPlanet {
 		this.ships = new Navy(1);
 		this.ships.type = 1;
 		this.ships.m = enemyShips();
+		this.ships.dst = id;
 		this.type = 0;
 		for(let i=0; i<Resources.length; i++)
 			this[Resources[i].name] = 0;
@@ -60,6 +61,7 @@ class NPCPlanet {
 			if (key == "ships") this.ships.load(value);
 			else this[key] = value;
 		}
+		this.ships.dst = this.id;
 	}
 	totalResources() {
 		let total_res = 0;
@@ -75,7 +77,7 @@ class NPCPlanet {
 		else if (this.type < 15) {msg += "Вы обнаружили астероид"; pn = "Астероид";}
 		else {msg += "Ура! Неизвестная планета!"; pn = "Неизвестная планета";}
 		if (!first) msg = "<b>"+pn+"</b>";
-		msg += "\n координаты: /e_" + this.owner + "x" + this.id + "\n";
+		msg += "\n координаты: /eh_" + this.owner + "x" + this.id + "\n";
 		if (this.totalResources() == 0) {
 			msg += "Здесь нет ничего полезного\n";
 		} else {
@@ -132,5 +134,10 @@ class NPCPlanets {
 	}
 	forgetPlanet(id) {
 		this.planets.delete(id);
+	}
+	fix() {
+		for (var [key, value] of this.planets) {
+			value.ships.battle_id = 0;
+		}
 	}
 }

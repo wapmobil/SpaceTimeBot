@@ -18,6 +18,7 @@ class Ship {
 	price   () {return 0;} // each resource
 	energy  () {return 0;} // launch price
 	level   () {return 1;} // requred spaceyard level
+	is_enemy() {return false;}
 	
 	health  () {return 1;}
 	attack  () {return 0;}
@@ -74,7 +75,10 @@ class Ship {
 				ret.msgf += `\n ☠️ отряд ${ship.name()} уничтожен`;
 			}
 			ret.new_cnt = ship_cnt;
-			ret.new_hp  = ship_hp ;
+			ret.new_hp = ship_hp;
+			ret.parts = killed * ship.price();
+			ret.enemy = ship.is_enemy();
+			//print(killed, ship.price(), ret.parts);
 		}
 		ret.msg = msg;
 		return ret;
@@ -178,7 +182,7 @@ class FrigateShip extends Ship {
 	capacity() {return 20;}
 	price   () {return 700;}
 	energy  () {return 400;}
-	level   () {return 4;}
+	level   () {return 3;}
 	
 	health  () {return 300;}
 	attack  () {return 4+3;}
@@ -195,7 +199,7 @@ class CruiserShip extends Ship {
 	capacity() {return 0;}
 	price   () {return 1500;}
 	energy  () {return 500;}
-	level   () {return 5;}
+	level   () {return 4;}
 	
 	health  () {return 600;}
 	attack  () {return 6+3;}
@@ -235,6 +239,7 @@ class EnemyJunior extends Ship {
 	capacity() {return 0;}
 	price   () {return 0;}
 	energy  () {return 0;}
+	is_enemy() {return true;}
 	
 	health  () {return 10;}
 	attack  () {return 4+3;}
@@ -251,6 +256,7 @@ class EnemyMiddle extends Ship {
 	capacity() {return 0;}
 	price   () {return 2;}
 	energy  () {return 0;}
+	is_enemy() {return true;}
 	
 	health  () {return 100;}
 	attack  () {return 5+3;}
@@ -265,8 +271,9 @@ class EnemySenior extends Ship {
 	description() {return "";}
 	size    () {return 1;}
 	capacity() {return 0;}
-	price   () {return 25;}
+	price   () {return 40;}
 	energy  () {return 0;}
+	is_enemy() {return true;}
 	
 	health  () {return 1000;}
 	attack  () {return 10+3;}

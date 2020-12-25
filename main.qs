@@ -9,7 +9,7 @@ include("mininig.qs")
 include("helps.qs")
 
 
-const isProduction = false;
+const isProduction = true;
 const NPC_count = isProduction ? 2 : 3;
 const npc_delay = 5;
 
@@ -41,7 +41,7 @@ Telegram.addCommand("💸Торговля/📈Биржа ресурсов/🖥С
 Telegram.addCommand("📖Инфоцентр/🌍Планета", "planet_info");
 Telegram.addCommand("📖Инфоцентр/💻Дерево исследований", "research_map");
 Telegram.addCommand("📖Инфоцентр/Статистика", "stat_info");
-Telegram.addCommand("📖Инфоцентр/Тест сражения", "battle_test");
+//Telegram.addCommand("📖Инфоцентр/Тест сражения", "battle_test");
 Telegram.addCommand("✈️Флот", "navy_info");
 Telegram.addCommand("✈️Флот/📖Инфо", "navy_info");
 Telegram.addCommand("✈️Флот/📤Разгрузить", "navy_unload");
@@ -54,7 +54,7 @@ Telegram.addCommand("✈️Флот/ℹ️Cправка", "help_ships");
 Telegram.addCommand("✈️Флот/👣️Экспедиции/ℹ️Cправка", "help_expeditions");
 Telegram.addCommand("✈️Флот/👣️Экспедиции/📖Инфо", "info_expeditions");
 Telegram.addCommand("✈️Флот/👣️Экспедиции/👣Отправить экспедицию", "expedition_start");
-Telegram.addCommand("🛠Строительство/📖Инфо", "planet_info");
+//Telegram.addCommand("🛠Строительство/📖Инфо", "planet_info");
 Telegram.addCommand("🛠Строительство/🍍Ферма", "info_farm");
 Telegram.addCommand("🛠Строительство/🍍Ферма/📖Инфо", "info_farm");
 Telegram.addCommand("🛠Строительство/🍍Ферма/🛠Cтроить 🍍Ферму", "build_farm");
@@ -80,6 +80,9 @@ Telegram.addCommand("🛠Строительство/🏗Верфь/🏗Стро�
 Telegram.addCommand("🛠Строительство/🏗Верфь/🏗Строительство ✈Кораблей/📖Инфо", "ship_info");
 Telegram.addCommand("🛠Строительство/🏗Верфь/🏗Строительство ✈Кораблей/⚖Сравнение моделей️", "ship_models");
 Telegram.addCommand("🛠Строительство/🏗Верфь/🏗Строительство ✈Кораблей/🏗Cтроить", "ship_create");
+Telegram.addCommand("🛠Строительство/🏪Командный центр", "info_comcenter");
+Telegram.addCommand("🛠Строительство/🏪Командный центр/📖Инфо", "info_comcenter");
+Telegram.addCommand("🛠Строительство/🏪Командный центр/🛠Cтроить 🏪Командный центр", "build_comcenter");
 
 Telegram["receiveMessage"].connect(received);
 Telegram["receiveSpecialMessage"].connect(receivedSpecial);
@@ -192,15 +195,15 @@ function receivedSpecial(chat_id, msg) {
 			Planets.get(chat_id).initTradeExpedition(GlobalMarket.get(id));
 			return;
 		}
-		s = "/commande_";
+		s = "/e_cmd_";
 		if (msg.substring(0, s.length) == s) {
-			const id = parseInt(msg.match(/\/commande_(\d+)/i)[1]);
+			const id = parseInt(msg.match(/\/e_cmd_(\d+)/i)[1]);
 			processExpeditionCommand(chat_id, 0, id);
 			return;
 		}
-		s = "/e_";
+		s = "/eh_";
 		if (msg.substring(0, s.length) == s) {
-			let cd = msg.match(/\/e_(\d+)x(\d+)/i);
+			let cd = msg.match(/\/eh_(\d+)x(\d+)/i);
 			//print(cd[1], cd[2]);
 			//const id = parseInt([1]);
 			Planets.get(chat_id).expeditionSupport(parseInt(cd[1]), parseInt(cd[2]));
@@ -453,6 +456,7 @@ function loadNPCPlanets() {
 	if (typeof data == 'string') {
 		m.load(JSON.parse(data));
 	}
+	m.fix();
 	return m;
 }
 
@@ -760,52 +764,42 @@ function ship_models(chat_id) {
 	Telegram.send(chat_id, ShipsDescription);
 }
 
-
-function createTestBattle(chat_id) {
-	let enemy = new Navy(1);
-	enemy.type = 1;
-	enemy.m = enemyShips();
-	enemy.m[0].count = 60;
-	enemy.m[1].count = 30;
-	enemy.m[2].count = 3;
-	let nv = new Navy(chat_id);
-	nv.type = 1;
-	nv.m[1].count = 200;
-	nv.m[2].count = 20;
-	nv.m[3].count = 7;
-	//nv.m[4].count = 5;
-	nv.m[5].count = 4;
-	return new Battle(nv, enemy);
-}
-
-function battle_test(chat_id) {
-	let btid = Planets.get(chat_id).battle;
-	//if (!Battles.b.has(btid)) {
-		btid = Battles.addBattle(createTestBattle(chat_id));
-		Planets.get(chat_id).battle = btid;
-	//}
-	const b = Battles.b.get(btid);
-	Telegram.send(chat_id, b.info(chat_id), b.buttons(chat_id));
-}
-
 function battle_start(chat_id, msg_id, data) {
-	let btid = Planets.get(chat_id).battle;
+	const sid = data.split(" ");
+	if (sid.length != 2)  {
+		print(sid,  data);
+		Telegram.edit(chat_id, msg_id, "Ошибка");
+		return;
+	}
+	let btid = parseInt(sid[0]);
 	if (Battles.b.has(btid)) {
-		if (data == 0) {
+		if (parseInt(sid[1]) == 0) {
 			Battles.b.get(btid).start(chat_id, msg_id);
 			const b = Battles.b.get(btid);
 			Telegram.edit(chat_id, msg_id, b.info(chat_id), b.buttons(chat_id));
 		}
-		if (data == 1) {
-			Battles.b.get(btid).mode = -3;
+		if (parseInt(sid[1]) == 1) {
+			let b = Battles.b.get(btid);
+			b.nv1.battle_id = 0;
+			b.nv2.battle_id = 0;
+			b.mode = -3;
+			Telegram.edit(chat_id, msg_id, "Отменено");
 		}
+	} else {
+		Telegram.edit(chat_id, msg_id, "Ошибка");
 	}
 }
 
 function battle_step(chat_id, msg_id, data) {
-	let btid = Planets.get(chat_id).battle;
+	const sid = data.split(" ");
+	if (sid.length != 2)  {
+		print(sid,  data);
+		Telegram.edit(chat_id, msg_id, "Ошибка");
+		return;
+	}
+	let btid = parseInt(sid[0]);
 	if (Battles.b.has(btid)) {
-		Battles.b.get(btid).step(chat_id, data);
+		Battles.b.get(btid).step(chat_id, sid[1]);
 	}
 }
 

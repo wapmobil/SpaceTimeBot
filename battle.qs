@@ -1,5 +1,7 @@
 include("navy.qs")
 
+const battle_timeout = 60;
+
 class Battle {
 	constructor(nv1, nv2) {
 		this.nv1 = nv1;
@@ -47,7 +49,7 @@ class Battle {
 		return msg;
 	}
 	buttons(chat_id) {
-		if (this.mode == -2) return [{button: "Начать сражение!", script: "battle_start", data: 0}, {button: "Отмена", script: "battle_start", data: 1}];
+		if (this.mode == -2) return [{button: "Начать сражение!", script: "battle_start", data: `${this.nv1.battle_id} 0`}, {button: "Отмена", script: "battle_start", data: `${this.nv1.battle_id} 1`}];
 		let a = [];
 		let bt = [];
 		if (chat_id != this.cur_id) return bt;
@@ -67,14 +69,14 @@ class Battle {
 			if (a[j].length == 0) continue;
 			if (this.mode == -1) {
 				if (list[j] == 0)
-					bt.push({button: a[j], script: "battle_step", data: j});
+					bt.push({button: a[j], script: "battle_step", data: `${this.nv1.battle_id} ${j}`});
 			} else {
-				bt.push({button: `атаковать ${a[j]}`, script: "battle_step", data: j});
+				bt.push({button: `атаковать ${a[j]}`, script: "battle_step", data: `${this.nv1.battle_id} ${j}`});
 			}
 		}
-		if (this.mode >= 0 && chat_id > 1) {
-			bt.push({button: "защищаться", script: "battle_step", data: "skip"});
-			bt.push({button: "назад к выбору отряда", script: "battle_step", data: "back"});
+		if (this.mode >= 0 && chat_id > 1 && this.timeout < battle_timeout) {
+			bt.push({button: "защищаться", script: "battle_step", data: `${this.nv1.battle_id} skip`});
+			bt.push({button: "назад к выбору отряда", script: "battle_step", data: `${this.nv1.battle_id} back`});
 		}
 		return bt;
 	}
@@ -87,11 +89,11 @@ class Battle {
 	}
 	step(chat_id, data) {
 		if (chat_id != this.cur_id) return;
+		if (data != "back") this.timeout = 0;
 		if (this.mode >= 0) {
 			if (data == "skip") {
 				if (this.cur_id == this.nv1.chat_id) this.list1[this.mode] = 1;
 				else this.list2[this.mode] = 1;
-				this.timeout = 0;
 			} else if (data != "back") {
 				const oi = parseInt(data);
 				let sz = 0;
@@ -100,11 +102,11 @@ class Battle {
 				if (oi >=0 && oi < sz) {
 					if (this.cur_id == this.nv1.chat_id) {
 						this.list1[this.mode] = 2;
-						this.attack(this.nv1.m[this.mode], this.nv2.m[oi]);
+						this.attack(this.nv1.m[this.mode], this.nv2.m[oi], this.nv2.dst);
 						if (this.nv2.m[oi].count == 0) this.list2[oi] = -1;
 					} else {
 						this.list2[this.mode] = 2;
-						this.attack(this.nv2.m[this.mode], this.nv1.m[oi]);
+						this.attack(this.nv2.m[this.mode], this.nv1.m[oi], this.nv2.dst);
 						if (this.nv1.m[oi].count == 0) this.list1[oi] = -1;
 					}
 					if (this.checkFinish()) return;
@@ -121,7 +123,6 @@ class Battle {
 						this.cur_id = this.nv1.chat_id;
 					else if (!this.list2.some(e => e == 0)) this.newRound();
 				}
-				this.timeout = 0;
 			}
 		} else {
 			const oi = parseInt(data);
@@ -177,11 +178,28 @@ class Battle {
 		this.nv2.battle_id = 0;
 		this.mode = -3;
 	}
-	attack(s1, s2) {
+	attack(s1, s2, npc_id) {
 		let res_1_hit_2 = s1.hitTo(s2);
 		let res_2_hit_1 = s2.hitTo(s1);
 		//this.lastAction = `${res_1_hit_2.msg}\n${res_1_hit_2.msgf}\n`;
 		this.lastAction = `${res_1_hit_2.msg}\n${res_2_hit_1.msg}\n${res_1_hit_2.msgf}${res_2_hit_1.msgf}\n`;
+//		/print(npc_id);
+		if (npc_id > 0) {
+			let npc = GlobalNPCPlanets.getPlanet(npc_id);
+			//print(res_1_hit_2.parts, res_2_hit_1.parts);
+			if (res_1_hit_2.parts > 0) {
+				if (res_1_hit_2.enemy) npc.ino_tech += res_1_hit_2.parts;
+				else {
+					for(let i=0; i<Resources_base; i++) npc[Resources[i].name] += res_1_hit_2.parts;
+				}
+			}
+			if (res_2_hit_1.parts > 0) {
+				if (res_2_hit_1.enemy) npc.ino_tech += res_2_hit_1.parts;
+				else {
+					for(let i=0; i<Resources_base; i++) npc[Resources[i].name] += res_2_hit_1.parts;
+				}
+			}
+		}
 		s2.applyHit(res_1_hit_2);
 		s1.applyHit(res_2_hit_1);
 	}
@@ -205,14 +223,15 @@ class BattleList {
 		let del = [];
 		for (var [key, value] of this.b) {
 			//print("battle", this.cur_id, this.msg_id1, this. msg_id2);
-			if (value.cur_id == 1 || value.timeout > 60) {
-				const bts = value.buttons(1);
+			if (value.cur_id == 1 || value.timeout > battle_timeout) {
+				const bts = value.buttons(value.cur_id);
 				let rb = getRandom(bts.length);
 				//print("step", value.cur_id, bts.length, rb);
-				value.step(1, bts[rb].data);
+				value.step(value.cur_id, bts[rb].data.split(" ")[1]);
 			}
 			if (value.mode == -3) del.push(key);
-			if (value.mode >= 0) value.timeout++;
+			if (value.mode >= -1) value.timeout++;
+			//print(value.timeout);
 		}
 		for (var k of del) this.b.delete(k);
 	}

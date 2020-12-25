@@ -16,7 +16,7 @@ class Spaceyard extends Building {
 	buildTimeAdd() {return 3000;}
 	buildShip() {
 		if (this.ship_que.length > 0) {
-			this.ship_bt -= 1;
+			this.ship_bt -= isProduction ? 1 : 100;
 			//print(this.ship_bt)
 			if (this.ship_bt <= 0) {
 				const ret = this.ship_que.shift();
