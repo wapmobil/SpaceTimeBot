@@ -202,13 +202,13 @@ class MiningLabyrinth {
 
 
 class MiningGame {
-	constructor() {
+	constructor(boost) {
 		let mapSize = 13;
 		this.pl = new MiningPlayer(1, 1);
 		this.plMap = new MiningLabyrinth(mapSize);
 		this.plMap.dig(this.pl.x, this.pl.y, 3);
 		this.active_bomb = false;
-		
+		this.boost = boost;
 	}
 
 
@@ -308,16 +308,16 @@ class MiningGame {
 				this.pl.bombs++;
 				break;
 			case 6:
-				this.pl.money += spawnMiningCells[this.plMap.map[x][y]].value;
+				this.pl.money += this.boost * spawnMiningCells[this.plMap.map[x][y]].value;
 				break;
 			case 7:
-				this.pl.money += spawnMiningCells[this.plMap.map[x][y]].value;
+				this.pl.money += this.boost * spawnMiningCells[this.plMap.map[x][y]].value;
 				break;
 			case 8:
 			case 9:
 			case 10:
 				this.pl.hp    -= spawnMiningCells[this.plMap.map[x][y]].health;
-				this.pl.money += spawnMiningCells[this.plMap.map[x][y]].value;
+				this.pl.money += this.boost * spawnMiningCells[this.plMap.map[x][y]].value;
 				break;
 			}
 			if (x == this.plMap.mapsize - 2 && y == this.plMap.mapsize - 1) {

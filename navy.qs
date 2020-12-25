@@ -71,7 +71,7 @@ class Navy {
 	}
 	remove(index, cnt) {
 		this.m[index].count -= cnt;
-		if (this.m[index] < 0) {
+		if (this.m[index].count < 0) {
 			this.m[index].count = 0;
 			return false;
 		}

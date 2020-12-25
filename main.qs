@@ -9,10 +9,11 @@ include("mininig.qs")
 include("helps.qs")
 
 
-const isProduction = true;
+const isProduction = false;
 const NPC_count = isProduction ? 2 : 3;
 const npc_delay = 5;
 const TgBotName = isProduction ? "SpaceTimeStrategyBot" : "SHS503bot";
+const mining_timeout = isProduction ? 300 : 30;
 
 buttonLoad["clicked()"].connect(on_buttonLoad_clicked);
 buttonSave["clicked()"].connect(on_buttonSave_clicked);
@@ -321,8 +322,14 @@ function ship_reclaim(chat_id) {
 }
 
 function find_money(chat_id) {
+	let tm = Planets.get(chat_id).miningTimeout;
+	if (tm != 0) {
+		Telegram.send(chat_id, "Подземелье ещё занято, нужно подождать " + time2text(tm));
+		return;
+	}
 	Statistica.mining++;
-	MiningGames.set(chat_id, new MiningGame(chat_id));
+	Planets.get(chat_id).miningTimeout = mining_timeout;
+	MiningGames.set(chat_id, new MiningGame(Planets.get(chat_id).miningBoost()));
 	Telegram.send(chat_id, "Подземелье.\n" + MiningGames.get(chat_id).show(), miningButtons);
 	//let pr = getRandom(3);
 	//pr *= p.facility.level*p.facility.level+1;
@@ -423,11 +430,13 @@ function loadPlanets() {
 			let p = new Planet(item.chat_id);
 			p.load(item);
 			p.fixSience();
-			if (p.facility.level == 0 && p.farm.level < 2 && p.food == p.storage.capacity(p.storage.level)) {
-				print("remove player" + p.chat_id);
-			} else {
+			//if (p.facility.level == 0 && 
+			//	((p.farm.level < 2 && p.food == p.storage.capacity(p.storage.level)) ||
+			//	 p.farm.level == 0)) {
+			//	print("remove player" + p.chat_id);
+			//} else {
 	  			m.set(item.chat_id, p);
-	  		}
+	  		//}
 		});
 	}
 	
@@ -798,6 +807,11 @@ function battle_start(chat_id, msg_id, data) {
 			b.nv1.battle_id = 0;
 			b.nv2.battle_id = 0;
 			b.mode = -3;
+			if (b.nv1.type == 4) {
+				b.nv1.dst = b.nv1.chat_id;
+				b.nv1.type = 0;
+				b.nv1.arrived = 500;
+			}
 			Telegram.edit(chat_id, msg_id, "Отменено");
 		}
 	} else {

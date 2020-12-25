@@ -47,6 +47,7 @@ class Planet {
 		this.enabled_exp = 0;
 		this.max_exp = 1;
 		this.max_stocks = 3;
+		this.miningTimeout = 0;
 		if (!isProduction) {
 			this.money = 9999999;
 			this.food = 9999999;
@@ -153,6 +154,10 @@ class Planet {
 		this.money -= cnt/100;
 	}
 	
+	miningBoost() {
+		return Math.pow(2, this.facility.level);
+	}
+	
 	info(ret) { // отобразить текущее состояние планеты
 		let msg = this.infoResources();
 		const bds = this.getBuildings();
@@ -215,6 +220,7 @@ class Planet {
 			this.ships.m[new_ship].count += 1;
 			Telegram.send(this.chat_id, `Корабль ${this.ships.m[new_ship].name()} собран`);
 		}
+		if (this.miningTimeout > 0) this.miningTimeout--;
 	}
 	
 	isBuilding() {
