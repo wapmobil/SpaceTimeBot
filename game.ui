@@ -29,7 +29,7 @@
    <item>
     <widget class="SHSTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="tabService">
       <attribute name="title">
@@ -160,6 +160,7 @@
          <property name="variables">
           <stringlist>
            <string>dayly_players=players</string>
+           <string>battles_day=battles</string>
           </stringlist>
          </property>
         </widget>
@@ -179,6 +180,12 @@
            <string>stock_items=stocks</string>
            <string>money_total=total money</string>
            <string>battle_active=battles</string>
+           <string>resource1=композиты</string>
+           <string>resource2=механизмы</string>
+           <string>resource3=реагенты</string>
+           <string>resource4=технологии</string>
+           <string>expeditions_now=экспедиции</string>
+           <string>ships_total_slots=корабли</string>
           </stringlist>
          </property>
         </widget>
@@ -197,10 +204,12 @@
            <string>active_players=players</string>
            <string>messages=messages</string>
            <string>mining=mining</string>
-           <string>expeditions_total=expeditions</string>
+           <string>expeditions_trade=trade</string>
            <string>battle_win=battle win</string>
            <string>battle_lose=battle lose</string>
            <string>battle_rounds=rounds</string>
+           <string>expeditions_rs=exp_found</string>
+           <string>ships_created=ships_create</string>
           </stringlist>
          </property>
         </widget>
@@ -250,8 +259,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>919</width>
-            <height>746</height>
+            <width>98</width>
+            <height>44</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_7">

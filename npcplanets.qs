@@ -13,6 +13,7 @@ class NPCPlanet {
 			this[Resources[i].name] = 0;
 	}
 	generate(x) {
+		Statistica.expeditions_rs++;
 		this.type = getRandom(20);
 		if (this.type < 1) return;
 		let rnd = Math.floor(this.type / 5) + 1;

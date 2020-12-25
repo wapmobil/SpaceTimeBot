@@ -20,9 +20,10 @@ class Spaceyard extends Building {
 			//print(this.ship_bt)
 			if (this.ship_bt <= 0) {
 				const ret = this.ship_que.shift();
-				print(ret);
+				//print(ret);
 				if (this.ship_que.length > 0)
 					this.ship_bt = ShipModels()[this.ship_que[0]].price()*Resources_base;
+				Statistica.ships_created++;
 				return ret;
 			}
 		}

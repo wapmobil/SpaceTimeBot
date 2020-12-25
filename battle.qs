@@ -212,6 +212,7 @@ class BattleList {
 		this.b = new Map();
 	}
 	addBattle(bt) {
+		StatisticaDay.battles_day++;
 		this.gid += 1;
 		this.b.set(this.gid, bt);
 		bt.nv1.battle_id = this.gid;

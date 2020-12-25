@@ -20,7 +20,7 @@ class StockItem {
 		let msg = "";
 		if(this.is_sell) msg = `<b>Продаю:</b>\n`;
 		else msg = `<b>Куплю:</b>\n`;
-		if (this.private && this.client == 0) msg += `Скрытая, доступна по ссылке \n/go_${this.id} \n`;
+		if (this.private && this.client == 0) msg += `Скрытая, доступна по ссылке \nhttps://t.me/${TgBotName}?start=go_${this.id} \n`;
 		msg += `    ${getResourceInfo(this.res, this.count)} за ${money2text(this.price*this.count)} (${money2text(this.price)}/${Resources_icons[this.res]})`;
 		if(ext && this.client != 0) msg += " 🔒";
 		return msg+"\n";

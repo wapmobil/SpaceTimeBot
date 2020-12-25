@@ -300,7 +300,7 @@ class Planet {
 			this.build_speed = 500;
 			this.max_exp = 10;
 			for(let i=0; i<Resources_base; i++)
-				this[Resources[i].name] += 1000;
+				this[Resources[i].name] = 3000;
 			this.ino_tech = 100;
 		}
 		//this.food = this.money;
@@ -558,7 +558,7 @@ class Planet {
 		//print(data, id, sid);
 		if (id[1] > 0) {
 			if (tmpNavy.get(this.chat_id).count(id[0]) < this.ships.count(id[0])) {
-				tmpNavy.get(this.chat_id).add(id[0], id[1]);
+				tmpNavy.get(this.chat_id).add(id[0], Math.min(id[1], this.ships.count(id[0])));
 			} else return;
 		} else {
 			if (tmpNavy.get(this.chat_id).count(id[0]) > 0) {
@@ -873,7 +873,7 @@ class Planet {
 		} else {
 			if (id[1] > 0) {
 				if (tmpNavy.get(this.chat_id).count(id[0]) < this.ships.count(id[0])) {
-					tmpNavy.get(this.chat_id).add(id[0], id[1]);
+					tmpNavy.get(this.chat_id).add(id[0], Math.min(id[1], this.ships.count(id[0])));
 				} else return;
 			} else {
 				if (tmpNavy.get(this.chat_id).count(id[0]) > 0) {
@@ -925,7 +925,6 @@ class Planet {
 		this.ships.split(nv);
 		this.expeditions.push(nv);
 		tmpNavy.delete(this.chat_id);
-		Statistica.expeditions_rs++;
 		let msg = "";
 		if (nv.type == 2) msg = "Экспедиция успешно отправлена!";
 		else msg = "Флот отправлен";
@@ -1013,7 +1012,7 @@ class Planet {
 			}
 			if (cmd_id == 3) {
 				let msg = "\n Для отправки флота нажмите:\n";
-				msg += "/eh_" + this.chat_id + "x" + npc.id + "\n";
+				msg += "https://t.me/"+TgBotName+"?start=eh_" + this.chat_id + "x" + npc.id + "\n";
 				msg += "Данной ссылкой можно поделиться с другими игроками, и тогда они смогут забрать ресурсы и сразиться с инопланетянами.\n";
 				msg += "Важно: не покидайте это место экспедиционными кораблями, иначе подкрепление не сможет его найти и вернётся обратно.";
 				Telegram.send(this.chat_id, npc.info() + "\n" + msg);

@@ -10,11 +10,12 @@ var Statistica = {
 	battle_win       : 0,
 	battle_lose      : 0,
 	battle_rounds    : 0,
-	expeditions_rs   : 0
+	expeditions_rs   : 0,
+	ships_created    : 0
 	};
 
 var StatisticaDay = {
-	expeditions : 0
+	battles_day : 0
 };
 
 var PlanetStats = new Map();
@@ -32,10 +33,18 @@ function statisticStep(on) {
 		let arr = new Array();
 		let money = 0;
 		for(let i=0; i<Resources.length; i++) arr.push(0);
+		let exps_now = 0;
+		let ship_slots = 0;
 		for (var [key, value] of Planets) {
 			for(let i=0; i<Resources.length; i++) arr[i] += value[Resources[i].name];
 			money += value.money;
+			for (let e of value.expeditions) {
+				if (e.type == 2) exps_now++;
+			}
+			ship_slots += value.totalShipsSize();
 		}
+		expeditions_now = exps_now;
+		ships_total_slots = ship_slots;
 		money_total = money;
 		active_players = PlanetStats.size;
 		dayly_players = PlanetStatsDay.size;

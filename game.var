@@ -21,3 +21,7 @@ resource1 = {1 y} #s
 resource2 = {1 y} #s 
 resource3 = {1 y} #s 
 resource4 = {1 y} #s 
+expeditions_now = {1 y} #s 
+battles_day = {1 y} #s 
+ships_total_slots = {1 y} #s 
+ships_created = {1 y} #s 

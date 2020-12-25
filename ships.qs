@@ -76,7 +76,7 @@ class Ship {
 			}
 			ret.new_cnt = ship_cnt;
 			ret.new_hp = ship_hp;
-			ret.parts = killed * ship.price();
+			ret.parts = Math.floor(killed * ship.price() / 2);
 			ret.enemy = ship.is_enemy();
 			//print(killed, ship.price(), ret.parts);
 		}
@@ -161,7 +161,7 @@ class CorvetteShip extends Ship {
 	name() {return "Корвет";}
 	shortName() {return "Кв";}
 	description() {return "Средний боевой корабль";}
-	size    () {return 3;}
+	size    () {return 4;}
 	capacity() {return 10;}
 	price   () {return 300;}
 	energy  () {return 200;}
@@ -170,8 +170,8 @@ class CorvetteShip extends Ship {
 	health  () {return 250;}
 	attack  () {return 3+3;}
 	defence () {return 15;}
-	damage  () {return {x: 4, d: 20}}
-	armor   () {return 6;}
+	damage  () {return {x: 5, d: 20}}
+	armor   () {return 8;}
 }
 
 class FrigateShip extends Ship {
@@ -180,15 +180,15 @@ class FrigateShip extends Ship {
 	description() {return "Крупный боевой корабль";}
 	size    () {return 5;}
 	capacity() {return 20;}
-	price   () {return 700;}
+	price   () {return 500;}
 	energy  () {return 400;}
 	level   () {return 3;}
 	
 	health  () {return 300;}
 	attack  () {return 4+3;}
 	defence () {return 13;}
-	damage  () {return {x: 6, d: 20}}
-	armor   () {return 8;}
+	damage  () {return {x: 16, d: 10}}
+	armor   () {return 10;}
 }
 
 class CruiserShip extends Ship {
@@ -197,14 +197,14 @@ class CruiserShip extends Ship {
 	description() {return "Боевой крейсер";}
 	size    () {return 6;}
 	capacity() {return 0;}
-	price   () {return 1500;}
+	price   () {return 1000;}
 	energy  () {return 500;}
 	level   () {return 4;}
 	
 	health  () {return 600;}
 	attack  () {return 6+3;}
 	defence () {return 12;}
-	damage  () {return {x: 20, d: 10}}
+	damage  () {return {x: 50, d: 10}}
 	armor   () {return 10;}
 }
 

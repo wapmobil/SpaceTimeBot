@@ -12,6 +12,7 @@ include("helps.qs")
 const isProduction = true;
 const NPC_count = isProduction ? 2 : 3;
 const npc_delay = 5;
+const TgBotName = isProduction ? "SpaceTimeStrategyBot" : "SHS503bot";
 
 buttonLoad["clicked()"].connect(on_buttonLoad_clicked);
 buttonSave["clicked()"].connect(on_buttonSave_clicked);
@@ -186,8 +187,17 @@ function received(chat_id, msg) {
 	}
 }
 
-function receivedSpecial(chat_id, msg) {
-	if (Planets.has(chat_id)) {
+function receivedSpecial(chat_id, payload) {
+	const st = "/start ";
+	let msg = "";
+	//print(payload);
+	if (payload.substring(0, st.length) == st) {
+		let cd = payload.split(" ")[1];
+		msg = "/"+cd;
+	} else {
+		msg = payload;
+	}
+	if (Planets.has(chat_id) && msg.length > 0) {
 		let s = "";
 		s = "/go_";
 		if (msg.substring(0, s.length) == s) {
@@ -413,9 +423,14 @@ function loadPlanets() {
 			let p = new Planet(item.chat_id);
 			p.load(item);
 			p.fixSience();
-	  		m.set(item.chat_id, p);
+			if (p.facility.level == 0 && p.farm.level < 2 && p.food == p.storage.capacity(p.storage.level)) {
+				print("remove player" + p.chat_id);
+			} else {
+	  			m.set(item.chat_id, p);
+	  		}
 		});
 	}
+	
 	spinPlayers.setValue(m.size);
 	return m;
 }
