@@ -562,12 +562,13 @@ class Planet {
 		}
 		const id = [parseInt(sid[0]), parseInt(sid[1])];
 		//print(data, id, sid);
+		const scnt = tmpNavy.get(this.chat_id).count(id[0]);
 		if (id[1] > 0) {
-			if (tmpNavy.get(this.chat_id).count(id[0]) < this.ships.count(id[0])) {
-				tmpNavy.get(this.chat_id).add(id[0], Math.min(id[1], this.ships.count(id[0])));
+			if (scnt < this.ships.count(id[0])) {
+				tmpNavy.get(this.chat_id).add(id[0], Math.min(id[1], this.ships.count(id[0])-scnt));
 			} else return;
 		} else {
-			if (tmpNavy.get(this.chat_id).count(id[0]) > 0) {
+			if (scnt > 0) {
 				tmpNavy.get(this.chat_id).remove(id[0], -id[1]);
 			} else return;
 		}
@@ -877,12 +878,13 @@ class Planet {
 			if (arv < 60*60) arv = 60*60;
 			tmpNavy.get(this.chat_id).arrived = arv;
 		} else {
+			const scnt = tmpNavy.get(this.chat_id).count(id[0]);
 			if (id[1] > 0) {
-				if (tmpNavy.get(this.chat_id).count(id[0]) < this.ships.count(id[0])) {
-					tmpNavy.get(this.chat_id).add(id[0], Math.min(id[1], this.ships.count(id[0])));
+				if (scnt < this.ships.count(id[0])) {
+					tmpNavy.get(this.chat_id).add(id[0], Math.min(id[1], this.ships.count(id[0]) - scnt));
 				} else return;
 			} else {
-				if (tmpNavy.get(this.chat_id).count(id[0]) > 0) {
+				if (scnt > 0) {
 					tmpNavy.get(this.chat_id).remove(id[0], -id[1]);
 				} else return;
 			}
