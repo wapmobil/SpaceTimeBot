@@ -9,7 +9,7 @@ include("mininig.qs")
 include("helps.qs")
 
 
-const isProduction = false;
+const isProduction = true;
 const NPC_count = isProduction ? 2 : 3;
 const npc_delay = 5;
 const TgBotName = isProduction ? "SpaceTimeStrategyBot" : "SHS503bot";
@@ -250,6 +250,7 @@ function info_solar(chat_id) {infoSomething(chat_id, "solar");}
 function info_factory(chat_id) {infoSomething(chat_id, "factory");}
 function info_accum(chat_id) {infoSomething(chat_id, "accum");}
 function info_spaceyard(chat_id) {infoSomething(chat_id, "spaceyard");}
+function info_comcenter(chat_id) {infoSomething(chat_id, "comcenter");}
 
 function buildSomething(chat_id, bl) {
 	//let p = Planets.get(chat_id);
@@ -274,6 +275,7 @@ function build_factory(chat_id)   {buildSomething(chat_id, "factory");}
 function build_accum(chat_id)     {buildSomething(chat_id, "accum");}
 function build_solar(chat_id)     {buildSomething(chat_id, "solar");}
 function build_spaceyard(chat_id) {buildSomething(chat_id, "spaceyard");}
+function build_comcenter(chat_id) {buildSomething(chat_id, "comcenter");}
 
 function getRandom(max) {
 	return Math.floor(Math.random() * Math.floor(max));
@@ -400,6 +402,7 @@ function stat_info(chat_id) {
 	for(let i=0; i<Resources.length; i++) msg += getResourceInfo(i, arr[i]) + "\n";
 	msg += `Деньги: ${money2text(money)}\n`;
 	msg += `Экспедиций в процессе ${exps}\n`;
+	msg += `Сражения ${Battles.b.size}\n`;
 	Telegram.send(chat_id, msg);
 }
 

@@ -8,6 +8,7 @@ include("storage.qs")
 include("facility.qs")
 include("farm.qs")
 include("energystorage.qs")
+include("comcenter.qs")
 
 // Планета
 class Planet {
@@ -26,6 +27,8 @@ class Planet {
 		this.factory.locked = true;
 		this.spaceyard = new Spaceyard(id);
 		this.spaceyard.locked = true;
+		this.comcenter = new Comcenter(id);
+		this.comcenter.locked = true;
 		this.chat_id = id;
 		this.build_speed = 1;
 		this.sience_speed = 1;
@@ -315,10 +318,10 @@ class Planet {
 		//this.money = 0;
 		//this.factory.type = getRandom(3);
 		//this.storage.mult = 1;
-		//this.sience.forEach(r => {
-		//	if (r.id == 1) 
-		//		this.eco_power();
-		//});
+		this.sience.forEach(r => {
+			if (r.id == 21) 
+				this.enable_сommcenter();
+		});
 		for (let value of this.expeditions) {
 			value.battle_id = 0;
 			if (value.type == 3) {
@@ -387,6 +390,11 @@ class Planet {
 	
 	increase_market() {
 		this.max_stocks += 2;
+	}
+	
+	enable_сommcenter() {
+		Telegram.send(this.chat_id, "Поздравляем, теперь ты можешь построить 🏪Командный центр");
+		this.comcenter.locked = false;
 	}
 	
 	addStockTask(sell, res, count, price, priv) {

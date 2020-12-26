@@ -8,7 +8,7 @@ class Comcenter extends Building {
 		return msg;
 	}
 	cost() {
-		return 10000000 * this.level;
+		return 10000000 * this.level + (this.level == 0 ? 1 : 0);
 	}
 	info() {
 		let msg = this.infoHeader()+`\n`;
