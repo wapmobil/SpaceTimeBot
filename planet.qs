@@ -72,6 +72,7 @@ class Planet {
 		if (!this.accum.locked) a.push(this.accum);
 		if (!this.factory.locked) a.push(this.factory);
 		if (!this.spaceyard.locked) a.push(this.spaceyard);
+		if (!this.comcenter.locked) a.push(this.comcenter);
 		return a;
 	}
 	
@@ -179,6 +180,7 @@ class Planet {
 		this.factory.step(this.build_speed);
 		this.accum.step(this.build_speed);
 		this.spaceyard.step(this.build_speed);
+		this.comcenter.step(this.build_speed);
 		this.accum.add(this.energy());
 		if (this.food < this.storage.capacity(this.storage.level)) {
 			this.food += this.farm.level - this.facility.eat_food(this.facility.level);
