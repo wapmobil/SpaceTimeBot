@@ -34,6 +34,7 @@ class Planet {
 		this.sience_speed = 1;
 		this.energy_eco = 1;
 		this.sience = new Array();
+		this.sience2 = new Array();
 		this.factory.type = getRandom(Resources_base);
 		this.factory.prod_cnt = 0;
 		this.accum.energy = 0;
@@ -78,7 +79,7 @@ class Planet {
 	
 	load(o) {
 		for (const [key, value] of Object.entries(o)) {
-			if (typeof value == 'object' && this[key] && key != 'sience') {
+			if (typeof value == 'object' && this[key] && key != 'sience' && key != 'sience2') {
 				if (key == 'expeditions') {
 					if (Array.isArray(value)) {
 						for (const v of value) {
@@ -255,15 +256,15 @@ class Planet {
 	}
 	
 	sienceInfo() {
-		return SieceTree.reduce(printSienceTree, "Исследования:\n", Research.Traversal.DepthFirst, this.sience);
+		return SieceTree.reduce(printSienceTree, "Исследования:\n", ResearchBase.Traversal.DepthFirst, this.sience);
 	}
 	
 	sienceList() {
-		return SieceTree.reduce(getSienceButtons, [], Research.Traversal.Actual, this.sience);
+		return SieceTree.reduce(getSienceButtons, [], ResearchBase.Traversal.Actual, this.sience);
 	}
 	
 	sienceListExt() {
-		return SieceTree.reduce(printSienceDetail, "", Research.Traversal.Actual, this.sience);
+		return SieceTree.reduce(printSienceDetail, "", ResearchBase.Traversal.Actual, this.sience);
 	}
 	
 	isSienceActive() {
@@ -320,10 +321,10 @@ class Planet {
 		//this.money = 0;
 		//this.factory.type = getRandom(3);
 		//this.storage.mult = 1;
-		this.sience.forEach(r => {
-			if (r.id == 21) 
-				this.enable_сommcenter();
-		});
+		//this.sience.forEach(r => {
+		//	if (r.id == 21) 
+		//		this.enable_сommcenter();
+		//});
 		for (let value of this.expeditions) {
 			value.battle_id = 0;
 			if (value.type == 3) {

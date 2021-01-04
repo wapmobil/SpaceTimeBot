@@ -160,6 +160,8 @@ class Battle {
 		let msg2 = msg + "<b>Вы проиграли</b>😒\n"; 
 		if (side == 1) {
 			Statistica.battle_win++;
+			this.nv1.money += this.nv2.money;
+			this.nv2.money = 0;
 			msg1 += this.nv1.info("Оставшиеся корабли");
 			if (this.nv1.chat_id > 1)
 				Telegram.edit(this.nv1.chat_id, this.msg_id1, msg1);
@@ -168,6 +170,8 @@ class Battle {
 		}
 		if (side == 2) {
 			Statistica.battle_lose++;
+			this.nv2.money += this.nv1.money;
+			this.nv1.money = 0;
 			msg1 += this.nv2.info("Оставшиеся корабли");
 			if (this.nv1.chat_id > 1)
 				Telegram.edit(this.nv1.chat_id, this.msg_id1, msg2);

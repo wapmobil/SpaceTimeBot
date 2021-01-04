@@ -1,4 +1,4 @@
-class Research {
+class ResearchBase {
 	constructor (id, name, desc, func, time, cost, money) {
 		this.id = id;
 		this.name = name;
@@ -8,9 +8,6 @@ class Research {
 		this.cost = cost;
 		this.money = money;
 		this.children = [];
-	}
-	moneyCost() {
-		return this.money > 0 ? money2text(this.money) : "";
 	}
 
 	add (...children) {
@@ -25,7 +22,7 @@ class Research {
 		return this.children[this.children.length-1];
 	}
 
-	traverse (callback, traversal = Research.Traversal.DepthFirst, cursience = [], prefix = "") {
+	traverse (callback, traversal = ResearchBase.Traversal.DepthFirst, cursience = [], prefix = "") {
 		traversal.call(this, callback, cursience, prefix);
 		return this;
 	}
@@ -51,17 +48,34 @@ class Research {
 	includes (value) {
 		return this.some(n => n.value === value);
 	}
-
+	info() {
+		return "";
+	}
+	
 }
 
+class Research extends ResearchBase {
+	moneyCost() {
+		return this.money > 0 ? money2text(this.money) : "";
+	}
+	info() {
+		return `${food2text(this.cost)} ${this.moneyCost()} ${time2text(this.time)}`;
+	}
+}
 
-Research.Traversal = {
+class Research2 extends ResearchBase {
+	info() {
+		return `${getResourceCount(4, this.cost)} ${time2text(this.time)}`;
+	}
+}
+
+ResearchBase.Traversal = {
 	//BreadthFirst: function(callback) {
 	//	let nodes = [this];
 	//	while (nodes.length > 0) {
 	//		const current = nodes.shift();
 	//		callback(current);
-	//		nodes = nodes.concat(current.children,  Research.Traversal.BreadthFirst);
+	//		nodes = nodes.concat(current.children,  ResearchBase.Traversal.BreadthFirst);
 	//	}
 	//},
 	DepthFirst: function(callback, cursience, prefix = "") {
@@ -74,7 +88,7 @@ Research.Traversal = {
 			let pref = prefix;
 			if (i == this.children.length-1) pref += " └";
 			else pref += " ├"
-			this.children[i].traverse(callback, Research.Traversal.DepthFirst, cursience, pref);
+			this.children[i].traverse(callback, ResearchBase.Traversal.DepthFirst, cursience, pref);
 		}
 	},
 	Actual: function(callback, cursience, prefix = "") {
@@ -82,7 +96,7 @@ Research.Traversal = {
 		if (!er) {
 			callback(this, prefix);
 		} else if (er.time == 0) {
-			this.children.forEach(n => n.traverse(callback, Research.Traversal.Actual, cursience));
+			this.children.forEach(n => n.traverse(callback, ResearchBase.Traversal.Actual, cursience));
 		} else callback(this, prefix);
 	}
 };
@@ -111,7 +125,7 @@ const printSienceTree = function(ret, res, cursience, prefix) {
 			pref_price = " │";
 		ret += pref_price + "   ";
 		ret += "  ";
-		ret += "</code>" + `${food2text(res.cost)} ${res.moneyCost()} ${time2text(res.time)}`;
+		ret += "</code>" + res.info();
 		ret += '\n';
 	}
 	return ret;
@@ -123,7 +137,7 @@ const getSienceButtons = function(a, r) {
 }
 
 const printSienceDetail = function(a, r, cursience) {
-	a += `<b>${r.name}</b> - ${food2text(r.cost)} ${r.moneyCost()} ${time2text(r.time)}\n`;
+	a += `<b>${r.name}</b> - ${r.info()}\n`;
 	const er = cursience.find(cr => cr.id == r.id);
 	if (er) {
 		if (er.time > 0)
@@ -160,4 +174,8 @@ const SieceTree = function () {
 	return s;
 }();
 
-
+const InoTechTree = function () {
+	let s = new Research(1, "Дополнительная экспедиция", "Позволяет отправлять 2 экспедиции", 12345, 10);
+	
+	return s;
+}();

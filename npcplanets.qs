@@ -15,16 +15,16 @@ class NPCPlanet {
 	generate(x) {
 		Statistica.expeditions_rs++;
 		this.type = getRandom(20);
-		if (this.type < 1) return;
+		//if (this.type < 1) return;
 		let rnd = Math.floor(this.type / 5) + 1;
-		let crnd = 0;
-		if (this.type >= 5) crnd += 5;
-		if (this.type >= 10) crnd += 5;
+		let crnd = 1;
+		if (this.type >= 5) crnd += 10;
+		if (this.type >= 10) crnd += 10;
 		if (this.type >= 11) {
 			this.ships.m[0].count = getRandom(this.type);
 		}
 		if (this.type >= 15) {
-			crnd = 0;
+			//crnd = 0;
 			rnd += 1;
 		}
 		if (this.type == 16) {
@@ -39,7 +39,7 @@ class NPCPlanet {
 			this.ships.m[1].count += Math.floor(this.ships.m[0].count / 10);
 		}
 		for(let i=0; i<rnd; i++)
-			this[Resources[getRandom(Resources_base)].name] += getRandom(this.type) + crnd;
+			this[Resources[getRandom(Resources_base)].name] += getRandom(this.type)*2 + crnd*2;
 		if (this.type >= 19) {
 			this[Resources[getRandom(Resources_base)].name] += 100 + getRandom(50);
 			this.ships.m[0].count += Math.floor(this.totalResources()/2);
@@ -51,10 +51,15 @@ class NPCPlanet {
 			this.ships.m[1].count += 5;
 			this.ships.m[2].count += 1;
 			if (getRandom(2) == 0) {
-				for(let i=0; i<Resources_base; i++) this[Resources[i].name] += getRandom(500);
+				for(let i=0; i<Resources_base; i++) this[Resources[i].name] += 500 + getRandom(500);
 				this.ships.m[2].count += 10 + getRandom(10);
 			}
 		}
+		if (this.ships.countAll() > 0) this.ships.money +=
+				this.ships.countAll()*100 +
+				getRandom(this.ships.countAll()*100) +
+				this.ships.m[1].count*1000 +
+				this.ships.m[2].count*10000;
 		//print(this.type, rnd);
 	}
 	load(o) {
@@ -72,7 +77,7 @@ class NPCPlanet {
 	info(first) { // отобразить текущее состояние планеты
 		let msg = "";
 		let pn = "";
-		if (this.type < 2) {msg += "Вы обнаружили хлам"; pn = "Хлам";}
+		if (this.type < 2) {msg += "Вы обнаружили заброшенную станцию"; pn = "Заброшенная станция";}
 		else if (this.type < 8) {msg += "Найдены обломки"; pn = "Обломки";}
 		else if (this.type < 10) {msg += "Обнаружен космический мусор"; pn = "Космический мусор";}
 		else if (this.type < 15) {msg += "Вы обнаружили астероид"; pn = "Астероид";}

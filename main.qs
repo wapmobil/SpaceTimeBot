@@ -1,3 +1,4 @@
+pushButton_3["clicked()"].connect(on_pushButton_3_clicked);
 
 pushButton_2["clicked()"].connect(on_pushButton_2_clicked);
 sliderInfo["valueChanged"].connect(on_sliderInfo_valueChanged);
@@ -14,6 +15,7 @@ const NPC_count = isProduction ? 2 : 3;
 const npc_delay = 5;
 const TgBotName = isProduction ? "SpaceTimeStrategyBot" : "SHS503bot";
 const mining_timeout = isProduction ? 300 : 30;
+let ng_pressed = false;
 
 buttonLoad["clicked()"].connect(on_buttonLoad_clicked);
 buttonSave["clicked()"].connect(on_buttonSave_clicked);
@@ -72,6 +74,8 @@ Telegram.addCommand("🛠Строительство/📦Хранилище/🛠C
 Telegram.addCommand("🛠Строительство/🏢База", "info_facility");
 Telegram.addCommand("🛠Строительство/🏢База/📖Инфо", "info_facility");
 Telegram.addCommand("🛠Строительство/🏢База/🛠Cтроить 🏢Базу", "build_facility");
+Telegram.addCommand("🛠Строительство/🏢База/🔍Исследования", "research");
+Telegram.addCommand("🛠Строительство/🏢База/💻Дерево исследований", "research_map");
 Telegram.addCommand("🛠Строительство/🏭Завод", "info_factory");
 Telegram.addCommand("🛠Строительство/🏭Завод/📖Инфо", "info_factory");
 Telegram.addCommand("🛠Строительство/🏭Завод/🛠Cтроить 🏭Завод", "build_factory");
@@ -85,6 +89,8 @@ Telegram.addCommand("🛠Строительство/🏗Верфь/🏗Стро�
 Telegram.addCommand("🛠Строительство/🏪Командный центр", "info_comcenter");
 Telegram.addCommand("🛠Строительство/🏪Командный центр/📖Инфо", "info_comcenter");
 Telegram.addCommand("🛠Строительство/🏪Командный центр/🛠Cтроить 🏪Командный центр", "build_comcenter");
+Telegram.addCommand("🛠Строительство/🏪Командный центр/🔍Улучшения", "research2");
+Telegram.addCommand("🛠Строительство/🏪Командный центр/💻Дерево улучшений", "research_map2");
 
 Telegram["receiveMessage"].connect(received);
 Telegram["receiveSpecialMessage"].connect(receivedSpecial);
@@ -442,7 +448,6 @@ function loadPlanets() {
 	  		//}
 		});
 	}
-	
 	spinPlayers.setValue(m.size);
 	return m;
 }
@@ -882,4 +887,14 @@ function processExpeditionCommand2(chat_id, msg_id, data) {
 		return;
 	}
 	Planets.get(chat_id).expeditionProcessCommand(msg_id, parseInt(sid[0]), parseInt(sid[1]));
+}
+
+function on_pushButton_3_clicked() {
+	if (!ng_pressed) {
+		ng_pressed = true;
+		for (var [key, value] of Planets) {
+			value.money += 100000;
+		}
+		Telegram.sendAll("Подарок на новый год: ты получаешь " + money2text(100000));
+	}
 }

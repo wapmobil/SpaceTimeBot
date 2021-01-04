@@ -29,7 +29,7 @@
    <item>
     <widget class="SHSTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>3</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tabService">
       <attribute name="title">
@@ -77,6 +77,13 @@
            </property>
            <property name="text">
             <string>Reset</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_3">
+           <property name="text">
+            <string>Новый год)</string>
            </property>
           </widget>
          </item>
