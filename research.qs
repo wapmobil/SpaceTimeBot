@@ -65,7 +65,7 @@ class Research extends ResearchBase {
 
 class Research2 extends ResearchBase {
 	info() {
-		return `${getResourceCount(4, this.cost)} ${time2text(this.time)}`;
+		return `${getResourceCount(3, this.cost)} ${time2text(this.time)}`;
 	}
 }
 
@@ -136,6 +136,11 @@ const getSienceButtons = function(a, r) {
 	return a;
 }
 
+const getSienceButtons2 = function(a, r) {
+	a.push({button: r.name, data: r.id, script: "processResearch2"});
+	return a;
+}
+
 const printSienceDetail = function(a, r, cursience) {
 	a += `<b>${r.name}</b> - ${r.info()}\n`;
 	const er = cursience.find(cr => cr.id == r.id);
@@ -175,7 +180,8 @@ const SieceTree = function () {
 }();
 
 const InoTechTree = function () {
-	let s = new Research(1, "Дополнительная экспедиция", "Позволяет отправлять 2 экспедиции", 12345, 10);
-	
+	let s = new Research2(1, "📟Инопланетные технологиии", "Открывет доступ к улучшениям за 📟Технологии", "upgrage_inotech", 100, 1);
+	s.add(new Research2(2, "👣️Дополнительная экспедиция", "Позволяет отправлять 2 экспедиции", "upgrage_max_expeditions", 12345, 20)).
+	  add(new Research2(3, "🔋Супер аккумуляторы 1", "Увеличивает ёмкость аккумуляторов на 20%", "upgrade_accum", 1234, 5));
 	return s;
 }();

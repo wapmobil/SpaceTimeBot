@@ -1,4 +1,3 @@
-pushButton_3["clicked()"].connect(on_pushButton_3_clicked);
 
 pushButton_2["clicked()"].connect(on_pushButton_2_clicked);
 sliderInfo["valueChanged"].connect(on_sliderInfo_valueChanged);
@@ -10,12 +9,11 @@ include("mininig.qs")
 include("helps.qs")
 
 
-const isProduction = true;
+const isProduction = false;
 const NPC_count = isProduction ? 2 : 3;
 const npc_delay = 5;
 const TgBotName = isProduction ? "SpaceTimeStrategyBot" : "SHS503bot";
 const mining_timeout = isProduction ? 300 : 30;
-let ng_pressed = false;
 
 buttonLoad["clicked()"].connect(on_buttonLoad_clicked);
 buttonSave["clicked()"].connect(on_buttonSave_clicked);
@@ -33,15 +31,16 @@ Telegram.clearCommands();
 Telegram.disablePassword();
 Telegram.addCommand("Подземелье/🤠Отправиться", "find_money");
 Telegram.addCommand("Подземелье/ℹ️Справка", "mining_info");
-Telegram.addCommand("🔍Исследования", "research");
+//Telegram.addCommand("🔍Исследования", "research");
 Telegram.addCommand("💸Торговля/Купить 🍍", "buy_food");
 Telegram.addCommand("💸Торговля/Продать ресурсы", "sell_resources");
-Telegram.addCommand("💸Торговля/📖Мои ресурсы", "info_resources");
+Telegram.addCommand("📖Мои ресурсы", "info_resources");
 Telegram.addCommand("💸Торговля/📈Биржа ресурсов/📗️Мои заявки", "my_stock");
 Telegram.addCommand("💸Торговля/📈Биржа ресурсов/✳️Создать заявку", "new_stock");
 Telegram.addCommand("💸Торговля/📈Биржа ресурсов/✳️Создать 🔐скрытую заявку", "new_stock_priv");
 Telegram.addCommand("💸Торговля/📈Биржа ресурсов/ℹ️Cправка", "help_stock");
 Telegram.addCommand("💸Торговля/📈Биржа ресурсов/🖥Смотреть заявки", "show_stock");
+Telegram.addCommand("💸Торговля/📖Мои ресурсы", "info_resources");
 Telegram.addCommand("📖Инфоцентр/🌍Планета", "planet_info");
 Telegram.addCommand("📖Инфоцентр/💻Дерево исследований", "research_map");
 Telegram.addCommand("📖Инфоцентр/Статистика", "stat_info");
@@ -58,39 +57,39 @@ Telegram.addCommand("✈️Флот/ℹ️Cправка", "help_ships");
 Telegram.addCommand("✈️Флот/👣️Экспедиции/ℹ️Cправка", "help_expeditions");
 Telegram.addCommand("✈️Флот/👣️Экспедиции/📖Инфо", "info_expeditions");
 Telegram.addCommand("✈️Флот/👣️Экспедиции/👣Отправить экспедицию", "expedition_start");
-//Telegram.addCommand("🛠Строительство/📖Инфо", "planet_info");
-Telegram.addCommand("🛠Строительство/🍍Ферма", "info_farm");
-Telegram.addCommand("🛠Строительство/🍍Ферма/📖Инфо", "info_farm");
-Telegram.addCommand("🛠Строительство/🍍Ферма/🛠Cтроить 🍍Ферму", "build_farm");
-Telegram.addCommand("🛠Строительство/⚡️Электростанция", "info_solar");
-Telegram.addCommand("🛠Строительство/⚡️Электростанция/📖Инфо", "info_solar");
-Telegram.addCommand("🛠Строительство/⚡️Электростанция/🛠Cтроить ⚡️Электростанцию", "build_solar");
-Telegram.addCommand("🛠Строительство/🔋Аккумулятор", "info_accum");
-Telegram.addCommand("🛠Строительство/🔋Аккумулятор/📖Инфо", "info_accum");
-Telegram.addCommand("🛠Строительство/🔋Аккумулятор/🛠Cтроить 🔋Аккумулятор", "build_accum");
-Telegram.addCommand("🛠Строительство/📦Хранилище", "info_storage");
-Telegram.addCommand("🛠Строительство/📦Хранилище/📖Инфо", "info_storage");
-Telegram.addCommand("🛠Строительство/📦Хранилище/🛠Cтроить 📦Хранилище", "build_storage");
-Telegram.addCommand("🛠Строительство/🏢База", "info_facility");
-Telegram.addCommand("🛠Строительство/🏢База/📖Инфо", "info_facility");
-Telegram.addCommand("🛠Строительство/🏢База/🛠Cтроить 🏢Базу", "build_facility");
-Telegram.addCommand("🛠Строительство/🏢База/🔍Исследования", "research");
-Telegram.addCommand("🛠Строительство/🏢База/💻Дерево исследований", "research_map");
-Telegram.addCommand("🛠Строительство/🏭Завод", "info_factory");
-Telegram.addCommand("🛠Строительство/🏭Завод/📖Инфо", "info_factory");
-Telegram.addCommand("🛠Строительство/🏭Завод/🛠Cтроить 🏭Завод", "build_factory");
-Telegram.addCommand("🛠Строительство/🏗Верфь", "info_spaceyard");
-Telegram.addCommand("🛠Строительство/🏗Верфь/📖Инфо", "info_spaceyard");
-Telegram.addCommand("🛠Строительство/🏗Верфь/🛠Cтроить 🏗Верфь", "build_spaceyard");
-Telegram.addCommand("🛠Строительство/🏗Верфь/🏗Строительство ✈Кораблей", "ship_info");
-Telegram.addCommand("🛠Строительство/🏗Верфь/🏗Строительство ✈Кораблей/📖Инфо", "ship_info");
-Telegram.addCommand("🛠Строительство/🏗Верфь/🏗Строительство ✈Кораблей/⚖Сравнение моделей️", "ship_models");
-Telegram.addCommand("🛠Строительство/🏗Верфь/🏗Строительство ✈Кораблей/🏗Cтроить", "ship_create");
-Telegram.addCommand("🛠Строительство/🏪Командный центр", "info_comcenter");
-Telegram.addCommand("🛠Строительство/🏪Командный центр/📖Инфо", "info_comcenter");
-Telegram.addCommand("🛠Строительство/🏪Командный центр/🛠Cтроить 🏪Командный центр", "build_comcenter");
-Telegram.addCommand("🛠Строительство/🏪Командный центр/🔍Улучшения", "research2");
-Telegram.addCommand("🛠Строительство/🏪Командный центр/💻Дерево улучшений", "research_map2");
+//Telegram.addCommand("🏛Строения/📖Инфо", "planet_info");
+Telegram.addCommand("🏛Строения/🍍Ферма", "info_farm");
+Telegram.addCommand("🏛Строения/🍍Ферма/📖Инфо", "info_farm");
+Telegram.addCommand("🏛Строения/🍍Ферма/🛠Cтроить 🍍Ферму", "build_farm");
+Telegram.addCommand("🏛Строения/⚡️Электростанция", "info_solar");
+Telegram.addCommand("🏛Строения/⚡️Электростанция/📖Инфо", "info_solar");
+Telegram.addCommand("🏛Строения/⚡️Электростанция/🛠Cтроить ⚡️Электростанцию", "build_solar");
+Telegram.addCommand("🏛Строения/🔋Аккумулятор", "info_accum");
+Telegram.addCommand("🏛Строения/🔋Аккумулятор/📖Инфо", "info_accum");
+Telegram.addCommand("🏛Строения/🔋Аккумулятор/🛠Cтроить 🔋Аккумулятор", "build_accum");
+Telegram.addCommand("🏛Строения/📦Хранилище", "info_storage");
+Telegram.addCommand("🏛Строения/📦Хранилище/📖Инфо", "info_storage");
+Telegram.addCommand("🏛Строения/📦Хранилище/🛠Cтроить 📦Хранилище", "build_storage");
+Telegram.addCommand("🏛Строения/🏢База", "info_facility");
+Telegram.addCommand("🏛Строения/🏢База/📖Инфо", "info_facility");
+Telegram.addCommand("🏛Строения/🏢База/🛠Cтроить 🏢Базу", "build_facility");
+Telegram.addCommand("🏛Строения/🏢База/🔍Исследования", "research");
+Telegram.addCommand("🏛Строения/🏢База/💻Дерево исследований", "research_map");
+Telegram.addCommand("🏛Строения/🏭Завод", "info_factory");
+Telegram.addCommand("🏛Строения/🏭Завод/📖Инфо", "info_factory");
+Telegram.addCommand("🏛Строения/🏭Завод/🛠Cтроить 🏭Завод", "build_factory");
+Telegram.addCommand("🏛Строения/🏗Верфь", "info_spaceyard");
+Telegram.addCommand("🏛Строения/🏗Верфь/📖Инфо", "info_spaceyard");
+Telegram.addCommand("🏛Строения/🏗Верфь/🛠Cтроить 🏗Верфь", "build_spaceyard");
+Telegram.addCommand("🏛Строения/🏗Верфь/🏗Строительство ✈Кораблей", "ship_info");
+Telegram.addCommand("🏛Строения/🏗Верфь/🏗Строительство ✈Кораблей/📖Инфо", "ship_info");
+Telegram.addCommand("🏛Строения/🏗Верфь/🏗Строительство ✈Кораблей/⚖Сравнение моделей️", "ship_models");
+Telegram.addCommand("🏛Строения/🏗Верфь/🏗Строительство ✈Кораблей/🏗Cтроить", "ship_create");
+Telegram.addCommand("🏛Строения/🏪Командный центр", "info_comcenter");
+Telegram.addCommand("🏛Строения/🏪Командный центр/📖Инфо", "info_comcenter");
+Telegram.addCommand("🏛Строения/🏪Командный центр/🛠Cтроить 🏪Командный центр", "build_comcenter");
+Telegram.addCommand("🏛Строения/🏪Командный центр/🔍Улучшения", "research2");
+Telegram.addCommand("🏛Строения/🏪Командный центр/💻Дерево улучшений", "research_map2");
 
 Telegram["receiveMessage"].connect(received);
 Telegram["receiveSpecialMessage"].connect(receivedSpecial);
@@ -102,7 +101,7 @@ Telegram["disconnected"].connect(telegramDisconnect);
 if (isProduction) {
 	Telegram.start(SHS.load(77));
 	buttonReset.enabled = false;
-	buttonLoad.enabled = false;
+	//buttonLoad.enabled = false;
 } else {
 	buttonReset.enabled = true;
 	Telegram.start("733272349:AAEHpMUGv0sV1JRcVS1aR8fWXIH5HpPapAQ");
@@ -364,6 +363,19 @@ function processResearch(chat_id, msg_id, data) {
 	Planets.get(chat_id).sienceStart(parseInt(data), msg_id);
 }
 
+function processResearch2(chat_id, msg_id, data) {
+	Planets.get(chat_id).sienceStart2(parseInt(data), msg_id);
+}
+
+function research2(chat_id) {
+	const p = Planets.get(chat_id);
+	if (p.comcenter.level > 0) {
+		Telegram.send(chat_id, "Доступные улучшения:\n" + p.sienceListExt2(), p.isSienceActive2() ? [] : p.sienceList2());
+	} else {
+		Telegram.send(chat_id, "Требуется 🏪Командный центр");
+	}
+}
+
 function map_info(chat_id) {
 	const p = Planets.get(chat_id);
 	if (p.facility.level >= 1) {
@@ -414,6 +426,10 @@ function stat_info(chat_id) {
 
 function research_map(chat_id) {
 	Telegram.send(chat_id, Planets.get(chat_id).sienceInfo());
+}
+
+function research_map2(chat_id) {
+	Telegram.send(chat_id, Planets.get(chat_id).sienceInfo2());
 }
 
 function on_buttonSave_clicked() {
@@ -887,14 +903,4 @@ function processExpeditionCommand2(chat_id, msg_id, data) {
 		return;
 	}
 	Planets.get(chat_id).expeditionProcessCommand(msg_id, parseInt(sid[0]), parseInt(sid[1]));
-}
-
-function on_pushButton_3_clicked() {
-	if (!ng_pressed) {
-		ng_pressed = true;
-		for (var [key, value] of Planets) {
-			value.money += 100000;
-		}
-		Telegram.sendAll("Подарок на новый год: ты получаешь " + money2text(100000));
-	}
 }

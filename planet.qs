@@ -206,7 +206,17 @@ class Planet {
 				this.sience[cs].time = 0;
 				const csid = this.sience[cs].id;
 				this[SieceTree.find(r => r.id == csid).func]();
-				Telegram.send(this.chat_id, "Исследование завершено");
+				Telegram.send(this.chat_id, "Исследование завершено!");
+			}
+		}
+		const cs2 = this.sience2.findIndex(r => r.time > 0);
+		if (cs2 >= 0) {
+			this.sience2[cs2].time -= this.sience_speed;
+			if (this.sience2[cs2].time <= 0) {
+				this.sience2[cs2].time = 0;
+				const csid = this.sience2[cs2].id;
+				this[InoTechTree.find(r => r.id == csid).func]();
+				Telegram.send(this.chat_id, "Улучшение готово!");
 			}
 		}
 		for(let i=0; i<this.expeditions.length; i++) {
@@ -258,17 +268,29 @@ class Planet {
 	sienceInfo() {
 		return SieceTree.reduce(printSienceTree, "Исследования:\n", ResearchBase.Traversal.DepthFirst, this.sience);
 	}
+	sienceInfo2() {
+		return InoTechTree.reduce(printSienceTree, "Улучшения:\n", ResearchBase.Traversal.DepthFirst, this.sience2);
+	}
 	
 	sienceList() {
 		return SieceTree.reduce(getSienceButtons, [], ResearchBase.Traversal.Actual, this.sience);
+	}
+	sienceList2() {
+		return InoTechTree.reduce(getSienceButtons2, [], ResearchBase.Traversal.Actual, this.sience2);
 	}
 	
 	sienceListExt() {
 		return SieceTree.reduce(printSienceDetail, "", ResearchBase.Traversal.Actual, this.sience);
 	}
+	sienceListExt2() {
+		return InoTechTree.reduce(printSienceDetail, "", ResearchBase.Traversal.Actual, this.sience2);
+	}
 	
 	isSienceActive() {
 		return this.sience.some(r => r.time > 0);
+	}
+	isSienceActive2() {
+		return this.sience2.some(r => r.time > 0);
 	}
 	
 	sienceStart(id, msg_id) {
@@ -280,7 +302,7 @@ class Planet {
 		if (!bs) {
 			Telegram.edit(this.chat_id, msg_id, "Исследование недоступно");
 		}
-		if (this.food <= bs.cost) {
+		if (this.food < bs.cost) {
 			Telegram.edit(this.chat_id, msg_id, "Недостаточно 🍍еды");
 			return;
 		}
@@ -296,6 +318,27 @@ class Planet {
 		this.money -= bs.money;
 		this.sience.push(ns);
 		Telegram.edit(this.chat_id, msg_id, "Исследование началось");
+	}
+
+	sienceStart2(id, msg_id) {
+		if (this.isSienceActive2()) {
+			Telegram.edit(this.chat_id, msg_id, "Сейчас нельзя, улучшение уже идёт");
+			return;
+		}
+		const bs = InoTechTree.find(r => r.id == id);
+		if (!bs) {
+			Telegram.edit(this.chat_id, msg_id, "Улучшение недоступно");
+		}
+		if (this.ino_tech < bs.cost) {
+			Telegram.edit(this.chat_id, msg_id, "Недостаточно " + Resources_desc[3]);
+			return;
+		}
+		let ns = new Object();
+		ns.id = bs.id;
+		ns.time = bs.time;
+		this.ino_tech -= bs.cost;
+		this.sience2.push(ns);
+		Telegram.edit(this.chat_id, msg_id, "Улучшение началось");
 	}
 	
 	fixSience() {
@@ -337,6 +380,10 @@ class Planet {
 				}
 			}
 		}
+	}
+	
+	upgrage_inotech() {
+		Telegram.send(this.chat_id, "Теперь тебе доступны новые улучшения");
 	}
 	
 	enable_factory() {
@@ -400,6 +447,11 @@ class Planet {
 		this.comcenter.locked = false;
 	}
 	
+	upgrage_max_expeditions() {
+		this.max_exp += 1;
+		Telegram.send(this.chat_id, "Количество одновременных экспедиций увеличено на 1 и составляет " + this.max_exp);
+	}
+		
 	addStockTask(sell, res, count, price, priv) {
 		if (sell) {
 			if (count > this.resourceCount(res)) {
