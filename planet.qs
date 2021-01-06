@@ -222,6 +222,7 @@ class Planet {
 		for(let i=0; i<this.expeditions.length; i++) {
 			if (this.expeditions[i].countAll() == 0) {
 				this.expeditions.splice(i, 1);
+				if (i == this.expeditions.length) break;
 			}
 			if (this.expeditions[i].battle_id != 0) continue;
 			if (this.expeditions[i].type != 3) {
@@ -1112,7 +1113,7 @@ class Planet {
 			if (npc.owner != owner) return;
 			this.initExpeditionRS(4, {ow: owner, id: npc_id});
 		} else {
-			Telegram.edit(this.chat_id, msg_id, "Ошибка, координаты неверны или корабли уже покинули это место");
+			Telegram.send(this.chat_id, "Ошибка, координаты неверны или корабли уже покинули это место");
 		}
 	}
 	

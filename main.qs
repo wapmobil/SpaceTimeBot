@@ -9,7 +9,7 @@ include("mininig.qs")
 include("helps.qs")
 
 
-const isProduction = false;
+const isProduction = true;
 const NPC_count = isProduction ? 2 : 3;
 const npc_delay = 5;
 const TgBotName = isProduction ? "SpaceTimeStrategyBot" : "SHS503bot";
