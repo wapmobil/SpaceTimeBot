@@ -35,11 +35,11 @@ class Building {
 			return food;
 		}
 		if (energy < this.consumption() && this.consumption() > 0) {
-			Telegram.send(this.chat_id, "Недостаточно ⚡электроэнергии,\n нужно больше электростанций");
+			Telegram.send(this.chat_id, `Недостаточно ⚡электроэнергии,\n нужно больше электростанций (требуется ещё ${this.consumption() - energy}⚡)`);
 			return food;
 		}
 		if (food < this.cost()) {
-			Telegram.send(this.chat_id, "Недостаточно 🍍");
+			Telegram.send(this.chat_id, "Недостаточно 🍍, необходимо ещё "+food2text(this.cost()-food));
 			return food;
 		}
 		if (this.build_progress != 0) {

@@ -39,7 +39,7 @@ class Navy {
 	battleList() {
 		let arr = [];
 		for (let j=0; j<this.m.length; j++) {
-			if (this.m[j].count > 0) {
+			if (this.m[j].count > 0 && !this.m[j].peaceful()) {
 				arr.push(0);
 			} else arr.push(-1);
 		}
@@ -131,5 +131,12 @@ class Navy {
 		let total_res = 0;
 		for(let i=0; i<Resources.length; i++) total_res += this[Resources[i].name];
 		return total_res;
+	}
+	peaceful() {
+		let ps = 0;
+		for (const value of this.m) {
+			if (value.peaceful()) ps += value.count;
+		}
+		return this.countAll() == ps ? true : false;
 	}
 }

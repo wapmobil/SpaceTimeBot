@@ -9,7 +9,7 @@ include("mininig.qs")
 include("helps.qs")
 
 
-const isProduction = true;
+const isProduction = false;
 const NPC_count = isProduction ? 2 : 3;
 const npc_delay = 5;
 const TgBotName = isProduction ? "SpaceTimeStrategyBot" : "SHS503bot";
@@ -223,6 +223,14 @@ function receivedSpecial(chat_id, payload) {
 			//print(cd[1], cd[2]);
 			//const id = parseInt([1]);
 			Planets.get(chat_id).expeditionSupport(parseInt(cd[1]), parseInt(cd[2]));
+			return;
+		}
+		s = "/battle_";
+		if (msg.substring(0, s.length) == s) {
+			let id = parseInt(msg.match(/\/battle_(\d+)/i)[1]);
+			if (Battles.b.has(id)) {
+				Telegram.send(chat_id, Battles.b.get(id).info(chat_id), Battles.b.get(id).buttons(chat_id, true));
+			}
 			return;
 		}
 	}
@@ -836,7 +844,7 @@ function battle_start(chat_id, msg_id, data) {
 				b.nv1.type = 0;
 				b.nv1.arrived = 500;
 			}
-			Telegram.edit(chat_id, msg_id, "Отменено");
+			Telegram.edit(chat_id, msg_id, "Вы сбежали из боя");
 		}
 	} else {
 		Telegram.edit(chat_id, msg_id, "Ошибка");

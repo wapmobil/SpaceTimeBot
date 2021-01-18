@@ -25,7 +25,8 @@ class Ship {
 	defence () {return 10;}
 	damage  () {return {x: 1, d: 10}} // 1d10
 	armor   () {return 0;} // damage reduction
-	crit    () {return {miss: 1, hit: 20, x: 2}}
+	crit    () {return {miss: 1, hit: 20, x: 2};}
+	peaceful() {return false;}
 	
 	roll      (d) {return getRandom(d) + 1;}
 	baseRoll   () {return this.roll(20);}
@@ -114,7 +115,7 @@ class TradeShip extends Ship {
 	shortName() {return "Гр";}
 	description() {return "Торговый корабль";}
 	size    () {return 2;}
-	capacity() {return 30;}
+	capacity() {return 100;}
 	price   () {return 100;}
 	energy  () {return 100;}
 	
@@ -123,6 +124,7 @@ class TradeShip extends Ship {
 	defence () {return 5;}
 	damage  () {return {x: 0, d: 0}}
 	armor   () {return 2;}
+	peaceful() {return true;}
 }
 
 class SmallShip extends Ship {
@@ -135,7 +137,7 @@ class SmallShip extends Ship {
 	
 	health  () {return 10;}
 	attack  () {return 1+3;}
-	defence () {return 10;}
+	defence () {return 17;}
 	damage  () {return {x: 1, d: 2}}
 	armor   () {return 2;}
 }
@@ -201,11 +203,11 @@ class CruiserShip extends Ship {
 	energy  () {return 500;}
 	level   () {return 4;}
 	
-	health  () {return 600;}
+	health  () {return 2000;}
 	attack  () {return 6+3;}
 	defence () {return 12;}
 	damage  () {return {x: 50, d: 10}}
-	armor   () {return 10;}
+	armor   () {return 20;}
 }
 
 
@@ -220,8 +222,8 @@ const ShipsDescription = function() {
 		msg += `  слоты: ${s.size()}\n`;
 		msg += `  вместимость: ${s.capacity()}📦\n`;
 		msg += `  энергия пуска: ${s.energy()}🔋\n`;
-		msg += `  ${s.health()}❤️ ${s.attack()}⚔️ ${s.defence()}🛡\n`;
-		msg += `  ${s.damage().x}d${s.damage().d}🗡 ${s.armor()}👕\n`;
+		msg += `  ${s.health()}❤️ ${s.attack()}⚔️ ${s.defence()}🏃\n`;
+		msg += `  ${s.damage().x}d${s.damage().d}🗡 ${s.armor()}🛡\n`;
 		msg += "  стоимость: ";
 		for (let i = 0; i < Resources_base; i++) msg += getResourceCount(i, s.price());
 		msg += "\n";
@@ -271,11 +273,11 @@ class EnemySenior extends Ship {
 	description() {return "";}
 	size    () {return 1;}
 	capacity() {return 0;}
-	price   () {return 40;}
+	price   () {return 100;}
 	energy  () {return 0;}
 	is_enemy() {return true;}
 	
-	health  () {return 1000;}
+	health  () {return 8000;}
 	attack  () {return 10+3;}
 	defence () {return 10;}
 	damage  () {return {x: 10, d: 8}}

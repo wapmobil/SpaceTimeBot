@@ -220,6 +220,7 @@ class Planet {
 			}
 		}
 		for(let i=0; i<this.expeditions.length; i++) {
+			//print(i, this.expeditions[i].type, this.expeditions[i].battle_id, this.expeditions[i].countAll(), this.expeditions[i].arrived);
 			if (this.expeditions[i].countAll() == 0) {
 				this.expeditions.splice(i, 1);
 				if (i == this.expeditions.length) break;
@@ -512,6 +513,7 @@ class Planet {
 			}
 			for (const value of this.expeditions) {
 				if (value.battle_id != 0) {
+					msg += "/battle_" + value.battle_id + " \n";;
 					msg += value.info("✈️Флот ⚔️сражается⚔️");
 				} else if (value.type == 0 && !exp_only) {
 					if (value.dst == this.chat_id)
@@ -778,13 +780,17 @@ class Planet {
 			if (npc) {
 				let msg = "✈️Флот достиг заданых координат.\n";
 				if (npc.ships.countAll() != 0) {
-					if (npc.ships.battle_id == 0) {
+					if (npc.ships.battle_id == 0 && !e.peaceful()) {
 						const btid = Battles.addBattle(new Battle(e, npc.ships));
 						const b = Battles.b.get(btid);
 						Telegram.send(this.chat_id, b.info(this.chat_id), b.buttons(this.chat_id));
 						return;
 					} else {
-						Telegram.send(this.chat_id, "Невозможно - другое сражение ещё не окончено");
+						if (e.peaceful()) {
+							Telegram.send(this.chat_id, "Невозможно - нет боевых кораблей, ✈️Флот возвращается на базу.");
+						} else {
+							Telegram.send(this.chat_id, "Невозможно - другое сражение ещё не окончено, ✈️Флот возвращается на базу.");
+						}
 					}
 					//msg += "Невозможно загрузиться - ресурсы охраняются инопланетянами";
 				} else {
@@ -1061,10 +1067,14 @@ class Planet {
 			if (cmd_id == 1) {
 				for (let value of this.expeditions) {
 					if (value.type == 3 && value.dst == npc_id) {
-						value.type = 2;
-						GlobalNPCPlanets.forgetPlanet(npc_id);
-						value.dst = 0;
-						Telegram.edit(this.chat_id, msg_id, "Принято\n✈️Флот продолжает 👣️Экспедицию");
+						if (npc.ships.battle_id == 0) {
+							value.type = 2;
+							GlobalNPCPlanets.forgetPlanet(npc_id);
+							value.dst = 0;
+							Telegram.edit(this.chat_id, msg_id, "Принято\n✈️Флот продолжает 👣️Экспедицию");
+						}  else {
+							Telegram.edit(this.chat_id, msg_id, "Невозможно - другое сражение ещё не окончено", [{button: "Выдать указания", data: npc_id, script: "processExpeditionCommand"}]);
+						}
 						return;
 					}
 				}

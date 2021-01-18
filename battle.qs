@@ -24,6 +24,14 @@ class Battle {
 			return this.infoBattle(this.nv2.infoBattle(), this.nv1.infoBattle(), this.cur_id == chat_id);
 		}
 	}
+	updateMgs(chat_id, msg_id) {
+		if (chat_id == this.nv1.chat_id) {
+			this.msg_id1 = msg_id;
+		}
+		if (chat_id == this.nv2.chat_id) {
+			this.msg_id2 = msg_id;
+		}
+	}
 	infoBattle(a1, a2, your) {
 		let msg = "Сражение:";
 		if (this.round > 0) msg += ` ${this.round} раунд\n`;
@@ -48,8 +56,8 @@ class Battle {
 		} else msg += "Ждём ход противника...";
 		return msg;
 	}
-	buttons(chat_id) {
-		if (this.mode == -2) return [{button: "Начать сражение!", script: "battle_start", data: `${this.nv1.battle_id} 0`}, {button: "Отмена", script: "battle_start", data: `${this.nv1.battle_id} 1`}];
+	buttons(chat_id, cont) {
+		if (this.mode == -2 || cont) return [{button: "Начать сражение!", script: "battle_start", data: `${this.nv1.battle_id} 0`}, {button: "сбежать", script: "battle_start", data: `${this.nv1.battle_id} 1`}];
 		let a = [];
 		let bt = [];
 		if (chat_id != this.cur_id) return bt;
@@ -77,13 +85,14 @@ class Battle {
 		if (this.mode >= 0 && chat_id > 1 && this.timeout < battle_timeout) {
 			bt.push({button: "защищаться", script: "battle_step", data: `${this.nv1.battle_id} skip`});
 			bt.push({button: "назад к выбору отряда", script: "battle_step", data: `${this.nv1.battle_id} back`});
+			bt.push({button: "сбежать", script: "battle_start", data: `${this.nv1.battle_id} 1`});
 		}
 		return bt;
 	}
 	start(chat_id, msg_id) {
 		if (chat_id == this.nv1.chat_id) this.msg_id1 = msg_id;
 		if (chat_id == this.nv2.chat_id) this.msg_id2 = msg_id;
-		if (this.msg_id1 > 0 && this.msg_id2 > 0) {
+		if (this.msg_id1 > 0 && this.msg_id2 > 0 && this.mode == -2) {
 			this.newRound();
 		}
 	}
