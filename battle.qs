@@ -57,7 +57,8 @@ class Battle {
 		return msg;
 	}
 	buttons(chat_id, cont) {
-		if (this.mode == -2 || cont) return [{button: "Начать сражение!", script: "battle_start", data: `${this.nv1.battle_id} 0`}, {button: "сбежать", script: "battle_start", data: `${this.nv1.battle_id} 1`}];
+		if (this.mode == -2) return [{button: "Начать сражение!", script: "battle_start", data: `${this.nv1.battle_id} 0`}, {button: "сбежать", script: "battle_start", data: `${this.nv1.battle_id} 1`}];
+		if (cont) return [{button: "Продолжить сражение!", script: "battle_start", data: `${this.nv1.battle_id} 0`}, {button: "сбежать", script: "battle_start", data: `${this.nv1.battle_id} 1`}];
 		let a = [];
 		let bt = [];
 		if (chat_id != this.cur_id) return bt;
@@ -240,6 +241,8 @@ class BattleList {
 			if (value.cur_id == 1 || value.timeout > battle_timeout) {
 				const bts = value.buttons(value.cur_id);
 				let rb = getRandom(bts.length);
+				if (rb >= bts.length) rb = bts.length -1;
+				if (rb < 0) print("invalid battle buttons", bts);
 				//print("step", value.cur_id, bts.length, rb);
 				value.step(value.cur_id, bts[rb].data.split(" ")[1]);
 			}

@@ -1,7 +1,11 @@
+console.clear();
 
 pushButton_2["clicked()"].connect(on_pushButton_2_clicked);
 sliderInfo["valueChanged"].connect(on_sliderInfo_valueChanged);
-console.clear();
+buttonLoad["clicked()"].connect(on_buttonLoad_clicked);
+buttonSave["clicked()"].connect(on_buttonSave_clicked);
+buttonReset["clicked()"].connect(on_buttonReset_clicked);
+pushButton["clicked()"].connect(on_pushButton_clicked);
 
 include("statistic.qs")
 include("planet.qs")
@@ -9,18 +13,14 @@ include("mininig.qs")
 include("helps.qs")
 
 
-const isProduction = false;
-const NPC_count = isProduction ? 2 : 3;
+const isProduction = true;
+const NPC_count = 3;
 const npc_delay = 5;
 const TgBotName = isProduction ? "SpaceTimeStrategyBot" : "SHS503bot";
 const mining_timeout = isProduction ? 300 : 30;
 
-buttonLoad["clicked()"].connect(on_buttonLoad_clicked);
-buttonSave["clicked()"].connect(on_buttonSave_clicked);
-buttonReset["clicked()"].connect(on_buttonReset_clicked);
-pushButton["clicked()"].connect(on_pushButton_clicked);
 let save_timer = new QTimer();
-save_timer["timeout"].connect(on_buttonSave_clicked);
+save_timer.timeout.connect(on_buttonSave_clicked);
 
 Cron.removeAll();
 Cron.addSchedule("*/10 * * * * *", "processTradeNPC")
@@ -91,11 +91,18 @@ Telegram.addCommand("🏛Строения/🏪Командный центр/🛠
 Telegram.addCommand("🏛Строения/🏪Командный центр/🔍Улучшения", "research2");
 Telegram.addCommand("🏛Строения/🏪Командный центр/💻Дерево улучшений", "research_map2");
 
-Telegram["receiveMessage"].connect(received);
-Telegram["receiveSpecialMessage"].connect(receivedSpecial);
+Telegram.addSpecialCommand("/expeditions", "info_expeditions");
+Telegram.addSpecialCommand("/navy", "navy_info");
+Telegram.addSpecialCommand("/resources", "info_resources");
+Telegram.addSpecialCommand("/stock", "show_stock");
+Telegram.addSpecialCommand("/dungeon", "find_money");
+
+Telegram.receiveMessage.connect(received);
+Telegram.receiveSpecialMessage.connect(receivedSpecial);
+Telegram.receiveSpecialCommand.connect(receivedSpecialCommand);
 //Telegram["buttonPressed"].connect(telegramButton);
-Telegram["connected"].connect(telegramConnect);
-Telegram["disconnected"].connect(telegramDisconnect);
+Telegram.connected.connect(telegramConnect);
+Telegram.disconnected.connect(telegramDisconnect);
 //Telegram["messageSent"].connect(telegramSent);
 
 if (isProduction) {
@@ -123,7 +130,7 @@ let Battles = loadBattles();
 let npc_delay_cnt = npc_delay;
 let expedition_cnt = 0;
 let timer = new QTimer();
-timer["timeout"].connect(timerDone);
+timer.timeout.connect(timerDone);
 timer.start(1000);
 save_timer.start(timer.interval*100);
 processTradeNPC(true);
@@ -196,7 +203,7 @@ function received(chat_id, msg) {
 function receivedSpecial(chat_id, payload) {
 	const st = "/start ";
 	let msg = "";
-	//print(payload);
+	print(payload);
 	if (payload.substring(0, st.length) == st) {
 		let cd = payload.split(" ")[1];
 		msg = "/"+cd;
@@ -236,7 +243,8 @@ function receivedSpecial(chat_id, payload) {
 	}
 }
 
-function telegramButton(chat_id, msg_id, button, msg) {
+function receivedSpecialCommand(chat_id, cmd, script) {
+	this[script](chat_id);
 }
 
 function telegramSent(chat_id, msg_id, msg) {
@@ -794,10 +802,10 @@ function processTradeNPC(on) {
 			}
 			NPCstock[j].buy = b;
 			while (NPCstock[j].sell.length < 4) {
-				NPCstock[j].add(true, getRandom(Resources_base), (2*j*j+1)*(getRandom(20)+1), 100+getRandom(100));
+				NPCstock[j].add(true, getRandom(Resources_base), (2*j*j+1)*(getRandom(50)+1), 100+getRandom(100));
 			}
 			while (NPCstock[j].buy.length < 4) {
-				NPCstock[j].add(false, getRandom(Resources_base), (2*j*j+1)*(getRandom(20)+1), 50+getRandom(100));
+				NPCstock[j].add(false, getRandom(Resources_base), (2*j*j+1)*(getRandom(50)+1), 50+getRandom(100));
 			}
 			//print(NPCstock[j].info().msg);
 		}
