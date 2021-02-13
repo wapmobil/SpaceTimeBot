@@ -35,7 +35,7 @@ class Building {
 			return food;
 		}
 		if (energy < this.consumption() && this.consumption() > 0) {
-			Telegram.send(this.chat_id, `Недостаточно ⚡электроэнергии,\n нужно больше электростанций (требуется ещё ${this.consumption() - energy}⚡)`);
+			Telegram.send(this.chat_id, `Недостаточно ⚡электроэнергии,\n нужно больше электростанций (требуется ещё ${Math.floor(this.consumption() - energy)+1}⚡)`);
 			return food;
 		}
 		if (food < this.cost()) {

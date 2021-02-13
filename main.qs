@@ -11,6 +11,7 @@ include("statistic.qs")
 include("planet.qs")
 include("mininig.qs")
 include("helps.qs")
+include("ratings.qs")
 
 
 const isProduction = true;
@@ -26,6 +27,7 @@ Cron.removeAll();
 Cron.addSchedule("*/10 * * * * *", "processTradeNPC")
 Cron.addSchedule("*/5 * * * * *", "statisticStep")
 Cron.addSchedule("0 6 * * * *", "statisticDayStep")
+Cron.addSchedule("0 * * * * *", "ratingCalc")
 
 Telegram.clearCommands();
 Telegram.disablePassword();
@@ -34,7 +36,7 @@ Telegram.addCommand("Подземелье/ℹ️Справка", "mining_info");
 //Telegram.addCommand("🔍Исследования", "research");
 Telegram.addCommand("💸Торговля/Купить 🍍", "buy_food");
 Telegram.addCommand("💸Торговля/Продать ресурсы", "sell_resources");
-Telegram.addCommand("📖Мои ресурсы", "info_resources");
+Telegram.addCommand("📦Мои ресурсы", "info_resources");
 Telegram.addCommand("💸Торговля/📈Биржа ресурсов/📗️Мои заявки", "my_stock");
 Telegram.addCommand("💸Торговля/📈Биржа ресурсов/✳️Создать заявку", "new_stock");
 Telegram.addCommand("💸Торговля/📈Биржа ресурсов/✳️Создать 🔐скрытую заявку", "new_stock_priv");
@@ -44,6 +46,11 @@ Telegram.addCommand("💸Торговля/📖Мои ресурсы", "info_reso
 Telegram.addCommand("📖Инфоцентр/🌍Планета", "planet_info");
 Telegram.addCommand("📖Инфоцентр/💻Дерево исследований", "research_map");
 Telegram.addCommand("📖Инфоцентр/Статистика", "stat_info");
+Telegram.addCommand("📖Инфоцентр/🏆Рейтинги/🍍Еда", "rait_food");
+Telegram.addCommand("📖Инфоцентр/🏆Рейтинги/💰Деньги", "rait_money");
+Telegram.addCommand("📖Инфоцентр/🏆Рейтинги/✈Корабли", "rait_ships");
+Telegram.addCommand("📖Инфоцентр/🏆Рейтинги/🏛Строения", "rait_buildings");
+Telegram.addCommand("📖Инфоцентр/🏆Рейтинги/📦Ресурсы", "rait_resources");
 //Telegram.addCommand("📖Инфоцентр/Тест сражения", "battle_test");
 Telegram.addCommand("✈️Флот", "navy_info");
 Telegram.addCommand("✈️Флот/📖Инфо", "navy_info");
@@ -125,7 +132,6 @@ let tmpNavy = new Map();
 let MiningGames = new Map();
 let StockTasks = new Map();
 let Battles = loadBattles();
-
 //Старт
 let npc_delay_cnt = npc_delay;
 let expedition_cnt = 0;
@@ -134,6 +140,7 @@ timer.timeout.connect(timerDone);
 timer.start(1000);
 save_timer.start(timer.interval*100);
 processTradeNPC(true);
+ratingCalc(true);
 //statisticStep();
 
 function telegramConnect() {
@@ -203,7 +210,7 @@ function received(chat_id, msg) {
 function receivedSpecial(chat_id, payload) {
 	const st = "/start ";
 	let msg = "";
-	print(payload);
+	//print(payload);
 	if (payload.substring(0, st.length) == st) {
 		let cd = payload.split(" ")[1];
 		msg = "/"+cd;
@@ -425,18 +432,28 @@ function stat_info(chat_id) {
 	msg += `Заявок в маркете ${GlobalMarket.items.size}\n`;
 	let arr = new Array();
 	let money = 0;
+	let food = 0;
+	let energy = 0;
 	let exps = 0;
+	let ships = ShipModels();
 	for(let i=0; i<Resources.length; i++) arr.push(0);
 	for (var [key, value] of Planets) {
 		for(let i=0; i<Resources.length; i++) arr[i] += value[Resources[i].name];
 		money += value.money;
+		food += value.food;
+		energy += value.energy();
 		exps += value.expeditions.length;
+		for(let i=0; i<ships.length; i++) ships[i].count += value.ships.m[i].count;
 	}
 	msg += "Всего ресурсов:\n";
 	for(let i=0; i<Resources.length; i++) msg += getResourceInfo(i, arr[i]) + "\n";
+	msg += `Еда: ${food2text(food)}\n`;
 	msg += `Деньги: ${money2text(money)}\n`;
+	msg += `Излишки эл-ва: ${Math.round(energy)}⚡\n`;
 	msg += `Экспедиций в процессе ${exps}\n`;
 	msg += `Сражения ${Battles.b.size}\n`;
+	msg += `Корабли:\n`;
+	for(let i=0; i<ships.length; i++) msg += `${ships[i].name()} ${ships[i].count}\n`;
 	Telegram.send(chat_id, msg);
 }
 
@@ -919,4 +936,36 @@ function processExpeditionCommand2(chat_id, msg_id, data) {
 		return;
 	}
 	Planets.get(chat_id).expeditionProcessCommand(msg_id, parseInt(sid[0]), parseInt(sid[1]));
+}
+
+function rait_money(chat_id) {
+	print_raiting(chat_id, "money", v => money2text(v));
+}
+
+function rait_food(chat_id) {
+	print_raiting(chat_id, "food", v => food2text(v));
+}
+
+function rait_ships(chat_id) {
+	print_raiting(chat_id, "ships", v => `${v}✈️`);
+}
+
+function rait_resources(chat_id) {
+	print_raiting(chat_id, "resources", v => v);
+}
+
+function rait_buildings(chat_id) {
+	print_raiting(chat_id, "buildings", v => v);
+}
+
+function print_raiting(chat_id, val, desc) {
+	let msg = "";
+	for(let i=0; i<Math.min(Ratings[val].length, 20); i++) {
+		if (Ratings[val][i].id == chat_id) msg += "Ты: ";
+		msg += `<b>№${i+1}. Планета ${Ratings[val][i].id}</b> - ${desc(Ratings[val][i].v)}\n`;
+	}
+	let yr = Ratings[val].findIndex(v => v.id == chat_id);
+	if (yr >= 0) msg += `\nТвоё место: <b>${yr+1}</b>`;
+	//print(msg);
+	Telegram.send(chat_id, msg);
 }

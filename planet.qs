@@ -163,8 +163,16 @@ class Planet {
 		return Math.pow(2, this.facility.level);
 	}
 	
+	totalBuildings() {
+		var lvl = 0;
+		const bds = this.getBuildings();
+		for (var value of bds) lvl += value.level;
+		return lvl;
+	}
+	
 	info(ret) { // отобразить текущее состояние планеты
-		let msg = this.infoResources();
+		let msg = `<b>Твоя планета ${this.chat_id}</b>\n`;
+		msg += this.infoResources();
 		const bds = this.getBuildings();
 		for (var value of bds) {
 			msg += value.info();

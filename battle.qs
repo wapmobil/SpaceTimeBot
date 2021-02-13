@@ -7,6 +7,7 @@ class Battle {
 		this.nv1 = nv1;
 		this.nv2 = nv2;
 		this.lastAction = "";
+		this.log = "";
 		this.mode = -2;
 		this.cur_id = this.nv1.chat_id;
 		this.msg_id1 = 0;
@@ -164,7 +165,7 @@ class Battle {
 	finish(side) {
 		//print("finish");
 		this.timeout = 0;
-		let msg = this.lastAction + "\n<b>Сражение завершено</b>\n";
+		let msg = this.log + "\n<b>Сражение завершено</b>\n";
 		msg += "Прошло раундов: "+this.round+"\n";
 		let msg1 = msg + "<b>Вы победили</b>😀\n";
 		let msg2 = msg + "<b>Вы проиграли</b>😒\n"; 
@@ -197,6 +198,7 @@ class Battle {
 		let res_2_hit_1 = s2.hitTo(s1);
 		//this.lastAction = `${res_1_hit_2.msg}\n${res_1_hit_2.msgf}\n`;
 		this.lastAction = `${res_1_hit_2.msg}\n${res_2_hit_1.msg}\n${res_1_hit_2.msgf}${res_2_hit_1.msgf}\n`;
+		this.log += this.lastAction;
 //		/print(npc_id);
 		if (npc_id > 0) {
 			let npc = GlobalNPCPlanets.getPlanet(npc_id);
