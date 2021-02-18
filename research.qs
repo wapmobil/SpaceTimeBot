@@ -96,7 +96,8 @@ ResearchBase.Traversal = {
 		if (!er) {
 			callback(this, prefix);
 		} else if (er.time == 0) {
-			this.children.forEach(n => n.traverse(callback, ResearchBase.Traversal.Actual, cursience));
+			prefix += "x";
+			this.children.forEach(n => n.traverse(callback, ResearchBase.Traversal.Actual, cursience, prefix));
 		} else callback(this, prefix);
 	}
 };
@@ -141,6 +142,11 @@ const getSienceButtons2 = function(a, r) {
 	return a;
 }
 
+const getSienceRank = function(a, r, cursience, prefix) {
+	a.push({id: r.id, rank: prefix.length});
+	return a;
+}
+
 const printSienceDetail = function(a, r, cursience) {
 	a += `<b>${r.name}</b> - ${r.info()}\n`;
 	const er = cursience.find(cr => cr.id == r.id);
@@ -182,6 +188,10 @@ const SieceTree = function () {
 const InoTechTree = function () {
 	let s = new Research2(1, "📟Инопланетные технологиии", "Открывет доступ к улучшениям за 📟Технологии", "upgrage_inotech", 100, 1);
 	s.add(new Research2(2, "👣️Дополнительная экспедиция", "Позволяет отправлять 2 экспедиции", "upgrage_max_expeditions", 12345, 20)).
-	  add(new Research2(3, "🔋Супер аккумуляторы 1", "Увеличивает ёмкость аккумуляторов на 20%", "upgrade_accum", 1234, 5));
+	  addNext(new Research2(3, "🔋Супер аккумуляторы 1", "Увеличивает ёмкость аккумуляторов на 20%", "upgrade_accum", 1234, 5)).
+	  addNext(new Research2(4, "🔋Супер аккумуляторы 2", "Увеличивает ёмкость аккумуляторов на 20%", "upgrade_accum", 2000, 10)).
+	  addNext(new Research2(5, "🔋Супер аккумуляторы 3", "Увеличивает ёмкость аккумуляторов на 20%", "upgrade_accum", 3000, 20)).
+	  addNext(new Research2(6, "🔋Супер аккумуляторы 4", "Увеличивает ёмкость аккумуляторов на 20%", "upgrade_accum", 4000, 30)).
+	  addNext(new Research2(7, "🔋Супер аккумуляторы 5", "Увеличивает ёмкость аккумуляторов на 20%", "upgrade_accum", 5000, 40));
 	return s;
 }();

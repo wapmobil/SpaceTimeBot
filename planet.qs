@@ -336,8 +336,15 @@ class Planet {
 			return;
 		}
 		const bs = InoTechTree.find(r => r.id == id);
+		//print(InoTechTree.reduce(getSienceRank, [], ResearchBase.Traversal.Actual, this.sience2));
+		const rank = InoTechTree.reduce(getSienceRank, [], ResearchBase.Traversal.Actual, this.sience2).find(r => r.id == id).rank;
+		if (rank > this.comcenter.level) {
+			Telegram.edit(this.chat_id, msg_id, `Требуется 🏪Командный центр ${rank} уровня`);
+			return;
+		}
 		if (!bs) {
 			Telegram.edit(this.chat_id, msg_id, "Улучшение недоступно");
+			return;
 		}
 		if (this.ino_tech < bs.cost) {
 			Telegram.edit(this.chat_id, msg_id, "Недостаточно " + Resources_desc[3]);
@@ -1015,6 +1022,34 @@ class Planet {
 		if (nv.type == 2) msg = "Экспедиция успешно отправлена!";
 		else msg = "Флот отправлен";
 		Telegram.edit(this.chat_id, msg_id, msg);
+	}
+	
+	returnExpeditionRS() {
+		this.navyInfo(true);
+		let res = 0;
+		let btns = [];
+		for (const value of this.expeditions) {
+			if (value.type == 2 || value.type == 3) res++;
+			if (value.type == 2) btns.push({button: `Вернуть экспедицию ${res}`, data: res, script: "returnExpeditionCommand"});
+		}
+		btns.push({button:"Отмена", data: -1, script: "returnExpeditionCommand"});
+		Telegram.send(this.chat_id, "Вернуть экспедицию:", btns);
+	}
+	
+	forseReturnExpedition(msg_id, e) {
+		if (e == -1) {
+			Telegram.edit(this.chat_id, msg_id, "Отменено");
+			return;
+		}
+		let res = 0;
+		for (const value of this.expeditions) {
+			if (value.type == 2 || value.type == 3) res++;
+			if (res == e && value.type == 2) {
+				value.arrived = 0;
+				Telegram.edit(this.chat_id, msg_id, "Принято");
+				return;
+			}
+		}
 	}
 	
 	expeditionsCount() {

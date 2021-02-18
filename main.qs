@@ -14,7 +14,7 @@ include("helps.qs")
 include("ratings.qs")
 
 
-const isProduction = true;
+const isProduction = false;
 const NPC_count = 3;
 const npc_delay = 5;
 const TgBotName = isProduction ? "SpaceTimeStrategyBot" : "SHS503bot";
@@ -24,7 +24,7 @@ let save_timer = new QTimer();
 save_timer.timeout.connect(on_buttonSave_clicked);
 
 Cron.removeAll();
-Cron.addSchedule("*/10 * * * * *", "processTradeNPC")
+Cron.addSchedule("*/15 * * * * *", "processTradeNPC")
 Cron.addSchedule("*/5 * * * * *", "statisticStep")
 Cron.addSchedule("0 6 * * * *", "statisticDayStep")
 Cron.addSchedule("0 * * * * *", "ratingCalc")
@@ -64,6 +64,7 @@ Telegram.addCommand("✈️Флот/ℹ️Cправка", "help_ships");
 Telegram.addCommand("✈️Флот/👣️Экспедиции/ℹ️Cправка", "help_expeditions");
 Telegram.addCommand("✈️Флот/👣️Экспедиции/📖Инфо", "info_expeditions");
 Telegram.addCommand("✈️Флот/👣️Экспедиции/👣Отправить экспедицию", "expedition_start");
+Telegram.addCommand("✈️Флот/👣️Экспедиции/↩️Вернуть экспедицию", "expedition_return");
 //Telegram.addCommand("🏛Строения/📖Инфо", "planet_info");
 Telegram.addCommand("🏛Строения/🍍Ферма", "info_farm");
 Telegram.addCommand("🏛Строения/🍍Ферма/📖Инфо", "info_farm");
@@ -611,7 +612,7 @@ function sell_resources(chat_id) {
 
 const TradeFoodButtons = function() {
 	let arr = [];
-	for(let j=2; j<7; j++) {
+	for(let j=2; j<8; j++) {
 		arr.push({button: `${food2text(Math.pow(10, j))} за ${money2text(Math.pow(10, j-2))}`, data:`${Math.pow(10, j)}`, script: "processBuyFood"});
 	}
 	return arr;
@@ -910,6 +911,10 @@ function expedition_start(chat_id) {
 	Planets.get(chat_id).initExpeditionRS(2);
 }
 
+function expedition_return(chat_id) {
+	Planets.get(chat_id).returnExpeditionRS();
+}
+
 function processExpeditionRS(chat_id, msg_id, data) {
 	Planets.get(chat_id).prepareExpeditionRS(msg_id, data);
 }
@@ -936,6 +941,10 @@ function processExpeditionCommand2(chat_id, msg_id, data) {
 		return;
 	}
 	Planets.get(chat_id).expeditionProcessCommand(msg_id, parseInt(sid[0]), parseInt(sid[1]));
+}
+
+function returnExpeditionCommand(chat_id, msg_id, data) {
+	Planets.get(chat_id).forseReturnExpedition(msg_id, parseInt(data));
 }
 
 function rait_money(chat_id) {

@@ -14,14 +14,16 @@ class NPCPlanet {
 	}
 	generate(x) {
 		Statistica.expeditions_rs++;
-		this.type = getRandom(20);
+		this.type = getRandom(21);
 		//if (this.type < 1) return;
 		let rnd = Math.floor(this.type / 5) + 1;
 		let crnd = 1;
 		if (this.type >= 5) crnd += 10;
 		if (this.type >= 10) crnd += 10;
 		if (this.type >= 11) {
-			this.ships.m[0].count = getRandom(this.type);
+			let mrnd = (this.type-10)*(this.type-10);
+			this.ships.m[0].count = getRandom(mrnd);
+			this[Resources[getRandom(Resources_base)].name] += getRandom(mrnd);
 		}
 		if (this.type >= 15) {
 			//crnd = 0;
@@ -29,37 +31,36 @@ class NPCPlanet {
 		}
 		if (this.type == 16) {
 			rnd = 0;
+		}
+		if (this.type >= 16) {
 			this.ships.m[1].count = getRandom(this.type);
 		}
-		if (this.type >= 17) {
-			this.ships.m[0].count = getRandom((this.type - 8)*5);
-		}
 		if (this.type == 18) {
-			rnd += 2;
-			this.ships.m[1].count += Math.floor(this.ships.m[0].count / 10);
+			rnd += 5;
+			this.ships.m[0].count += 100 + getRandom(100);
 		}
 		for(let i=0; i<rnd; i++)
 			this[Resources[getRandom(Resources_base)].name] += getRandom(this.type)*2 + crnd*2;
 		if (this.type >= 19) {
-			this[Resources[getRandom(Resources_base)].name] += 100 + getRandom(50);
-			this.ships.m[0].count += Math.floor(this.totalResources()/2);
-			this.ships.m[1].count += this.type;
+			this[Resources[getRandom(Resources_base)].name] += 500 + getRandom(100);
+			this.ships.m[1].count += 15;
 		}
 		if (this.type == 20) {
 			this.ino_tech += 6 + getRandom(4);
-			this.ships.m[0].count += this.ino_tech*2;
-			this.ships.m[1].count += 5;
-			this.ships.m[2].count += 1;
+			this.ships.m[0].count = this.ino_tech*10;
+			this.ships.m[1].count += 5+getRandom(20);
+			this.ships.m[2].count += 1+getRandom(4);
+			for(let i=0; i<Resources_base; i++) this[Resources[i].name] += 1000 + getRandom(1000);
 			if (getRandom(2) == 0) {
-				for(let i=0; i<Resources_base; i++) this[Resources[i].name] += 500 + getRandom(500);
-				this.ships.m[2].count += 10 + getRandom(10);
+				for(let i=0; i<Resources_base; i++) this[Resources[i].name] += getRandom(5000);
+				this.ships.m[2].count += getRandom(10);
 			}
 		}
 		if (this.ships.countAll() > 0) this.ships.money +=
 				this.ships.countAll()*100 +
 				getRandom(this.ships.countAll()*100) +
-				this.ships.m[1].count*1000 +
-				this.ships.m[2].count*10000;
+				this.ships.m[1].count*4000 +
+				this.ships.m[2].count*100000;
 		//print(this.type, rnd);
 	}
 	load(o) {
@@ -81,7 +82,8 @@ class NPCPlanet {
 		else if (this.type < 8) {msg += "Найдены обломки"; pn = "Обломки";}
 		else if (this.type < 10) {msg += "Обнаружен космический мусор"; pn = "Космический мусор";}
 		else if (this.type < 15) {msg += "Вы обнаружили астероид"; pn = "Астероид";}
-		else {msg += "Ура! Неизвестная планета!"; pn = "Неизвестная планета";}
+		else if (this.type < 20) {msg += "Ура! Неизвестная планета!"; pn = "Неизвестная планета";}
+		else {msg += "Вы нашли инопланетную базу!"; pn = "База инопланетян";}
 		if (!first) msg = "<b>"+pn+"</b>";
 		msg += "\n координаты: /eh_" + this.owner + "x" + this.id + "\n";
 		if (this.totalResources() == 0) {
