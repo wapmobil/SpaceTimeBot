@@ -51,7 +51,7 @@ Telegram.addCommand("📖Инфоцентр/🏆Рейтинги/💰Деньг�
 Telegram.addCommand("📖Инфоцентр/🏆Рейтинги/✈Корабли", "rait_ships");
 Telegram.addCommand("📖Инфоцентр/🏆Рейтинги/🏛Строения", "rait_buildings");
 Telegram.addCommand("📖Инфоцентр/🏆Рейтинги/📦Ресурсы", "rait_resources");
-//Telegram.addCommand("📖Инфоцентр/Тест сражения", "battle_test");
+Telegram.addCommand("Тест сражения", "battle_test");
 Telegram.addCommand("✈️Флот", "navy_info");
 Telegram.addCommand("✈️Флот/📖Инфо", "navy_info");
 Telegram.addCommand("✈️Флот/📤Разгрузить", "navy_unload");
@@ -978,3 +978,16 @@ function print_raiting(chat_id, val, desc) {
 	//print(msg);
 	Telegram.send(chat_id, msg);
 }
+
+function battle_test(chat_id) {
+	blablabla;
+	print("test");
+	let nv = new Navy(chat_id);
+	nv.m[1].count = 1;
+	let npc = new Navy(1);
+	npc.m[1].count = 1;
+	const btid = Battles.addBattle(new Battle(nv, npc));
+	const b = Battles.b.get(btid);
+	Telegram.send(chat_id, b.info(chat_id), b.buttons(chat_id));
+}
+
