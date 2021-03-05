@@ -54,14 +54,14 @@ class Navy {
 			}
 		}
 	}
-	buttons(scr) {
+	buttons(scr, all) {
 		let b = [];
 		for (let j=0; j<this.m.length; j++) {
-			if (this.m[j].count > 0) {
-				b.push([{button: `0`, data: `${j} -999`, script: scr},
+			if (this.m[j].count > 0 || all) {
+				b.push([{button: `-10`, data: `${j} -10`, script: scr},
 						{button: `${this.m[j].shortName()} -1`, data: `${j} -1`, script: scr},
 						{button: `${this.m[j].shortName()} +1`, data: `${j} +1`, script: scr},
-						{button: `+99`, data: `${j} +99`, script: scr}]);
+						{button: `+10`, data: `${j} +10`, script: scr}]);
 			}
 		}
 		return b;

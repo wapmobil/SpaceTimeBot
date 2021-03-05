@@ -16,7 +16,7 @@ include("ratings.qs")
 
 const isProduction = false;
 const NPC_count = 3;
-const npc_delay = 5;
+const npc_delay = isProduction ? 5 : 2;
 const TgBotName = isProduction ? "SpaceTimeStrategyBot" : "SHS503bot";
 const mining_timeout = isProduction ? 300 : 30;
 
@@ -130,6 +130,7 @@ let NPCstock = loadNPC();
 let GlobalNPCPlanets = loadNPCPlanets();
 let Planets = loadPlanets();
 let tmpNavy = new Map();
+let tmpNavyTest = new Map();
 let MiningGames = new Map();
 let StockTasks = new Map();
 let Battles = loadBattles();
@@ -979,15 +980,58 @@ function print_raiting(chat_id, val, desc) {
 	Telegram.send(chat_id, msg);
 }
 
+
 function battle_test(chat_id) {
-	blablabla;
-	print("test");
-	let nv = new Navy(chat_id);
-	nv.m[1].count = 1;
-	let npc = new Navy(1);
-	npc.m[1].count = 1;
-	const btid = Battles.addBattle(new Battle(nv, npc));
-	const b = Battles.b.get(btid);
-	Telegram.send(chat_id, b.info(chat_id), b.buttons(chat_id));
+	let nv_ = new Navy(chat_id);
+//	nv.m[0].count = 30;
+//	nv.m[1].count = 30;
+//	nv.m[2].count = 10;
+//	nv.m[3].count = 5;
+//	nv.m[4].count = 5;
+//	nv.m[5].count = 5;
+	let npc_ = new Navy(1);
+	npc_.type = 1;
+	npc_.m = enemyShips();
+//	npc.m[0].count = 160;
+//	npc.m[1].count = 20;
+//	npc.m[2].count = 2;
+	tmpNavyTest.set(chat_id, {nv: nv_, npc: npc_});
+	Telegram.send(chat_id, npc_.info("Корабли противника"), npc_.buttons("battle_test1", true).concat([{button: "Далее", script: "battle_test1", data: "-1"}]));
 }
 
+
+function battle_test1(chat_id, msg_id, data) {
+	const sid = data.split(" ");
+	const id = [parseInt(sid[0]), parseInt(sid[1])];
+	if (id[0] < 0) {
+		let msg = tmpNavyTest.get(chat_id).npc.info("Корабли противника");
+		msg += "\n" + tmpNavyTest.get(chat_id).nv.info("Твои корабли");
+		Telegram.edit(chat_id, msg_id, msg, tmpNavyTest.get(chat_id).nv.buttons("battle_test2", true).concat([{button: "Далее", script: "battle_test2", data: "-1"}]));
+	} else {
+		if (id[1] > 0) tmpNavyTest.get(chat_id).npc.add(id[0], id[1]);
+		else tmpNavyTest.get(chat_id).npc.remove(id[0], -id[1]);
+		let msg = tmpNavyTest.get(chat_id).npc.info("Корабли противника");
+		Telegram.edit(chat_id, msg_id, msg, tmpNavyTest.get(chat_id).npc.buttons("battle_test1", true).concat([{button: "Далее", script: "battle_test1", data: "-1"}]));
+	}
+}
+
+
+function battle_test2(chat_id, msg_id, data) {
+	const sid = data.split(" ");
+	const id = [parseInt(sid[0]), parseInt(sid[1])];
+	if (id[0] < 0) battle_test3(chat_id, msg_id, data);
+	else {
+		if (id[1] > 0) tmpNavyTest.get(chat_id).nv.add(id[0], id[1]);
+		else tmpNavyTest.get(chat_id).nv.remove(id[0], -id[1]);
+		let msg = tmpNavyTest.get(chat_id).npc.info("Корабли противника");
+		msg += "\n" + tmpNavyTest.get(chat_id).nv.info("Твои корабли");
+		Telegram.edit(chat_id, msg_id, msg, tmpNavyTest.get(chat_id).nv.buttons("battle_test2", true).concat([{button: "Далее", script: "battle_test2", data: "-1"}]));
+	}
+}
+
+
+function battle_test3(chat_id, msg_id, data) {
+	const btid = Battles.addBattle(new Battle(tmpNavyTest.get(chat_id).nv, tmpNavyTest.get(chat_id).npc));
+	const b = Battles.b.get(btid);
+	Telegram.edit(chat_id, msg_id, b.info(chat_id), b.buttons(chat_id));
+}

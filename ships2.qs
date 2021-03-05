@@ -93,7 +93,7 @@ class Ship {
 		if (bt) return this.name() + " " + this.count + "шт";
 		let cn = `${this.count}✈️${this.hp}❤️`;
 		cn = cn.padEnd(18);
-		return `${nm}:${cn}`;
+		return `${nm}: ${cn}`;
 	}
 }
 
@@ -215,7 +215,7 @@ class EnemyMiddle extends Ship {
 	name() {return "EnemyMiddle";}
 	shortName() {return "EM";}
 	description() {return "";}
-	size    () {return 1;}
+	size    () {return 2;}
 	capacity() {return 0;}
 	price   () {return 2;}
 	energy  () {return 0;}
@@ -228,7 +228,7 @@ class EnemySenior extends Ship {
 	name() {return "EnemySenior";}
 	shortName() {return "ES";}
 	description() {return "";}
-	size    () {return 1;}
+	size    () {return 10;}
 	capacity() {return 0;}
 	price   () {return 100;}
 	energy  () {return 0;}
