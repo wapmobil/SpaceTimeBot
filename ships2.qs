@@ -1,8 +1,11 @@
+include("weapons.qs")
+
 // Базовый класс корабля
 class Ship {
 	constructor(){
 		this.count = 0;
 		this.hp = this.health();
+		this._weapon();
 	}
 	load(o) {
 		for (const [key, value] of Object.entries(o)) {
@@ -20,7 +23,12 @@ class Ship {
 	level   () {return 1;} // requred spaceyard level
 	is_enemy() {return false;}
 	
-	peaceful() {return false;}
+	health  () {return 1;}
+	cur_health() {return this.hp + (this.count-1)*this.health();}
+	armor   () {return 0;} // damage reduction
+	_weapon () {this.wp = new Weapon(0,0);}
+	peaceful() {return this.wp.count == 0;}
+	damage  () {return this.count*this.wp.damage1()+getRandom(this.count*this.wp.damage2()-this.count*this.wp.damage1()+1);}
 	
 	
 	hitTo(ship) {
@@ -73,11 +81,6 @@ class Ship {
 		return ret;
 	}
 	
-	applyHit(result) {
-		this.count = result.new_cnt;
-		this.hp    = result.new_hp ;
-	}
-	
 	info(detail) {
 		let msg = `${this.name()}: ${this.count} шт.\n`
 		if (detail) {
@@ -91,8 +94,8 @@ class Ship {
 	infoBattle(bt) {
 		let nm = this.shortName();
 		if (bt) return this.name() + " " + this.count + "шт";
-		let cn = `${this.count}✈️${this.hp}❤️`;
-		cn = cn.padEnd(18);
+		let cn = `${this.count}✈️${this.hp}❤️ (${this.wp.info()}🗡)`;
+		//cn = cn.padEnd(18);
 		return `${nm}: ${cn}`;
 	}
 }
@@ -107,8 +110,7 @@ class TradeShip extends Ship {
 	price   () {return 100;}
 	energy  () {return 100;}
 	
-	health  () {return 100;}
-	peaceful() {return true;}
+	health  () {return 10;}
 }
 
 class SmallShip extends Ship {
@@ -119,7 +121,8 @@ class SmallShip extends Ship {
 	price   () {return 10;}
 	energy  () {return 10;}
 	
-	health  () {return 10;}
+	_weapon () {this.wp = new LaserWeapon(1, 1);}
+	health  () {return 4;}
 }
 
 class InterceptorShip extends Ship {
@@ -132,7 +135,8 @@ class InterceptorShip extends Ship {
 	energy  () {return 100;}
 	level   () {return 2;}
 	
-	health  () {return 40;}
+	_weapon () {this.wp = new LaserWeapon(8, 1);}
+	health  () {return 10;}
 }
 
 class CorvetteShip extends Ship {
@@ -141,11 +145,13 @@ class CorvetteShip extends Ship {
 	description() {return "Средний боевой корабль";}
 	size    () {return 4;}
 	capacity() {return 10;}
-	price   () {return 300;}
+	price   () {return 250;}
 	energy  () {return 200;}
 	level   () {return 3;}
 	
-	health  () {return 250;}
+	_weapon () {this.wp = new LaserWeapon(2, 6);}
+	armor   () {return 2;}
+	health  () {return 40;}
 }
 
 class FrigateShip extends Ship {
@@ -158,7 +164,9 @@ class FrigateShip extends Ship {
 	energy  () {return 400;}
 	level   () {return 3;}
 	
-	health  () {return 300;}
+	_weapon () {this.wp = new LaserWeapon(4, 4);}
+	armor   () {return 5;}
+	health  () {return 60;}
 }
 
 class CruiserShip extends Ship {
@@ -171,7 +179,9 @@ class CruiserShip extends Ship {
 	energy  () {return 500;}
 	level   () {return 4;}
 	
-	health  () {return 2000;}
+	_weapon () {this.wp = new LaserWeapon(2, 12);}
+	armor   () {return 10;}
+	health  () {return 200;}
 }
 
 
@@ -187,6 +197,9 @@ const ShipsDescription = function() {
 		msg += `  вместимость: ${s.capacity()}📦\n`;
 		msg += `  энергия пуска: ${s.energy()}🔋\n`;
 		msg += `  ${s.health()}❤️\n`;
+		msg += `  вооружение: ${s.wp.description()}\n`;
+		msg += `  урон: ${s.wp.info()}🗡\n`;
+		msg += `  броня: ${s.armor()}🛡\n`;
 		//msg += `  ${s.health()}❤️ ${s.attack()}⚔️ ${s.defence()}🏃\n`;
 		//msg += `  ${s.damage().x}d${s.damage().d}🗡 ${s.armor()}🛡\n`;
 		msg += "  стоимость: ";
@@ -208,7 +221,9 @@ class EnemyJunior extends Ship {
 	energy  () {return 0;}
 	is_enemy() {return true;}
 	
-	health  () {return 10;}
+	armor   () {return 1;}
+	health  () {return 5;}
+	_weapon () {this.wp = new LaserWeapon(2, 1);}
 }
 
 class EnemyMiddle extends Ship {
@@ -221,7 +236,9 @@ class EnemyMiddle extends Ship {
 	energy  () {return 0;}
 	is_enemy() {return true;}
 	
-	health  () {return 100;}
+	armor   () {return 4;}
+	health  () {return 30;}
+	_weapon () {this.wp = new LaserWeapon(3, 3);}
 }
 
 class EnemySenior extends Ship {
@@ -234,7 +251,9 @@ class EnemySenior extends Ship {
 	energy  () {return 0;}
 	is_enemy() {return true;}
 	
-	health  () {return 8000;}
+	armor   () {return 20;}
+	health  () {return 1000;}
+	_weapon () {this.wp = new LaserWeapon(4, 4);}
 }
 
 function enemyShips() {return [new EnemyJunior(), new EnemyMiddle(), new EnemySenior()]}

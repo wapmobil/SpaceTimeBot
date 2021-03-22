@@ -1,8 +1,8 @@
 include("navy2.qs")
 
 const battle_timeout = 60;
-const battle_mapsize = 11;
-const battle_maxnvsize = 9;
+const battle_mapsize = 7;
+const battle_maxnvsize = 14;
 const battle_layouts = {
 	left : {i: 0, desc : "на лево"},
 	right : {i: 1, desc : "на право"},
@@ -29,7 +29,6 @@ class BattlePlayer {
 		this.step = 0;
 		if (nv.chat_id == 1) this.msg_id = 1;
 	}
-	
 	chat_id() {return this.nv.chat_id;}
 }
 
@@ -69,7 +68,15 @@ class Battle {
 						Math.min(Math.ceil(p.nv.size()/10), battle_maxnvsize),
 						chat_id == p.chat_id(), p.move);
 			});
-
+		this.players.forEach(p => {
+			if (chat_id == p.chat_id() && p.step == 2)
+				this.attackPrint(map, p.attack);
+			});
+		if (cur_id == chat_id && this.curPlayer().step == 0 && this.round > 1) {
+			this.players.forEach(p => {
+				this.hitPrint(map, chat_id == p.chat_id(), p.attack);
+			});
+		}
 		msg += "Противник:\n"
 		if (chat_id != this.players[0].chat_id()) msg += n1.join("\n");
 		else msg += n2.join("\n");
@@ -79,29 +86,89 @@ class Battle {
 				msg += map[i*battle_mapsize+j];
 			}
 			msg += "\n";
+			if (i==battle_mapsize-1) {
+				for(let j=0; j<battle_mapsize; j++) msg += "〰️";
+				msg += "\n";
+			}
 		}
 		msg += "Ты:\n"
 		if (chat_id == this.players[0].chat_id()) msg += n1.join("\n");
 		else msg += n2.join("\n");
 		msg += "\n";
-		/*const sz = Math.max(n1.length, n2.length);
-		for(let j=0; j<sz; j++) {
-			msg += "<code>"
-			if (n1.length > j) msg += "🟢"+n1[j];
-			else msg += "⚪️------------";
-			//msg += "⏹  ";
-			if (n2.length > j) msg += "🟠"+n2[j];
-			else msg += "⚪️------------";
-			msg += "</code>\n\n";
-		}*/
-		msg += this.lastAction + "\n";
+		msg += "\n" + this.lastAction + "\n";
 		if (cur_id == chat_id) {
-			//if (this.mode == -2) msg += "Ты ходишь первым";
-//			if (this.mode == -1) msg += "Выбери отряд";
-			//if (this.mode == -1) 
-			msg += "Твой ход";
+			msg += "Твой ход ";
+			if (this.curPlayer().step == 0) msg += "(перемещение)";
+			if (this.curPlayer().step == 1) msg += "(атака)";
 		} else msg += "Ждём ход противника...";
 		return msg;
+	}
+	
+	attackPrint(map, attack) {
+		const s = "🎯";
+		switch(attack) {
+			case battle_attacks.left.i :
+				for(let j=0; j<battle_mapsize; j++) map[j*battle_mapsize] = s;
+				break;
+			case battle_attacks.right.i :
+				for(let j=0; j<battle_mapsize; j++) map[(j+1)*battle_mapsize-1] = s;
+				break;
+			case battle_attacks.back.i :
+				for(let j=0; j<battle_mapsize; j++) map[j] = s;
+				break;
+			case battle_attacks.front.i :
+				for(let j=0; j<battle_mapsize; j++) map[battle_mapsize*battle_mapsize-j-1] = s;
+				break;
+			case battle_attacks.center.i :
+				for(let j=0; j<battle_mapsize; j++) map[j*battle_mapsize+Math.floor(battle_mapsize/2)] = s;
+				break;
+		}
+	}
+	
+	hitPrint(map, you, attack) {
+		const hit = "💥";
+		const miss = "🌪";
+		const f = function(x) {
+			if (map[x] == "✖️") map[x] = miss;
+			else map[x] = hit;
+		}
+		if (you) {
+			switch(attack) {
+				case battle_attacks.left.i :
+					for(let j=0; j<battle_mapsize; j++) f(j*battle_mapsize);
+					break;
+				case battle_attacks.right.i :
+					for(let j=0; j<battle_mapsize; j++) f((j+1)*battle_mapsize-1);
+					break;
+				case battle_attacks.back.i :
+					for(let j=0; j<battle_mapsize; j++) f(j);
+					break;
+				case battle_attacks.front.i :
+					for(let j=0; j<battle_mapsize; j++) f(battle_mapsize*battle_mapsize-j-1);
+					break;
+				case battle_attacks.center.i :
+					for(let j=0; j<battle_mapsize; j++) f(j*battle_mapsize + Math.floor(battle_mapsize/2));
+					break;
+			}
+		} else {
+			switch(attack) {
+				case battle_attacks.left.i :
+					for(let j=0; j<battle_mapsize; j++) f((j+battle_mapsize+1)*battle_mapsize-1);
+					break;
+				case battle_attacks.right.i :
+					for(let j=0; j<battle_mapsize; j++) f((j+battle_mapsize)*battle_mapsize);
+					break;
+				case battle_attacks.back.i :
+					for(let j=0; j<battle_mapsize; j++) f(2*battle_mapsize*battle_mapsize-j-1);
+					break;
+				case battle_attacks.front.i :
+					for(let j=0; j<battle_mapsize; j++) f(j+battle_mapsize*battle_mapsize);
+					break;
+				case battle_attacks.center.i :
+					for(let j=0; j<battle_mapsize; j++) f((j+battle_mapsize)*battle_mapsize + Math.floor(battle_mapsize/2));
+					break;
+			}
+		}
 	}
 	
 	movePrint(map, sz, you, move) {
@@ -115,7 +182,7 @@ class Battle {
 			case battle_layouts.flang.i : this.layoutFlang(map, sz, you); break;
 		}
 	}
-	
+		
 	layoutBack(map, sz, you) {
 		const st = you ? battle_mapsize*2-1 : 0; 
 		const ex = you ? i => i>battle_mapsize : i => i<battle_mapsize; 
@@ -226,8 +293,6 @@ class Battle {
 			i++; if (i == rows) {i = 0; n++; bt.push([]);}
 		}
 		if (this.mode >= 0 && chat_id > 1 && this.timeout < battle_timeout) {
-			//bt.push({button: "защищаться", script: "battle_step", data: `${this.players[0].nv.battle_id} skip`});
-			//bt.push({button: "назад к выбору отряда", script: "battle_step", data: `${this.players[0].nv.battle_id} back`});
 			bt.push({button: "сбежать", script: "battle_start", data: `${this.curPlayer().nv.battle_id} 1`});
 		}
 		return bt;
@@ -240,6 +305,7 @@ class Battle {
 		}
 	}
 	step(chat_id, data) {
+		//print(chat_id, data);
 		const cur_id = this.curPlayer().chat_id();
 		if (chat_id != cur_id) return;
 		this.timeout = 0;
@@ -261,16 +327,49 @@ class Battle {
 		);
 	}
 	checkFinish() {
-		if (!this.players[1].nv.battleList().some(e => e == 0)) {this.finish(1); return true;}
-		if (!this.players[0].nv.battleList().some(e => e == 0)) {this.finish(2); return true;}
-		return false;
+		if (!this.players[1].nv.battleList().some(e => e == 0)) this.finish(1);
+		if (!this.players[0].nv.battleList().some(e => e == 0)) this.finish(2);
 	}
 	newRound() {
 		//print("new round");
+		if (this.round != 0) {
+			let map = new Array(battle_mapsize * battle_mapsize * 2);
+			map.fill("✖️");
+			this.players.forEach(p => {
+					this.movePrint(map,
+							Math.min(Math.ceil(p.nv.size()/10), battle_maxnvsize),
+							this.players[0].chat_id() == p.chat_id(), p.move);
+				});
+				
+			let map0 = map.slice();
+			this.hitPrint(map0, true, this.players[0].attack);
+			let hits0 = 0;
+			let sz0 = Math.min(Math.ceil(this.players[0].nv.size()/10), battle_maxnvsize);
+			for(let j=0; j<battle_mapsize*battle_mapsize*2; j++) if (map0[j] == "💥") hits0++;
+			
+			let map1 = map.slice();
+			let hits1 = 0;
+			let sz1 = Math.min(Math.ceil(this.players[1].nv.size()/10), battle_maxnvsize);
+			this.hitPrint(map1, false, this.players[1].attack);
+			for(let j=0; j<battle_mapsize*battle_mapsize*2; j++) if (map1[j] == "💥") hits1++;
+			
+			print("player0: ", this.players[0].nv.maxDefeat(hits1, sz0));
+			print("player1: ", this.players[1].nv.maxDefeat(hits0, sz1));
+			let dmg0 = this.players[0].nv.damage(hits0, this.players[1].nv.maxDefeat(hits0, sz1));
+			let dmg1 = this.players[1].nv.damage(hits1, this.players[0].nv.maxDefeat(hits1, sz0));
+			
+			if(hits0 == 0) this.lastAction += "Ты промазал 💦\n";
+			else this.lastAction += `Ты попал ${hits0}💥 -> ${dmg0}🥊\n${this.players[1].nv.applyDamage(dmg0)}`;
+			if(hits1 == 0) this.lastAction += "Ты увернулся 🌪\n";
+			else this.lastAction += `Тебя подбили ${hits1}💥 -> ${dmg1}🥊\n${this.players[0].nv.applyDamage(dmg1)}`;
+			this.log += this.lastAction;
+			checkFinish();
+		}
+		
 		this.mode = -1;
 		this.cp = 0;
+		this.players.forEach(p => p.step = 0);
 		this.round++;
-		//this.lastAction += `<b>Начался раунд ${this.round}</b>\n`;
 		Statistica.battle_rounds++;
 	}
 	finish(side) {
@@ -304,32 +403,6 @@ class Battle {
 		this.players[1].nv.battle_id = 0;
 		this.mode = -3;
 	}
-	attack(s1, s2, npc_id) {
-		let res_1_hit_2 = s1.hitTo(s2);
-		let res_2_hit_1 = s2.hitTo(s1);
-		//this.lastAction = `${res_1_hit_2.msg}\n${res_1_hit_2.msgf}\n`;
-		this.lastAction = `${res_1_hit_2.msg}\n${res_2_hit_1.msg}\n${res_1_hit_2.msgf}${res_2_hit_1.msgf}\n`;
-		this.log += this.lastAction;
-//		/print(npc_id);
-		if (npc_id > 0) {
-			let npc = GlobalNPCPlanets.getPlanet(npc_id);
-			//print(res_1_hit_2.parts, res_2_hit_1.parts);
-			if (res_1_hit_2.parts > 0) {
-				if (res_1_hit_2.enemy) npc.ino_tech += res_1_hit_2.parts;
-				else {
-					for(let i=0; i<Resources_base; i++) npc[Resources[i].name] += res_1_hit_2.parts;
-				}
-			}
-			if (res_2_hit_1.parts > 0) {
-				if (res_2_hit_1.enemy) npc.ino_tech += res_2_hit_1.parts;
-				else {
-					for(let i=0; i<Resources_base; i++) npc[Resources[i].name] += res_2_hit_1.parts;
-				}
-			}
-		}
-		s2.applyHit(res_1_hit_2);
-		s1.applyHit(res_2_hit_1);
-	}
 }
 
 
@@ -350,13 +423,13 @@ class BattleList {
 		let del = [];
 		for (var [key, value] of this.b) {
 			//print("battle", this.cur_id, this.msg_id1, this. msg_id2);
-			if (value.cur_id == 1 || value.timeout > battle_timeout) {
-				const bts = value.buttons(value.cur_id).reduce((acc, val) => acc.concat(val), []);
+			if (value.curPlayer().chat_id() == 1 || value.timeout > battle_timeout) {
+				const bts = value.buttons(value.curPlayer().chat_id()).reduce((acc, val) => acc.concat(val), []);
 				let rb = getRandom(bts.length);
 				if (rb >= bts.length) rb = bts.length -1;
 				if (rb < 0) print("invalid battle buttons", bts);
 				//print("step", value.cur_id, bts.length, rb);
-				value.step(value.cur_id, bts[rb].data.split(" ")[1]);
+				value.step(value.curPlayer().chat_id(), bts[rb].data.split(" ")[1]);
 			}
 			if (value.mode == -3) del.push(key);
 			if (value.mode >= -1) value.timeout++;
@@ -365,15 +438,4 @@ class BattleList {
 		for (var k of del) this.b.delete(k);
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
 
