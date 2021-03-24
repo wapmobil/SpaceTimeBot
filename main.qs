@@ -318,7 +318,7 @@ function processShipCreate(chat_id, msg_id, data) {
 function ship_create(chat_id) {
 	const l = Planets.get(chat_id).spaceyard.level;
 	if (l == 0) {
-		Telegram.send(this.chat_id, msg_id, "Требуется построить 🏗Верфь");
+		Telegram.send(chat_id, "Требуется построить 🏗Верфь");
 		return;
 	}
 	let btns = [];

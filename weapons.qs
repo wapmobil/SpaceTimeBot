@@ -19,5 +19,5 @@ class Weapon {
 class LaserWeapon extends Weapon {
 	name() {return "Лазер";}
 	damage1() {return this.count*this.level;}
-	damage2() {return this.count*Math.floor(this.level*1.25)+1;}
+	damage2() {return this.count*(Math.floor(this.level*1.25)+1);}
 }

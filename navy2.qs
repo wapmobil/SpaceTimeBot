@@ -146,7 +146,7 @@ class Navy {
 	}
 	maxDefeat(hit, sz) {
 		let h = 0;
-		for (const value of this.m) h += value.cur_health();
+		for (const value of this.m) h += value.cur_health()+value.count*value.armor();
 		return Math.floor(h*hit/Math.max(sz,1));
 	}
 	applyDamage(dmg) {
@@ -154,6 +154,7 @@ class Navy {
 		let msg = "";
 		for (const value of this.m) h += value.cur_health();
 		for (const value of this.m) {
+			if (value.count == 0) continue;
 			let cd = Math.round(dmg*value.cur_health()/h);
 			let killed = 0;
 			while (cd > 0) {
@@ -164,7 +165,10 @@ class Navy {
 				if (value.hp <= 0) {
 					value.count--;
 					killed++;
-					if (value.count <= 0) break;
+					if (value.count <= 0) {
+						value.count = 0;
+						break;
+					}
 					value.hp = value.health();
 				}
 			}

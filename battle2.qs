@@ -2,10 +2,10 @@ include("navy2.qs")
 
 const battle_timeout = 60;
 const battle_mapsize = 7;
-const battle_maxnvsize = 14;
+const battle_maxnvsize = 21;
 const battle_layouts = {
-	left : {i: 0, desc : "на лево"},
-	right : {i: 1, desc : "на право"},
+	left : {i: 0, desc : "слева"},
+	right : {i: 1, desc : "справа"},
 	backward : {i: 2, desc : "позади"},
 	front : {i: 3, desc : "спереди"},
 	center : {i: 4, desc : "в центр"},
@@ -276,6 +276,85 @@ class Battle {
 		}
 	}
 		
+	getBallteLayouts(mv) {
+		let o = {};
+		switch (mv) {
+			case battle_layouts.left.i :
+				o.left = battle_layouts.left;
+				o.front = battle_layouts.front;
+				o.backward = battle_layouts.backward;
+				break;
+			case battle_layouts.right.i :
+				o.right = battle_layouts.right;
+				o.front = battle_layouts.front;
+				o.backward = battle_layouts.backward;
+				break;
+			case battle_layouts.backward.i :
+				o.left = battle_layouts.left;
+				o.right = battle_layouts.right;
+				o.center = battle_layouts.center;
+				o.backward = battle_layouts.backward;
+				break;
+			case battle_layouts.front.i :
+				o.left = battle_layouts.left;
+				o.right = battle_layouts.right;
+				o.center = battle_layouts.center;
+				o.front = battle_layouts.front;
+				o.flang = battle_layouts.flang;
+				break;
+			case battle_layouts.center.i :
+				o.left = battle_layouts.left;
+				o.right = battle_layouts.right;
+				o.center = battle_layouts.center;
+				o.front = battle_layouts.front;
+				o.flang = battle_layouts.flang;
+				o.backward = battle_layouts.backward;
+				break;
+			case battle_layouts.flang.i :
+				o.flang = battle_layouts.flang;
+				o.front = battle_layouts.front;
+				o.center = battle_layouts.center;
+				o.backward = battle_layouts.backward;
+				break;
+		}
+		return o;
+	}
+	
+	getBallteAttacks(mv) {
+		let o = {};
+		switch (mv) {
+			case battle_layouts.left.i :
+				o.left = battle_attacks.left;
+				o.center = battle_attacks.center;
+				o.front = battle_attacks.front;
+				break;
+			case battle_layouts.right.i :
+				o.right = battle_attacks.right;
+				o.center = battle_attacks.center;
+				o.front = battle_attacks.front;
+				break;
+			case battle_layouts.backward.i :
+				o.center = battle_attacks.center;
+				o.front = battle_attacks.front;
+				break;
+			case battle_layouts.front.i :
+			case battle_layouts.flang.i :
+				o.left = battle_attacks.left;
+				o.right = battle_attacks.right;
+				o.center = battle_attacks.center;
+				o.front = battle_attacks.front;
+				o.back = battle_attacks.back;
+				break;
+			case battle_attacks.center.i :
+				o.left = battle_attacks.left;
+				o.right = battle_attacks.right;
+				o.center = battle_attacks.center;
+				o.front = battle_attacks.front;
+				break;
+		}
+		return o;
+	}
+	
 	buttons(chat_id, cont) {
 		if (this.mode == -2) return [{button: "Начать сражение!", script: "battle_start", data: `${this.players[0].nv.battle_id} 0`}, {button: "сбежать", script: "battle_start", data: `${this.players[0].nv.battle_id} 1`}];
 		if (cont) return [{button: "Продолжить сражение!", script: "battle_start", data: `${this.players[0].nv.battle_id} 0`}, {button: "сбежать", script: "battle_start", data: `${this.players[0].nv.battle_id} 1`}];
@@ -286,8 +365,8 @@ class Battle {
 		bt.push([]);
 		let i = 0;
 		let n = 0;
-		let xx = Object.entries(battle_layouts);
-		if (this.curPlayer().step == 1) xx = Object.entries(battle_attacks);
+		let xx = Object.entries(this.getBallteLayouts(this.curPlayer().move));
+		if (this.curPlayer().step == 1) xx = Object.entries(this.getBallteAttacks(this.curPlayer().move));
 		for (const [key, value] of xx) {
 			bt[n].push({button: `${value.desc}`, script: "battle_step", data: `${this.curPlayer().nv.battle_id} ${value.i}`});
 			i++; if (i == rows) {i = 0; n++; bt.push([]);}
@@ -318,7 +397,7 @@ class Battle {
 		this.curPlayer().step++;
 		if (this.curPlayer().step == 2) this.cp++;
 		if (this.cp == this.players.length) this.newRound();
-		this.players.forEach(p => { if (p.chat_id() > 1)
+		if (this.mode != -3) this.players.forEach(p => { if (p.chat_id() > 1)
 				Telegram.edit(p.chat_id(),
 				 p.msg_id,
 				 this.info(p.chat_id()),
@@ -363,14 +442,22 @@ class Battle {
 			if(hits1 == 0) this.lastAction += "Ты увернулся 🌪\n";
 			else this.lastAction += `Тебя подбили ${hits1}💥 -> ${dmg1}🥊\n${this.players[0].nv.applyDamage(dmg1)}`;
 			this.log += this.lastAction;
-			checkFinish();
+			this.checkFinish();
+		} else {
+			const n1 = this.players[0].nv.infoBattle().filter(word => word.length > 0);
+			const n2 = this.players[1].nv.infoBattle().filter(word => word.length > 0);
+			this.log += "<b>Ты:</b>\n"
+			this.log += n1.join("\n");
+			this.log += "\n<b>Противник:</b>\n"
+			this.log += n2.join("\n");
+			this.log += "\n\n";
 		}
-		
-		this.mode = -1;
+		if (this.mode != -3) this.mode = -1;
 		this.cp = 0;
 		this.players.forEach(p => p.step = 0);
 		this.round++;
 		Statistica.battle_rounds++;
+
 	}
 	finish(side) {
 		//print("finish");
