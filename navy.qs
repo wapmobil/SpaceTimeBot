@@ -54,14 +54,14 @@ class Navy {
 			}
 		}
 	}
-	buttons(scr) {
+	buttons(scr, all) {
 		let b = [];
 		for (let j=0; j<this.m.length; j++) {
-			if (this.m[j].count > 0) {
-				b.push([{button: `0`, data: `${j} -999`, script: scr},
+			if (this.m[j].count > 0 || all) {
+				b.push([{button: `-10`, data: `${j} -10`, script: scr},
 						{button: `${this.m[j].shortName()} -1`, data: `${j} -1`, script: scr},
 						{button: `${this.m[j].shortName()} +1`, data: `${j} +1`, script: scr},
-						{button: `+99`, data: `${j} +99`, script: scr}]);
+						{button: `+10`, data: `${j} +10`, script: scr}]);
 			}
 		}
 		return b;
@@ -138,5 +138,43 @@ class Navy {
 			if (value.peaceful()) ps += value.count;
 		}
 		return this.countAll() == ps ? true : false;
+	}
+	damage(hit, max_dmg) {
+		let dmg = 0;
+		for (const value of this.m) dmg += value.damage();
+		return Math.min(hit*dmg, max_dmg);
+	}
+	maxDefeat(hit, sz) {
+		let h = 0;
+		for (const value of this.m) h += value.cur_health()+value.count*value.armor();
+		return Math.floor(h*hit/Math.max(sz,1));
+	}
+	applyDamage(dmg) {
+		let h = 0;
+		let msg = "";
+		for (const value of this.m) h += value.cur_health();
+		for (const value of this.m) {
+			if (value.count == 0) continue;
+			let cd = Math.round(dmg*value.cur_health()/h);
+			let killed = 0;
+			while (cd > 0) {
+				let cdam = Math.min(cd, value.hp + value.armor());
+				cd -= cdam;
+				cdam = Math.max(0, cdam - value.armor());
+				value.hp -= cdam;
+				if (value.hp <= 0) {
+					value.count--;
+					killed++;
+					if (value.count <= 0) {
+						value.count = 0;
+						break;
+					}
+					value.hp = value.health();
+				}
+			}
+			//print("убито", killed, value.name());
+			if (killed > 0) msg += `убито ${killed} ${value.name()}\n`;
+		}
+		return msg;
 	}
 }

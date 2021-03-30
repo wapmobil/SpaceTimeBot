@@ -14,7 +14,7 @@ include("helps.qs")
 include("ratings.qs")
 
 
-const isProduction = false;
+const isProduction = true;
 const NPC_count = 3;
 const npc_delay = isProduction ? 5 : 2;
 const TgBotName = isProduction ? "SpaceTimeStrategyBot" : "SHS503bot";
@@ -51,7 +51,7 @@ Telegram.addCommand("📖Инфоцентр/🏆Рейтинги/💰Деньг�
 Telegram.addCommand("📖Инфоцентр/🏆Рейтинги/✈Корабли", "rait_ships");
 Telegram.addCommand("📖Инфоцентр/🏆Рейтинги/🏛Строения", "rait_buildings");
 Telegram.addCommand("📖Инфоцентр/🏆Рейтинги/📦Ресурсы", "rait_resources");
-Telegram.addCommand("Тест сражения", "battle_test");
+Telegram.addCommand("📖Инфоцентр/Тест сражения", "battle_test");
 Telegram.addCommand("✈️Флот", "navy_info");
 Telegram.addCommand("✈️Флот/📖Инфо", "navy_info");
 Telegram.addCommand("✈️Флот/📤Разгрузить", "navy_unload");
@@ -863,15 +863,20 @@ function battle_start(chat_id, msg_id, data) {
 		}
 		if (parseInt(sid[1]) == 1) {
 			let b = Battles.b.get(btid);
-			b.nv1.battle_id = 0;
-			b.nv2.battle_id = 0;
 			b.mode = -3;
-			if (b.nv1.type == 4) {
-				b.nv1.dst = b.nv1.chat_id;
-				b.nv1.type = 0;
-				b.nv1.arrived = 500;
-			}
+			b.players.forEach(p => {
+				p.nv.battle_id = 0;
+				if (p.nv.type == 4) {
+					p.nv.dst = p.nv.chat_id;
+					p.nv.type = 0;
+					p.nv.arrived = 500;
+				}
+			});
 			Telegram.edit(chat_id, msg_id, "Вы сбежали из боя");
+		}
+		if (parseInt(sid[1]) == 2) {
+			let b = Battles.b.get(btid);
+			b.auto(chat_id, msg_id);
 		}
 	} else {
 		Telegram.edit(chat_id, msg_id, "Ошибка");

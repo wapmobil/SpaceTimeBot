@@ -1,4 +1,4 @@
-include("battle2.qs")
+include("battle.qs")
 
 class NPCPlanet {
 	constructor(id, owner) {
