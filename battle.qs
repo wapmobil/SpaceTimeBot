@@ -440,24 +440,41 @@ class Battle {
 			let map0 = map.slice();
 			this.hitPrint(map0, true, this.players[0].attack);
 			let hits0 = 0;
-			let sz0 = Math.min(Math.ceil(this.players[0].nv.size()/10), battle_maxnvsize);
+			const sz0 = Math.min(Math.ceil(this.players[0].nv.size()/10), battle_maxnvsize);
 			for(let j=0; j<battle_mapsize*battle_mapsize*2; j++) if (map0[j] == "💥") hits0++;
 			
 			let map1 = map.slice();
 			let hits1 = 0;
-			let sz1 = Math.min(Math.ceil(this.players[1].nv.size()/10), battle_maxnvsize);
+			const sz1 = Math.min(Math.ceil(this.players[1].nv.size()/10), battle_maxnvsize);
 			this.hitPrint(map1, false, this.players[1].attack);
 			for(let j=0; j<battle_mapsize*battle_mapsize*2; j++) if (map1[j] == "💥") hits1++;
 			
 			//print("player0: ", this.players[0].nv.maxDefeat(hits1, sz0));
 			//print("player1: ", this.players[1].nv.maxDefeat(hits0, sz1));
-			let dmg0 = this.players[0].nv.damage(hits0, this.players[1].nv.maxDefeat(hits0, sz1));
-			let dmg1 = this.players[1].nv.damage(hits1, this.players[0].nv.maxDefeat(hits1, sz0));
+			const dmg0 = this.players[0].nv.damage(hits0, this.players[1].nv.maxDefeat(hits0, sz1));
+			const dmg1 = this.players[1].nv.damage(hits1, this.players[0].nv.maxDefeat(hits1, sz0));
+			
+			const npc_id = this.players[1].nv.dst;
+			let npc = npc_id > 0 ? GlobalNPCPlanets.getPlanet(npc_id) : undefined;
 			
 			if(hits0 == 0) this.lastAction += "Ты промазал 💦\n";
-			else this.lastAction += `Ты попал ${hits0}💥 -> ${dmg0}🥊\n${this.players[1].nv.applyDamage(dmg0)}`;
+			else {
+				const dmr0 = this.players[1].nv.applyDamage(dmg0);
+				this.lastAction += `Ты попал ${hits0}💥 -> ${dmg0}🥊\n${dmr0.msg}`;
+				if (npc) {
+					npc.ino_tech += dmr0.tech;
+					for (let i=0; i<Resources_base; i++) npc[Resources[i].name] += dmr0.parts;
+				}
+			}
 			if(hits1 == 0) this.lastAction += "Ты увернулся 🌪\n";
-			else this.lastAction += `Тебя подбили ${hits1}💥 -> ${dmg1}🥊\n${this.players[0].nv.applyDamage(dmg1)}`;
+			else {
+				const dmr1 = this.players[0].nv.applyDamage(dmg1);
+				this.lastAction += `Тебя подбили ${hits1}💥 -> ${dmg1}🥊\n${dmr1.msg}`;
+				if (npc) {
+					npc.ino_tech += dmr1.tech;
+					for (let i=0; i<Resources_base; i++) npc[Resources[i].name] += dmr1.parts;
+				}
+			}
 			this.log += this.lastAction;
 			this.checkFinish();
 		} else {

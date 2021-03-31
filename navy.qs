@@ -150,8 +150,8 @@ class Navy {
 		return Math.floor(h*hit/Math.max(sz,1));
 	}
 	applyDamage(dmg) {
+		let ret = {msg:"", parts: 0, tech: 0};
 		let h = 0;
-		let msg = "";
 		for (const value of this.m) h += value.cur_health();
 		for (const value of this.m) {
 			if (value.count == 0) continue;
@@ -172,9 +172,12 @@ class Navy {
 					value.hp = value.health();
 				}
 			}
+			const gb = Math.floor(killed * value.price() / 2);
+			if (value.is_enemy()) ret.tech += gb;
+			else ret.parts += gb;
 			//print("убито", killed, value.name());
-			if (killed > 0) msg += `убито ${killed} ${value.name()}\n`;
+			if (killed > 0) ret.msg += `убито ${killed} ${value.name()}\n`;
 		}
-		return msg;
+		return ret;
 	}
 }

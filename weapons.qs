@@ -4,6 +4,11 @@ class Weapon {
 		this.count = c;
 		this.level = l;
 	}
+	load(o) {
+		for (const [key, value] of Object.entries(o)) {
+			this[key] = value;
+		}
+	}
 	name() {return "Нет вооружения";}
 	damage1() {return 0;}
 	damage2() {return 0;}

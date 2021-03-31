@@ -9,7 +9,8 @@ class Ship {
 	}
 	load(o) {
 		for (const [key, value] of Object.entries(o)) {
-			this[key] = value;
+			if (key == "wp") this.wp.load(value);
+			else this[key] = value;
 		}
 	}
 	name() {return "";}
@@ -32,57 +33,6 @@ class Ship {
 	_weapon () {this.wp = new Weapon(0,0);}
 	peaceful() {return this.wp.count == 0;}
 	damage  () {return this.count*this.wp.damage1()+getRandom(this.count*this.wp.damage2()-this.count*this.wp.damage1()+1);}
-	
-	
-	hitTo(ship) {
-		let ret = {msg:"", new_cnt: ship.count, new_hp: ship.hp, msgf: ""};
-		/*if (ship.count <= 0) return ret;
-		const thisAR = this.baseRoll();
-		let dam = this.damageRoll();
-		let hit = false;
-		let msg = `${this.name()} ⚔️ ${ship.name()} (${thisAR}🎲):\n`;
-		if (thisAR >= this.crit().hit) {
-			hit = true;
-			dam *= this.crit().x;
-			msg += `🥊критическое попадание x${this.crit().x}`;
-		} else if (thisAR <= this.crit().miss) {
-			msg += `🌪промах`;
-		} else if ((thisAR + this.attack()) >= ship.defence()) {
-			hit = true;
-			msg += `🗡попадание`;
-		} else {
-			msg += `☁️промах`;
-		}
-		if (hit) {
-			msg += `:-${dam}💔`;
-			let killed = 0, ship_cnt = ship.count, ship_hp = ship.hp;
-			while (dam > 0) {
-				let cdam = Math.min(dam, ship_hp + ship.armor());
-				dam -= cdam;
-				cdam = Math.max(0, cdam - ship.armor());
-				ship_hp -= cdam;
-				if (ship_hp <= 0) {
-					ship_cnt--;
-					killed++;
-					if (ship_cnt <= 0) break;
-					ship_hp = ship.health();
-				}
-			}
-			if (killed > 0) {
-				ret.msgf += `\n 💥 уничтожено ${killed} ${ship.name()}`;
-			}
-			if (ship_cnt <= 0) {
-				ret.msgf += `\n ☠️ отряд ${ship.name()} уничтожен`;
-			}
-			ret.new_cnt = ship_cnt;
-			ret.new_hp = ship_hp;
-			ret.parts = Math.floor(killed * ship.price() / 2);
-			ret.enemy = ship.is_enemy();
-			//print(killed, ship.price(), ret.parts);
-		}
-		ret.msg = msg;*/
-		return ret;
-	}
 	
 	info(detail) {
 		let msg = `${this.name()}: ${this.count} шт.\n`
@@ -113,7 +63,7 @@ class TradeShip extends Ship {
 	price   () {return 100;}
 	energy  () {return 100;}
 	
-	health  () {return 10;}
+	health  () {return 20;}
 }
 
 class SmallShip extends Ship {
@@ -139,7 +89,7 @@ class InterceptorShip extends Ship {
 	level   () {return 2;}
 	
 	_weapon () {this.wp = new LaserWeapon(8, 1);}
-	health  () {return 10;}
+	health  () {return 20;}
 }
 
 class CorvetteShip extends Ship {
@@ -154,7 +104,7 @@ class CorvetteShip extends Ship {
 	
 	_weapon () {this.wp = new LaserWeapon(2, 4);}
 	armor   () {return 10;}
-	health  () {return 100;}
+	health  () {return 200;}
 }
 
 class FrigateShip extends Ship {
@@ -169,7 +119,7 @@ class FrigateShip extends Ship {
 	
 	_weapon () {this.wp = new LaserWeapon(6, 4);}
 	armor   () {return 5;}
-	health  () {return 50;}
+	health  () {return 100;}
 }
 
 class CruiserShip extends Ship {
@@ -184,7 +134,7 @@ class CruiserShip extends Ship {
 	
 	_weapon () {this.wp = new LaserWeapon(2, 16);}
 	armor   () {return 20;}
-	health  () {return 300;}
+	health  () {return 500;}
 }
 
 
@@ -240,8 +190,8 @@ class EnemyMiddle extends Ship {
 	is_enemy() {return true;}
 	
 	armor   () {return 4;}
-	health  () {return 20;}
-	_weapon () {this.wp = new LaserWeapon(2, 1);}
+	health  () {return 40;}
+	_weapon () {this.wp = new LaserWeapon(2, 2);}
 }
 
 class EnemySenior extends Ship {
@@ -255,8 +205,8 @@ class EnemySenior extends Ship {
 	is_enemy() {return true;}
 	
 	armor   () {return 10;}
-	health  () {return 200;}
-	_weapon () {this.wp = new LaserWeapon(2, 3);}
+	health  () {return 400;}
+	_weapon () {this.wp = new LaserWeapon(2, 4);}
 }
 
 function enemyShips() {return [new EnemyJunior(), new EnemyMiddle(), new EnemySenior()]}
