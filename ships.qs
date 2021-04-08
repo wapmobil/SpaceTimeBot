@@ -159,7 +159,7 @@ const ShipsDescription = function() {
 		for (let i = 0; i < Resources_base; i++) msg += getResourceCount(i, s.price());
 		msg += "\n";
 		msg += `  время строительства: ${time2text(s.price()*Resources_base)}\n`;
-		msg += `  требеутся 🏗Верфь ${s.level()} уровня\n`;
+		msg += `  требуется 🏗Верфь ${s.level()} уровня\n`;
 	}
 	return msg;
 }();
