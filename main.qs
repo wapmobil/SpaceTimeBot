@@ -104,6 +104,7 @@ Telegram.addSpecialCommand("/navy", "navy_info");
 Telegram.addSpecialCommand("/resources", "info_resources");
 Telegram.addSpecialCommand("/stock", "show_stock");
 Telegram.addSpecialCommand("/dungeon", "find_money");
+Telegram.addSpecialCommand("/testbattle", "battle_test");
 
 Telegram.receiveMessage.connect(received);
 Telegram.receiveSpecialMessage.connect(receivedSpecial);
